@@ -17,3 +17,8 @@ def cast_votes(request):
     # View function for the GRADUATE CAST VOTES page.
     context_dict = {}
     return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+
+def login_landing(request):
+    # View function for the GRADUATE CAST VOTES page.
+    context_dict = {}
+    return render(request, 'allocationapp/login_landing.html', context=context_dict)
