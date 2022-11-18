@@ -1,0 +1,24 @@
+h1{
+    text-align: center;
+    position: relative;
+    margin-top: 6cm;
+}
+input{
+    width: 15cm;
+    height: 1cm;
+}
+
+#reset{
+    margin-left: 3cm;
+    margin-top: 1cm;
+    width: 150px;
+    background-color:  #00395d;
+    color: #00AEEF;
+}
+#submit{
+    margin-right: 3cm;
+    margin-top: 1cm;
+    width: 150px;
+    background-color:  #00395d;
+    color: #00AEEF;
+}
