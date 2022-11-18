@@ -8,59 +8,50 @@
 {% block body_block %}
     <div class="container">
         <div id="accordion">
-            <div class="card">
-                <div class="card-header" id="headingOne">
-                    <h5 class="mb-0">
-                        <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                        Team 1 (name here)
-                        </button>
-                    </h5>
-                </div>
-    
-                <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
-                    <div class="card-body p-0">
-                        <table class="table table-striped">
-                            <tbody>
-                              <tr>
-                                <th>Department</th>
-                                <td>Data Analytics</td>
-                              </tr>
-                              <tr>
-                                <th>Technologies</th>
-                                <td>Python, Java, Django</td>
-                              </tr>
-                              <tr>
-                                <th>Skills</th>
-                                <td>Mathematics, Programming, Thinking</td>
-                              </tr>
-                              <tr>
-                                <th>Group Size</th>
-                                <td>16 team members</td>
-                              </tr>
-                              <tr>
-                                <th>Description</th>
-                                <td>Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deserunt distinctio aut architecto debitis ipsam voluptatum veniam atque impedit eius hic quod repudiandae perferendis, delectus natus!</td>
-                              </tr>
-                            </tbody>
-                          </table>
+            {% if teams %}
+                {% for team in teams %}
+                    <div class="card">
+                        <div class="card-header" id="heading_{{ team.id }}">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
+                                {{ team.team_name }}
+                                </button>
+                            </h5>
+                        </div>
+            
+                        <div id="collapse_{{ team.id }}" class="collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
+                            <div class="card-body p-0">
+                                <table class="table table-striped">
+                                    <tbody>
+                                    <tr>
+                                        <th>Department</th>
+                                        <td>{{ team.department }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Technologies</th>
+                                        <td>{{ team.technologies|join:', ' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Skills</th>
+                                        <td>{{ team.skills|join:', ' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Group Size</th>
+                                        <td>{{ team.group_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Description</th>
+                                        <td>{{ team.description }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-header" id="headingTwo">
-                <h5 class="mb-0">
-                    <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                    Collapsible Group Item #2
-                    </button>
-                </h5>
-                </div>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                <div class="card-body">
-                    Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
-                </div>
-                </div>
-            </div>
+                {% endfor %}
+            {% else %}
+                <h2>There are no teams available to vote for. Please contact your manager.</h2>
+            {% endif %}
         </div>
     </div>
 {% endblock %}
