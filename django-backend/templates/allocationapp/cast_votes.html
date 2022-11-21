@@ -24,10 +24,15 @@
 
                                     <div class="col text-right">
                                         <div class="div">
-                                            <div class="btn btn_vote">
+                                            <div class="btn btn_vote" onclick="countVotes('{{ team.id }}')">
                                                 <i class="bi bi-hand-thumbs-up"></i>
                                             </div>
-                                            <span class="vote_text">3 votes</span>
+                                            <span class="vote_text"><span id="voteCount_{{ team.id }}">0</span> votes</span>
+
+                                            <!-- Only shows if there are > 0 votes -->
+                                            <div class="btn btn_vote text-danger">
+                                                <i class="bi bi-x-circle"></i>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
