@@ -6,26 +6,43 @@
 {% endblock %}
 
 {% block body_block %}
-    <div class="container">
+    <div class="container p-4">
         <div id="accordion">
             {% if teams %}
                 {% for team in teams %}
-                    <div class="card">
-                        <div class="card-header" id="heading_{{ team.id }}">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
-                                {{ team.team_name }}
-                                </button>
-                            </h5>
+                    <div class="card mb-3 p-0">
+                        <div class="card-header card-header-team" id="heading_{{ team.id }}">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link team_name_btn" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
+                                                {{ team.team_name }}
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div class="col text-right">
+                                        <div class="div">
+                                            <div class="btn btn_vote">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                            </div>
+                                            <span class="vote_text">3 votes</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
             
-                        <div id="collapse_{{ team.id }}" class="collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
+                        <div id="collapse_{{ team.id }}" class="collapse team_details_collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
                             <div class="card-body p-0">
-                                <table class="table table-striped">
+                                <table class="table table-striped team_details_table">
                                     <tbody>
                                     <tr>
-                                        <th>Department</th>
-                                        <td>{{ team.department }}</td>
+                                        <div class="container">
+                                            <th>Department</th>
+                                            <td>{{ team.department }}</td>
+                                        </div>
                                     </tr>
                                     <tr>
                                         <th>Technologies</th>
@@ -50,7 +67,7 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <h2>There are no teams available to vote for. Please contact your manager.</h2>
+                <h2>There are no teams open for voting. This is likely an error, so please contact your manager.</h2>
             {% endif %}
         </div>
     </div>

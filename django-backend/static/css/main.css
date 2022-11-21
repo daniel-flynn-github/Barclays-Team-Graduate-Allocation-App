@@ -1,3 +1,45 @@
 .navbar {
     background-color: #00AEEF;
 }
+
+.team_name_btn {
+    font-size: 1.6rem;
+    text-decoration: none !important;
+    color: white;
+}
+
+.team_name_btn:hover {
+    color: rgba(255, 255, 255, 0.607);
+}
+
+.card {
+    border: 5px solid #00395D;
+    border-radius: 10px;
+    background-color: #00395D;
+}
+
+.card-header-team {
+    background-color: #00395D;
+}
+
+.team_details_collapse {
+    background-color: white;
+}
+
+.team_details_table tr {
+    background-color: #00afef47 !important;
+}
+
+.team_details_table tr:nth-child(even) {
+    background-color: #00afef83 !important;
+}
+
+.btn_vote, .vote_text {
+    color: white;
+    font-size: 1.6rem;
+    vertical-align: middle;
+}
+
+.btn_vote:hover {
+    color: rgba(255, 255, 255, 0.607);
+}
