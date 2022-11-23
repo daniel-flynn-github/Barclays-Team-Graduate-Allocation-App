@@ -1,22 +1,30 @@
-#voteSubmitted{
-	width: 800px;
-	height: 200px;
-	line-height: 100px;
+#voteSubmitted {
+    padding: 50px;
 	text-align: center;
-    font-weight: 800;
-	background-color: #00AEEF;
+	background-color: #00395D;
+    color: white;
+    font-size: 2rem;
+    border-radius: 0.25rem;
 }
-#result{
+
+#result {
     margin-left: 9cm;
     margin-top: 3cm;
     width: 150px;
     background-color:  #00395d;
     color: #00AEEF;
 }
-#edit{
+
+#edit {
     margin-left: 4cm;
     margin-top: 3cm;
     width: 150px;
     background-color:  #00395d;
     color: #00AEEF;
+}
+
+.btn-vote-submitted {
+    width: 100%;
+    font-size: 1.5rem;
+    padding: 10px;
 }
