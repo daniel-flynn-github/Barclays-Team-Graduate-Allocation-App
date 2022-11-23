@@ -10,7 +10,7 @@ def index(request):
 def graduate_login(request):
     # Login via code page for the GRADUATE.
     context_dict = {}
-    return render(request, 'allocationapp/login.html', context=context_dict) 
+    return render(request, 'allocationapp/graduate_login.html', context=context_dict) 
 
 def cast_votes(request):
     # Currently populated with mock data
