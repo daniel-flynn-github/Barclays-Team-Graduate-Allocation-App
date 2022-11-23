@@ -3,24 +3,19 @@
 	height: 200px;
 	line-height: 100px;
 	text-align: center;
-	position: relative;
-    top: 3cm;
-    left: 6.5cm;
     font-weight: 800;
 	background-color: #00AEEF;
 }
 #result{
-    position: relative;
-    top: 5cm;
-    left:11cm;
+    margin-left: 9cm;
+    margin-top: 3cm;
     width: 150px;
     background-color:  #00395d;
     color: #00AEEF;
 }
 #edit{
-    position: relative;
-    top: 5cm;
-    left:15cm;
+    margin-left: 4cm;
+    margin-top: 3cm;
     width: 150px;
     background-color:  #00395d;
     color: #00AEEF;
