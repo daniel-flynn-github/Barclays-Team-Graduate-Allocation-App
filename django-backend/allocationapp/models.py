@@ -32,7 +32,7 @@ class Team(models.Model):
     teamTechnologies = models.MultiSelectField(choices = TECHNOLOGIES)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department)
-    manager = models.ForeginKey(Manager)
+    manager = models.ForeignKey(Manager)
 
 
     class Meta():
