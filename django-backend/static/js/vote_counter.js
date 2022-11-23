@@ -23,6 +23,7 @@ function countVotes(team_id) {
 
 function removeVotes(team_id) {
     var voteCounts = JSON.parse(localStorage.getItem("voteCountsObject"));
+    document.getElementById("like_btn_team_" + team_id).classList.remove("disabled");
 
     if (voteCounts[team_id] > 0) {
         voteCounts[team_id]--;
