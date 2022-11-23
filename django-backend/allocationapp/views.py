@@ -13,8 +13,6 @@ def graduate_login(request):
     return render(request, 'allocationapp/login.html', context=context_dict) 
 
 def cast_votes(request):
-    # View function for the GRADUATE CAST VOTES page.
-
     # Currently populated with mock data
     # Frontend expects this format.
     #   'teams' will be a list of dictionaries, each with the desired team info
@@ -45,3 +43,12 @@ def cast_votes(request):
     }
 
     return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+
+def login_landing(request):
+    # View function for the GRADUATE CAST VOTES page.
+    context_dict = {}
+    return render(request, 'allocationapp/login_landing.html', context=context_dict)
+
+def vote_submitted(request):
+    context_dict = {}
+    return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
