@@ -2,6 +2,16 @@ from django.db import models
 
 # Create your models here.
 
+class Department(models.Model):
+    departmentID = models.AutoField(primary_key=True)
+    departmentName = models.CharField(max_length=128)
+
+    class Meta:
+        verbose_name_plural = 'Departments'
+
+    def __str__(self):
+        return f"{self.departmentName} Department"
+
 SKILLS = (('skill_1','Skill Title 1'),
           ('skill_2','Skill Title 2'),
           ('skill_3','Skill Title 3'),
@@ -31,12 +41,3 @@ class Team(models.Model):
     def __str__(self):
         return f"Name: {self.teamName}, ID: {self.teamID}, Capacity: {self.capacity}"
 
-class Department(models.Model):
-    departmentID = models.AutoField(primary_key=True)
-    departmentName = models.CharField(max_length=128)
-
-    class Meta:
-        verbose_name_plural = 'Departments'
-
-    def __str__(self):
-        return f"{self.departmentName} Department"
