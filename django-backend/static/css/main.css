@@ -14,7 +14,7 @@
 
 .card {
     border: 5px solid #00395D;
-    border-radius: 10px;
+    border-radius: 0.25rem;
     background-color: #00395D;
 }
 
