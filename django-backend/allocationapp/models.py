@@ -32,7 +32,7 @@ class Team(models.Model):
     teamTechnologies = models.MultiSelectField(choices = TECHNOLOGIES)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department)
-    manager = models.ForeginKey(Manager)
+    manager = models.ForeignKey(Manager)
 
 
     class Meta():
@@ -51,17 +51,6 @@ class Admin(models.Model):
 
     def __str__(self):
         return f"{self.adminName} Admin"
-
-
-class Manager(models.Model):
-    managerID = models.AutoField(primary_key=True)
-    managerName = models.CharField(max_length=128)
-
-    class Meta:
-        verbose_name_plural = 'Managers'
-
-    def __str__(self):
-        return f"{self.managerName} Manager"
 
 
 
