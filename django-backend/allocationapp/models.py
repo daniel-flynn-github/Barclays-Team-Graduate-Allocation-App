@@ -41,3 +41,27 @@ class Team(models.Model):
     def __str__(self):
         return f"Name: {self.teamName}, ID: {self.teamID}, Capacity: {self.capacity}"
 
+
+class Admin(models.Model):
+    adminID = models.AutoField(primary_key=True)
+    adminName = models.CharField(max_length=128)
+
+    class Meta:
+        verbose_name_plural = 'Admins'
+
+    def __str__(self):
+        return f"{self.adminName} Admin"
+
+
+class Manager(models.Model):
+    managerID = models.AutoField(primary_key=True)
+    managerName = models.CharField(max_length=128)
+
+    class Meta:
+        verbose_name_plural = 'Managers'
+
+    def __str__(self):
+        return f"{self.managerName} Manager"
+
+
+
