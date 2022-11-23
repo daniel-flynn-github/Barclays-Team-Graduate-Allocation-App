@@ -12,4 +12,16 @@ class Department(models.Model):
     def __str__(self):
         return f"{self.departmentName} Department"
 
+class Allocation(models.Model):
+    allocationID = models.AutoField(primary_key=True)
+    teamID = models.ForeignKey(Team)
+    graduateID = models.OneToOneField(Graduate)
+
+    class Meta:
+        verbose_name_plural = 'Allocations'
+
+    def __str__(self):
+        return f"{Graduate.objects.get(id=graduateID)} has been allocated to {Team.objects.get(id=teamID)}"
+
+
 
