@@ -22,3 +22,7 @@ def login_landing(request):
     # View function for the GRADUATE CAST VOTES page.
     context_dict = {}
     return render(request, 'allocationapp/login_landing.html', context=context_dict)
+
+def vote_submitted(request):
+    context_dict = {}
+    return render(request, 'allocationapp/vote_submitted.html', context=context_dict)

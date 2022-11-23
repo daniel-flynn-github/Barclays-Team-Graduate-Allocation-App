@@ -1,0 +1,13 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+   Vote Submitted
+{% endblock %}
+
+{% block body_block %}
+   <div>Your votes have been submitted. You will be notified </br>
+      via email when the results are available.</div>
+   <button type="submit" id="result" class="btn">See Result</button>
+   <button type="submit" id="edit" class="btn">Edit Votes</button>
+{% endblock %}
