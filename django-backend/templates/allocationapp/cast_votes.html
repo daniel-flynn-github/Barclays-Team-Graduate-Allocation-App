@@ -6,6 +6,74 @@
 {% endblock %}
 
 {% block body_block %}
-    <h2>votes will be cast here.....</h2>
-    <h3>insert team listings etc etc.</h3>
+    <div class="container p-4">
+        <div id="accordion">
+            {% if teams %}
+                {% for team in teams %}
+                    <div class="card mb-3 p-0">
+                        <div class="card-header card-header-team" id="heading_{{ team.id }}">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link team_name_btn" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
+                                                {{ team.team_name }}
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div class="col text-right">
+                                        <div class="div">
+                                            <div class="btn btn_vote" onclick="countVotes('{{ team.id }}')" id="like_btn_team_{{ team.id }}">
+                                                <i class="bi bi-hand-thumbs-up"></i>
+                                            </div>
+                                            <span class="vote_text"><span id="voteCount_{{ team.id }}">0</span> votes</span>
+
+                                            <!-- Only shows if there are > 0 votes -->
+                                            <div hidden="true" class="btn btn_vote text-danger remove_vote_btn" onclick="removeVotes('{{ team.id }}')" id="remove_vote_team_{{ team.id }}">
+                                                <i class="bi bi-x-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div id="collapse_{{ team.id }}" class="collapse team_details_collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
+                            <div class="card-body p-0">
+                                <table class="table table-striped team_details_table">
+                                    <tbody>
+                                    <tr>
+                                        <div class="container">
+                                            <th>Department</th>
+                                            <td>{{ team.department }}</td>
+                                        </div>
+                                    </tr>
+                                    <tr>
+                                        <th>Technologies</th>
+                                        <td>{{ team.technologies|join:', ' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Skills</th>
+                                        <td>{{ team.skills|join:', ' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Group Size</th>
+                                        <td>{{ team.group_size }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Description</th>
+                                        <td>{{ team.description }}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h2>There are no teams open for voting. This is likely an error, so please contact your manager.</h2>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

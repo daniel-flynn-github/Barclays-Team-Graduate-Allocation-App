@@ -1,7 +1,7 @@
 h1{
     text-align: center;
-    position: relative;
-    margin-top: 6cm;
+    position: static;
+    margin-top: 8cm;
 }
 input{
     width: 15cm;
@@ -17,6 +17,20 @@ input{
 }
 #submit{
     margin-right: 3cm;
+    margin-top: 1cm;
+    width: 150px;
+    background-color:  #00395d;
+    color: #00AEEF;
+}
+#login{
+    margin-right: 2cm;
+    margin-top: 1cm;
+    width: 150px;
+    background-color:  #00395d;
+    color: #00AEEF;
+}
+#register{
+    margin-left: 2cm;
     margin-top: 1cm;
     width: 150px;
     background-color:  #00395d;
