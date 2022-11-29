@@ -43,3 +43,12 @@
 .btn_vote:hover {
     color: rgba(255, 255, 255, 0.607);
 }
+
+#codeEntryGraduate, #codeEntryGraduateBtn {
+    font-size: 2rem;
+}
+
+#codeEntryGraduate {
+    width: 60%;
+    display: inline;
+}
