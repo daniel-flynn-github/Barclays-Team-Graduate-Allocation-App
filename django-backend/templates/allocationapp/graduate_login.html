@@ -1,0 +1,21 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Login (Graduate)
+{% endblock %}
+
+
+{% block body_block %}
+    <div class="container text-center p-5" id="codeEntryGradContainer">
+        <form class="p-5">
+            <div class="form-group text-center">
+                <h1>Enter Code to Proceed</h1>
+                <input type="password" class="form-control" id="codeEntryGraduate" placeholder="Enter the 5 digit code here" maxlength="5">
+            </div>
+            <a href="{% url 'allocationapp:cast_votes' %}" class="btn btn-success" id="codeEntryGraduateBtn" type="submit">Start Voting</a>
+        </form>
+
+        <p>Haven't received a code? Please <a href="">click here</a>.</p>
+    </div>
+{% endblock %}

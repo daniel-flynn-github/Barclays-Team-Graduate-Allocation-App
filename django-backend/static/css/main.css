@@ -14,7 +14,7 @@
 
 .card {
     border: 5px solid #00395D;
-    border-radius: 10px;
+    border-radius: 0.25rem;
     background-color: #00395D;
 }
 
@@ -42,4 +42,13 @@
 
 .btn_vote:hover {
     color: rgba(255, 255, 255, 0.607);
+}
+
+#codeEntryGraduate, #codeEntryGraduateBtn {
+    font-size: 2rem;
+}
+
+#codeEntryGraduate {
+    width: 60%;
+    display: inline;
 }
