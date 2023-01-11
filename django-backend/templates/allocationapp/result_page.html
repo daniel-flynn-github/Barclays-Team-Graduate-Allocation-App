@@ -1,0 +1,55 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Result Page (Graduate)
+{% endblock %}
+
+{% block body_block %}
+    <div class="container-fluid text-center">
+        <div id="voteResult">
+            {% if teams %}
+                    {% for team in teams %}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <strong> Welcome to {{ team.team_name }}</strong>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row" id="{{ team.id }}">
+                                    <div class="col-md-6">Manage: {{ team.manage_name }}</div>
+                                    <div class="col-md-6">Team Size: {{ team.group_size }}</div>
+                                </div>
+                    {% endfor %}
+            {% else %}
+                The team is not exists.
+            {% endif %}
+        </div>
+    <br/>
+
+    <div id="member">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h3 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="dropdown">
+                            See Your Team member</a>
+                    </h3>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                    <div class="panel-body">
+                        {% if students %}
+                            {% for student in students %}
+                                <br/>
+                                <div id="student">
+                                    <td>{{ student.student_name }}</td>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+{% endblock %}

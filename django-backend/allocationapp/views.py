@@ -47,3 +47,34 @@ def cast_votes(request):
 def vote_submitted(request):
     context_dict = {}
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
+
+def result_page(request):
+    context_dict = {
+        'teams': [
+            {
+                'team_name': 'Team 1',
+                'group_size': 16,
+                'manage_name': 'Casey',
+                'team_members'
+                'id': 123,  # unique ID
+            },
+        ],
+        'students':[
+            {
+                'student_name' : 'student1',
+                'student_id' : '1',
+                'group_id' : 123,
+            },
+            {
+                'student_name': 'student2',
+                'student_id': '2',
+                'group_id': 123,
+            },
+            {
+                'student_name': 'student3',
+                'student_id': '3',
+                'group_id': 123,
+            },
+        ]
+    }
+    return render(request, 'allocationapp/result_page.html', context=context_dict)
