@@ -1,57 +1,74 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-# Create your models here.
+from django.core.validators import MaxValueValidator, MinValueValidator
+from multiselectfield import MultiSelectField
+
+SKILLS = (('skill_1','Maths'),
+          ('skill_2','Data Science'),
+          ('skill_3','Programming'),
+          ('skill_4','Critical Thinking'),
+          ('skill_5','Statistics'),)
+
+TECHNOLOGIES = (('technologies_1','Python'),
+          ('technologies_2','Java'),
+          ('technologies_3','C/C++'),
+          ('technologies_4','Haskell'),
+          ('technologies_5','R'),)
+
 
 class CustomUser(AbstractUser):
-    pass
+    # Define the roles for users
+    MANAGER = 1
+    GRADUATE = 2
+    HR_REP = 3
+    
+    ROLE_CHOICES = (
+        (MANAGER, 'Manager'),
+        (GRADUATE, 'Graduate'),
+        (HR_REP, 'HR_rep'),
+    )
+
+    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, blank=True, null=True)
 
     def __str__(self):
-        return self.email
+        return f"{self.email}"
 
 
+class Department(models.Model):
+    name = models.CharField(max_length=128)
 
-# class Department(models.Model):
-#     departmentID = models.AutoField(primary_key=True)
-#     departmentName = models.CharField(max_length=128)
+    class Meta:
+        verbose_name_plural = 'Departments'
 
-#     class Meta:
-#         verbose_name_plural = 'Departments'
-
-#     def __str__(self):
-#         return f"{self.departmentName} Department"
-
-# SKILLS = (('skill_1','Skill Title 1'),
-#           ('skill_2','Skill Title 2'),
-#           ('skill_3','Skill Title 3'),
-#           ('skill_4','Skill Title 4'),
-#           ('skill_5','Skill Title 5'),)
-
-# TECHNOLOGIES = (('technologies_1','Skill Title 1'),
-#           ('technologies_2','Skill Title 2'),
-#           ('technologies_3','Skill Title 3'),
-#           ('technologies_4','Skill Title 4'),
-#           ('technologies_5','Skill Title 5'),)
-
-# # class Team(models.Model):
-# #     teamID = models.AutoField(primary_key=True)
-# #     teamName = models.CharField(max_length=128)
-# #     teamDescription = models.CharField(max_length = 512, null = True, blank = True)
-# #     #teamSkills = models.MultiSelectField(choices=SKILLS)
-# #     #teamTechnologies = models.MultiSelectField(choices = TECHNOLOGIES)
-# #     capacity = models.IntegerField()
-# #     department = models.ForeignKey(Department)
-# #     #manager = models.ForeignKey(Manager)
+    def __str__(self):
+        return f"{self.name} Department"
 
 
-# #     class Meta():
-# #         verbose_name_plural = "Teams"
+class Team(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.CharField(max_length=512, null=True, blank=True)
+    skills = MultiSelectField(choices=SKILLS)
+    technologies = MultiSelectField(choices=TECHNOLOGIES)
+    capacity = models.IntegerField()
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
 
-# #     def __str__(self):
-# #         return f"Name: {self.teamName}, ID: {self.teamID}, Capacity: {self.capacity}"
+    class Meta():
+        verbose_name_plural = "Teams"
+
+    def __str__(self):
+        return f"Name: {self.name}, ID: {self.id}, Capacity: {self.capacity}"
+
+
+class Graduate(CustomUser):
+    teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+
+    class Meta():
+        verbose_name_plural = "Graduates"
 
 
 class Admin(CustomUser):
-    adminID = models.AutoField(primary_key=True)
+    adminId = models.AutoField(primary_key=True)
     adminName = models.CharField(max_length=128)
 
     class Meta:
@@ -61,25 +78,7 @@ class Admin(CustomUser):
         return f"{self.adminName} Admin"
 
 
-
-
-# class Department(models.Model):
-#     departmentID = models.AutoField(primary_key=True)
-#     departmentName = models.CharField(max_length=128)
-
-#     class Meta:
-#         verbose_name_plural = 'Departments'
-
-#     def __str__(self):
-#         return f"{self.departmentName} Department"
-
-# class Allocation(models.Model):
-#     allocationID = models.AutoField(primary_key=True)
-#     teamID = models.ForeignKey(Team)
-#     graduateID = models.OneToOneField(Graduate)
-
-#     class Meta:
-#         verbose_name_plural = 'Allocations'
-
-#     def __str__(self):
-#         return f"{Graduate.objects.get(id=self.graduateID)} has been allocated to {Team.objects.get(id=self.teamID)}"
+class Preference(models.Model):
+    gradId = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
+    teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
