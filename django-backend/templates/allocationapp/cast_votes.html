@@ -7,6 +7,15 @@
 
 {% block body_block %}
     <div class="container p-4">
+        <div class="row mb-3">
+            <div class="col-8">
+                <a href="{% url 'allocationapp:vote_submitted' %}" class="btn btn-success btn-vote-submitted">Submit Votes</a>
+            </div>
+            <div class="col-4">
+                <div class="btn btn-danger btn-vote-submitted">Reset All</div>
+            </div>
+        </div>
+
         <div id="accordion">
             {% if teams %}
                 {% for team in teams %}
