@@ -1,26 +1,9 @@
 #voteSubmitted {
     padding: 50px;
-	text-align: center;
 	background-color: #00395D;
     color: white;
     font-size: 2rem;
-    border-radius: 0.25rem;
-}
-
-#result {
-    margin-left: 9cm;
-    margin-top: 3cm;
-    width: 150px;
-    background-color:  #00395d;
-    color: #00AEEF;
-}
-
-#edit {
-    margin-left: 4cm;
-    margin-top: 3cm;
-    width: 150px;
-    background-color:  #00395d;
-    color: #00AEEF;
+    border-radius: 1rem;
 }
 
 .btn-vote-submitted {
