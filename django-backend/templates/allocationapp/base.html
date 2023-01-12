@@ -30,8 +30,15 @@
     </head>
 
     <body>
-        <nav class="navbar">
+        <nav class="navbar justify-content-between">
             <span class="navbar-brand mb-0 h1">Allocator</span>
+
+            {% if user.is_authenticated %}
+            <form action="/accounts/logout/" method="POST">
+                {% csrf_token %}
+                <button class="btn btn-sm btn-warning">Logout</button>
+            </form>
+            {% endif %}
         </nav>
         
         {% block body_block %}

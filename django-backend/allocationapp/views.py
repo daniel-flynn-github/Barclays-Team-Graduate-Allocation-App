@@ -1,17 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
 
 def index(request):
-    # This might return the login/landing page? Probably will be
-    # Right now it just redirects to the login page
-    return redirect(reverse('allocationapp:graduate_login'))
+    return redirect(reverse('allocationapp:cast_votes'))
 
-# def graduate_login(request):
-#     # Login via code page for the GRADUATE.
-#     context_dict = {}
-#     return render(request, 'account/signup.html', context=context_dict) 
-
+@login_required
 def cast_votes(request):
     # Currently populated with mock data
     # Frontend expects this format.
@@ -44,10 +39,12 @@ def cast_votes(request):
 
     return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
+@login_required
 def vote_submitted(request):
     context_dict = {}
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
+@login_required
 def result_page(request):
     context_dict = {
         'teams': [
