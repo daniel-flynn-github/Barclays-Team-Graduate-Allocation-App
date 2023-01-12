@@ -26,7 +26,7 @@
                                     <div class="col">
                                         <h5 class="mb-0">
                                             <button class="btn btn-link team_name_btn" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
-                                                {{ team.team_name }}
+                                                {{ team.name }}
                                             </button>
                                         </h5>
                                     </div>
@@ -55,24 +55,30 @@
                                     <tr>
                                         <div class="container">
                                             <th>Department</th>
-                                            <td>{{ team.department }}</td>
+                                            <td>{{ team.department.name }}</td>
                                         </div>
                                     </tr>
                                     <tr>
                                         <th>Technologies</th>
-                                        <td>{{ team.technologies|join:', ' }}</td>
+                                        <td>{{ team.technologies }}</td>
                                     </tr>
                                     <tr>
                                         <th>Skills</th>
-                                        <td>{{ team.skills|join:', ' }}</td>
+                                        <td>{{ team.skills }}</td>
                                     </tr>
                                     <tr>
                                         <th>Group Size</th>
-                                        <td>{{ team.group_size }}</td>
+                                        <td>{{ team.capacity }}</td>
                                     </tr>
                                     <tr>
                                         <th>Description</th>
                                         <td>{{ team.description }}</td>
+                                    </tr>
+                                    <tr>
+                                        <div class="container">
+                                            <th>Manager's Email</th>
+                                            <td>{{ team.manager.email }}</td>
+                                        </div>
                                     </tr>
                                     </tbody>
                                 </table>

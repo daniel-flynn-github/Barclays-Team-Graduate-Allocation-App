@@ -2,39 +2,15 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from .models import Team, CustomUser, Department
 
 def index(request):
     return redirect(reverse('allocationapp:cast_votes'))
 
 @login_required
 def cast_votes(request):
-    # Currently populated with mock data
-    # Frontend expects this format.
-    #   'teams' will be a list of dictionaries, each with the desired team info
-    #   could also potentially have a Class GradTeam, and the 'teams' list will be a list of instances of GradTeam?
-    #   will require minor frontend changes if this path is chosen.
     context_dict = {
-        'teams': [
-            {
-                'team_name': 'Team 1',
-                'department': 'Data Analytics',
-                'technologies': ['Python', 'Java', 'Django'],
-                'skills': ['Mathematics', 'Programming'],
-                'group_size': 16,
-                'description': 'description text here',
-                'id': 123,  # unique ID
-            },
-
-            {
-                'team_name': 'Team 2',
-                'department': 'Banking Apps',
-                'technologies': ['C++', 'Java', 'C#'],
-                'skills': ['Smartness', 'Programming'],
-                'group_size': 20,
-                'description': 'description text here as well',
-                'id': 345,
-            }
-        ]
+        'teams': Team.objects.all()
     }
 
     return render(request, 'allocationapp/cast_votes.html', context=context_dict)
