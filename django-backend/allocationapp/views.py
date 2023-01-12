@@ -7,10 +7,10 @@ def index(request):
     # Right now it just redirects to the login page
     return redirect(reverse('allocationapp:graduate_login'))
 
-def graduate_login(request):
-    # Login via code page for the GRADUATE.
-    context_dict = {}
-    return render(request, 'allocationapp/graduate_login.html', context=context_dict) 
+# def graduate_login(request):
+#     # Login via code page for the GRADUATE.
+#     context_dict = {}
+#     return render(request, 'account/signup.html', context=context_dict) 
 
 def cast_votes(request):
     # Currently populated with mock data

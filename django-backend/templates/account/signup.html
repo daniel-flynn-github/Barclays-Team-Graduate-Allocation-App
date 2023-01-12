@@ -1,0 +1,30 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Signup
+{% endblock %}
+
+
+{% block body_block %}
+    <div class="container text-center p-5" id="codeEntryGradContainer">
+        <form class="p-5" method="POST" action="#">
+            {% csrf_token %}
+            <h1>Sign up here</h1>
+
+            <div class="user-details-container">
+                <div class="form-group text-center">
+                    <input type="email" name="email" placeholder="Enter your email address" required id="id_email" class="form-control">
+                </div>
+
+                <div class="form-group text-center">
+                    <input type="password" name="password1" placeholder="Choose a password" required id="id_password1" class="form-control">
+                </div>
+            </div>
+
+            <button class="btn btn-success" id="codeEntryGraduateBtn" type="submit">Create Account</button>
+        </form>
+
+        <p>Already have an account? Please <a href="">login here</a>.</p>
+    </div>
+{% endblock %}
