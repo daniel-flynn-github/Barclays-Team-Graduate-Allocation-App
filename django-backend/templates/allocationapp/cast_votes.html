@@ -9,7 +9,10 @@
     <div class="container p-4">
         <div class="row mb-3">
             <div class="col-8">
-                <a href="{% url 'allocationapp:vote_submitted' %}" class="btn btn-success btn-vote-submitted">Submit Votes</a>
+                <form action="/cast_votes/" id="cast-votes-form" method="POST">
+                    {% csrf_token %}
+                    <button href="#" type="submit" class="btn btn-success btn-vote-submitted">Submit Votes</button>
+                </form>
             </div>
             <div class="col-4">
                 <div class="btn btn-danger btn-vote-submitted">Reset All</div>
@@ -36,7 +39,7 @@
                                             <div class="btn btn_vote" onclick="countVotes('{{ team.id }}')" id="like_btn_team_{{ team.id }}">
                                                 <i class="bi bi-hand-thumbs-up"></i>
                                             </div>
-                                            <span class="vote_text"><span id="voteCount_{{ team.id }}">0</span> votes</span>
+                                            <span class="vote_text"><span class="vote_count_value" id="voteCount_{{ team.id }}">0</span> votes</span>
 
                                             <!-- Only shows if there are > 0 votes -->
                                             <div hidden="true" class="btn btn_vote text-danger remove_vote_btn" onclick="removeVotes('{{ team.id }}')" id="remove_vote_team_{{ team.id }}">

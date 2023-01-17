@@ -2,18 +2,29 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Team, CustomUser, Department
+from .models import Team, CustomUser, Department, Preference
+from .forms import PreferencesForm
+import json
 
 def index(request):
     return redirect(reverse('allocationapp:cast_votes'))
 
 @login_required
 def cast_votes(request):
-    context_dict = {
-        'teams': Team.objects.all()
-    }
+    if request.method == "GET":
+        context_dict = {
+            'teams': Team.objects.all()
+        }
 
-    return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+    else:
+        votes = json.loads(request.POST.get('votes'))
+        
+        for team_id in votes:
+            p = Preference(teamId=Team.objects.get(id=int(team_id)), weight=votes[team_id], gradId=CustomUser.objects.get(id=7))
+            p.save()
+
+        return redirect(reverse('allocationapp:cast_votes'))
 
 @login_required
 def vote_submitted(request):

@@ -31,7 +31,7 @@ class CustomUser(AbstractUser):
     role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, blank=True, null=True)
 
     def __str__(self):
-        return f"{self.email}"
+        return f"{self.email} {self.id}"
 
 
 class Department(models.Model):
@@ -79,6 +79,6 @@ class Admin(CustomUser):
 
 
 class Preference(models.Model):
-    gradId = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
+    gradId = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
     teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
     weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
