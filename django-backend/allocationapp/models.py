@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import MaxValueValidator, MinValueValidator
 from multiselectfield import MultiSelectField
 
@@ -44,6 +44,20 @@ class Department(models.Model):
         return f"{self.name} Department"
 
 
+class Manager(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    managerId = models.AutoField(primary_key=True)
+    managerName = models.CharField(max_length=128)
+
+
+    class Meta:
+        verbose_name_plural = 'Managers'
+        permissions = (("see_manager", "can see manager page"),)
+
+    def __str__(self):
+        return f"{self.managerName} Manager"
+
+
 class Team(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=512, null=True, blank=True)
@@ -51,7 +65,7 @@ class Team(models.Model):
     technologies = MultiSelectField(choices=TECHNOLOGIES)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    manager = models.ForeignKey(CustomUser, on_delete=models.DO_NOTHING)
+    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING)
 
     class Meta():
         verbose_name_plural = "Teams"
@@ -60,23 +74,26 @@ class Team(models.Model):
         return f"Name: {self.name}, ID: {self.id}, Capacity: {self.capacity}"
 
 
-class Graduate(CustomUser):
+class Graduate(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
 
     class Meta():
         verbose_name_plural = "Graduates"
+        permissions = (("see_grad", "can see grad page"),)
 
 
-class Admin(CustomUser):
+class Admin(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     adminId = models.AutoField(primary_key=True)
     adminName = models.CharField(max_length=128)
 
     class Meta:
         verbose_name_plural = 'Admins'
+        permissions = (("see_admin", "can see admin page"),)
 
     def __str__(self):
         return f"{self.adminName} Admin"
-
 
 class Preference(models.Model):
     gradId = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
