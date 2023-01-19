@@ -3,6 +3,22 @@ from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 
+from allocationapp.models import Grad_CSV
+from allocationapp.forms import GradCSVForm
+
+def upload_file(request):
+    if request.method == 'POST':
+        form = GradCSVForm(request.POST, request.FILES)
+        if form.is_valid():
+            newcsv = Grad_CSV(csvfile = request.FILES['csvfile'])
+            newcsv.save()
+            return redirect(reverse('allocationapp:upload'))
+    else:
+        form = GradCSVForm
+    all_csv = Grad_CSV.objects.all()
+    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv})
+
+
 def index(request):
     return redirect(reverse('allocationapp:cast_votes'))
 

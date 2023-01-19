@@ -66,6 +66,10 @@ class Graduate(CustomUser):
     class Meta():
         verbose_name_plural = "Graduates"
 
+class Grad_CSV(models.Model):
+    csvfile = models.FileField(upload_to='grad CSVs')
+    csvdate = models.DateTimeField(auto_now_add = True)
+
 
 class Admin(CustomUser):
     adminId = models.AutoField(primary_key=True)

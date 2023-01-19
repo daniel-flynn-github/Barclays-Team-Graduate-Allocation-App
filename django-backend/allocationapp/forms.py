@@ -13,3 +13,9 @@ class CustomUserChangeForm(UserChangeForm):
     class Meta:
         model = CustomUser
         fields = ('username', 'email')
+
+class GradCSVForm(forms.Form):
+    csvfile = forms.FileField(
+        label = 'Select a file',
+        help_text = 'csv file'
+    )
