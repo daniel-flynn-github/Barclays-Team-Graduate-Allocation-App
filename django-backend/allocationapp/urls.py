@@ -1,6 +1,6 @@
 from django.urls import path
 
-from . import views
+from . import views, api
 
 app_name = 'allocationapp'
 
@@ -9,5 +9,6 @@ urlpatterns = [
     path('cast_votes/', views.cast_votes, name='cast_votes'),
     path('vote_submitted/', views.vote_submitted, name="vote_submitted"),
     path('result_page/', views.result_page, name="result_page"),
+    path('api/get_allocation', api.get_allocation, name="get_allocation"),
 
 ]
