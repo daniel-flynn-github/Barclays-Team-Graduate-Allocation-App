@@ -1,37 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.core.validators import MaxValueValidator, MinValueValidator
-from multiselectfield import MultiSelectField
-
-SKILLS = (('skill_1','Maths'),
-          ('skill_2','Data Science'),
-          ('skill_3','Programming'),
-          ('skill_4','Critical Thinking'),
-          ('skill_5','Statistics'),)
-
-TECHNOLOGIES = (('technologies_1','Python'),
-          ('technologies_2','Java'),
-          ('technologies_3','C/C++'),
-          ('technologies_4','Haskell'),
-          ('technologies_5','R'),)
-
 
 class CustomUser(AbstractUser):
-    # Define the roles for users
-    MANAGER = 1
-    GRADUATE = 2
-    HR_REP = 3
-    
-    ROLE_CHOICES = (
-        (MANAGER, 'Manager'),
-        (GRADUATE, 'Graduate'),
-        (HR_REP, 'HR_rep'),
-    )
-
-    role = models.PositiveSmallIntegerField(choices=ROLE_CHOICES, blank=True, null=True)
+    # has ID PK, email, name, last name by default from AbstractUser
 
     def __str__(self):
-        return f"{self.email}"
+        return f"Name:{self.first_name} {self.last_name}, Email:{self.email}"
 
 
 class Department(models.Model):
@@ -46,26 +21,33 @@ class Department(models.Model):
 
 class Manager(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    managerId = models.AutoField(primary_key=True)
-    managerName = models.CharField(max_length=128)
-
 
     class Meta:
         verbose_name_plural = 'Managers'
-        permissions = (("see_manager", "can see manager page"),)
 
     def __str__(self):
-        return f"{self.managerName} Manager"
+        return f"{self.user}"
 
+class Skill(models.Model):
+    name = models.CharField(max_length=128)
+
+    def __str__(self):
+        return f"Skill: {self.name}"
+
+class Technology(models.Model):
+    name = models.CharField(max_length=128)
+
+    def __str__(self):
+        return f"Technology: {self.name}"
 
 class Team(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=512, null=True, blank=True)
-    skills = MultiSelectField(choices=SKILLS)
-    technologies = MultiSelectField(choices=TECHNOLOGIES)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING)
+    skills = models.ManyToManyField(Skill)
+    technologies = models.ManyToManyRel(Technology)
 
     class Meta():
         verbose_name_plural = "Teams"
@@ -76,26 +58,27 @@ class Team(models.Model):
 
 class Graduate(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    assigned_team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
 
     class Meta():
         verbose_name_plural = "Graduates"
-        permissions = (("see_grad", "can see grad page"),)
 
+    def __str__(self):
+        return f"{self.user}"
 
 class Admin(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    adminId = models.AutoField(primary_key=True)
-    adminName = models.CharField(max_length=128)
 
     class Meta:
         verbose_name_plural = 'Admins'
-        permissions = (("see_admin", "can see admin page"),)
 
     def __str__(self):
-        return f"{self.adminName} Admin"
+        return f"{self.user}"
 
 class Preference(models.Model):
-    gradId = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
-    teamId = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    grad = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
+    team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
     weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
+
+    def __str__(self):
+        return f"Grad: {self.grad.user.email} has a preference of {self.weight} for {self.team.name}"    
