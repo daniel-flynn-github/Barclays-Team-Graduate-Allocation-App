@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
-from .models import Team, CustomUser, Department, Preference
+from .models import *
 from .forms import PreferencesForm
 import json
 
@@ -19,9 +19,14 @@ def cast_votes(request):
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
     else:
         votes = json.loads(request.POST.get('votes'))
+        current_user = request.user
         
         for team_id in votes:
-            p = Preference(teamId=Team.objects.get(id=int(team_id)), weight=votes[team_id], gradId=CustomUser.objects.get(id=7))
+            p = Preference(
+                    team=Team.objects.get(id=int(team_id)), 
+                    weight=votes[team_id], 
+                    grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))
+                )
             p.save()
 
         return redirect(reverse('allocationapp:cast_votes'))

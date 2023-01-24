@@ -9,9 +9,9 @@
     <div class="container p-4">
         <div class="row mb-3">
             <div class="col-8">
-                <form action="/cast_votes/" id="cast-votes-form" method="POST">
+                <form action="{% url 'allocationapp:vote_submitted' %}" id="cast-votes-form" method="POST">
                     {% csrf_token %}
-                    <button href="#" type="submit" class="btn btn-success btn-vote-submitted">Submit Votes</button>
+                    <button type="submit" class="btn btn-success btn-vote-submitted">Submit Votes</button>
                 </form>
             </div>
             <div class="col-4">
@@ -63,11 +63,11 @@
                                     </tr>
                                     <tr>
                                         <th>Technologies</th>
-                                        <td>{{ team.technologies }}</td>
+                                        <td>{{ team.technologies.all|join:", " }}</td>
                                     </tr>
                                     <tr>
                                         <th>Skills</th>
-                                        <td>{{ team.skills }}</td>
+                                        <td>{{ team.skills.all|join:", " }}</td>
                                     </tr>
                                     <tr>
                                         <th>Group Size</th>
@@ -80,7 +80,7 @@
                                     <tr>
                                         <div class="container">
                                             <th>Manager's Email</th>
-                                            <td>{{ team.manager.email }}</td>
+                                            <td><a href="mailto:{{ team.manager.user.email }}">{{ team.manager.user.email }}</a></td>
                                         </div>
                                     </tr>
                                     </tbody>
