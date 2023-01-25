@@ -58,3 +58,15 @@ def result_page(request):
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
+@login_required
+def create_vote(request):
+    context_dict = {
+        'past_allocations':[
+            "Grad Rotation1",
+            "Grad Rotation2"
+        ],
+        'progress_allocation':[
+            'Grad Rotation3'
+        ],
+    }
+    return render(request, 'allocationapp/admin_create_vote.html',context=context_dict)

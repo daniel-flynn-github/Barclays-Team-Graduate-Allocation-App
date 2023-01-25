@@ -1,10 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'allocationapp/base.html' %}
+{% load static %}
 
-</body>
-</html>
+{% block title_block %}
+    Admin Create a Vote
+{% endblock %}
+
+{% block body_block %}
+    <div class="container text-center">
+        <div class="row">
+        <div class="col" id = newVote>
+            <button class="btn btn-primary" type="button" data-toggle="collapse" data-target="#collapseNewVote" aria-expanded="false" aria-controls="collapseNewVote" id="pastAllocations">Past Allocations</button>
+            <div class="collapse" id="collapseNewVote">
+                <div class="card card-body" id = "newVoteBody">
+                    {% if past_allocations %}
+                        {% for past in past_allocations %}
+                            <div class="row">
+                             <div class="col align-self-center" id="past">
+                                 <table class="table table-striped " bgcolor="#00AEEF">
+                                    <tbody>
+                                        <tr>
+                                            <td> {{ past }}&ensp; &ensp;&ensp;&ensp;<a href="" class="btn btn-primary"id="button">See Results</a></td>
+                                        </tr>
+                                    </tbody>
+                             </table>
+                            </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col" id = newVote>
+            <button class="btn btn-primary" data-toggle="collapse" href="#collapseProgress" role="button" aria-expanded="false" aria-controls="collapseProgress" id="pastAllocations">Allocation in Progress</button>
+            <div class="collapse" id="collapseProgress">
+                <div class="card card-body" id = "newVoteBody">
+                 {% if past_allocations %}
+                        {% for progress in progress_allocation %}
+                            <div class="row">
+                             <div class="col align-self-center" id="past">
+                                 <table class="table table-striped " bgcolor="#00AEEF">
+                                    <tbody>
+                                        <tr>
+                                            <td> {{ progress }}&ensp; &ensp;&ensp;&ensp;<a href="" class="btn btn-primary"id="button">Open</a></td>
+                                        </tr>
+                                    </tbody>
+                             </table>
+                            </div>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+  </div>
+    </div>
+
+
+{% endblock %}
