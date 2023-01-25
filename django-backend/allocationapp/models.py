@@ -5,6 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class CustomUser(AbstractUser):
     # has ID PK, email, name, last name by default from AbstractUser
+    username = models.CharField(unique=False, blank=True, max_length = 20)
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         return f"{self.email} -> uid: {self.id}"
@@ -84,6 +86,8 @@ class Admin(models.Model):
     def __str__(self):
         return f"ADMIN | {self.user}"
 
+class Grad_CSV(models.Model):
+    csvfile = models.FileField(upload_to='documents/grad CSVs')
 
 class Preference(models.Model):
     grad = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
