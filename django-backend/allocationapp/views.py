@@ -26,6 +26,7 @@ def upload_file(request):
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
 
 def populate_db(request):
+    rs()
     csv_file = Grad_CSV.objects.get(pk=1).csvfile
     path = csv_file.path
     print(type(path))
@@ -47,17 +48,25 @@ def populate_db(request):
                     user=new_user
                 )
     allcsv = Grad_CSV.objects.all()
-    return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv})
+    form = GradCSVForm()
+    return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
 
-def reset(request):
+def rs():
     grads = Graduate.objects.all()
     managers  = Manager.objects.all()
+    if grads:
+        for grad in grads:
+            CustomUser.objects.get(id = grad.user_id).delete()
+    if managers:
+        for manager in managers:
+            CustomUser.objects.get(id = manager.user_id).delete()
+
+
+def reset(request):
+    rs()
     Grad_CSV.objects.all().delete()
-    for grad in grads:
-        CustomUser.objects.get(id = grad.user_id).delete()
-    for manager in managers:
-        CustomUser.objects.get(id = manager.user_id).delete()
-    return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': ''})
+    form = GradCSVForm
+    return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
 def index(request):
     return redirect(reverse('allocationapp:index'))

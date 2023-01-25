@@ -27,5 +27,5 @@ class PreferencesForm(forms.Form):
 class GradCSVForm(forms.Form):
     csvfile = forms.FileField(
         label = 'Select a file',
-        help_text = 'csv file'
+        help_text = ''
     )
