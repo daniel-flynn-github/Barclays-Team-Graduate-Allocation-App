@@ -7,7 +7,7 @@ class CustomUser(AbstractUser):
     # has ID PK, email, name, last name by default from AbstractUser
 
     def __str__(self):
-        return f"Name:{self.first_name} {self.last_name}, Email:{self.email}"
+        return f"{self.email} -> uid: {self.id}"
 
 
 class Department(models.Model):
@@ -27,21 +27,26 @@ class Manager(models.Model):
         verbose_name_plural = 'Managers'
 
     def __str__(self):
-        return f"{self.user}"
+        return f"MANAGER | {self.user}"
 
 
 class Skill(models.Model):
     name = models.CharField(max_length=128)
 
     def __str__(self):
-        return f"Skill: {self.name}"
+        # Needs to be exactly this so it displays in the template properly
+        return f"{self.name}"
 
 
 class Technology(models.Model):
     name = models.CharField(max_length=128)
 
+    class Meta():
+        verbose_name_plural = "Technologies"
+
     def __str__(self):
-        return f"Technology: {self.name}"
+        # Needs to be exactly this so it displays in the template properly
+        return f"{self.name}"
 
 
 class Team(models.Model):
@@ -57,18 +62,17 @@ class Team(models.Model):
         verbose_name_plural = "Teams"
 
     def __str__(self):
-        return f"Name: {self.name}, ID: {self.id}, Capacity: {self.capacity}"
-
+        return f"'{self.name}' -> teamID: {self.id}"
 
 class Graduate(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    assigned_team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    assigned_team = models.ForeignKey(Team, on_delete=models.DO_NOTHING, null=True, blank=True)
 
     class Meta():
         verbose_name_plural = "Graduates"
 
     def __str__(self):
-        return f"{self.user}"
+        return f"GRADUATE | {self.user}"
 
 
 class Admin(models.Model):
@@ -78,7 +82,7 @@ class Admin(models.Model):
         verbose_name_plural = 'Admins'
 
     def __str__(self):
-        return f"{self.user}"
+        return f"ADMIN | {self.user}"
 
 
 class Preference(models.Model):
@@ -87,4 +91,4 @@ class Preference(models.Model):
     weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     def __str__(self):
-        return f"Grad: {self.grad.user.email} has a preference of {self.weight} for {self.team.name}"
+        return f"{self.grad.user.email} -> {self.weight} votes for {self.team.name}"
