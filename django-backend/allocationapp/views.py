@@ -26,9 +26,17 @@ def manager_view_teams(request):
         context_dict = {
             'teams': teams,
             'team_members': team_members,
+            'graduates_with_no_team': Graduate.objects.filter(assigned_team=None),
         }
 
         return render(request, 'allocationapp/manager_teams.html', context=context_dict)
+
+
+@login_required
+def delete_team_member(request, user_id):
+    Graduate.objects.filter(user=CustomUser.objects.get(id=user_id)).update(assigned_team=None)
+    return redirect(reverse('allocationapp:manager_view_teams'))
+
 
 @login_required
 def manager_edit_team(request, team_id):

@@ -62,14 +62,26 @@
                                     <tr>
                                         <th>Team Members</th>
                                         <td>
-                                            {% if team_members|lookup:team.id %}
-                                                <ul>
-                                                    {% for grad in team_members|lookup:team.id %}
-                                                        <li>{{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a></li>
-                                                    {% endfor %}
-                                                </ul>
-                                            {% else %}
-                                                Allocation probably hasn't been run -- no team members.
+                                            <ul>
+                                                {% for grad in team_members|lookup:team.id %}
+                                                    <li>
+                                                        {{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a>
+                                                        <a href="{% url 'allocationapp:delete_team_member' grad.user.id %}" class="btn btn-danger">X</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+
+                                            {% if graduates_with_no_team %}
+                                                <form action="#" method="POST">
+                                                    {% csrf_token %}
+                                                    <select name="" id="" class="form-control">
+                                                        {% for grad in graduates_with_no_team %}
+                                                            <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
+                                                        {% endfor %}
+                                                    </select>
+
+                                                    <button class="btn btn-success" type="submit">Add to team</button>
+                                                </form>
                                             {% endif %}
                                         </td>
                                     </tr>
