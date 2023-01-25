@@ -38,32 +38,12 @@ def vote_submitted(request):
 
 @login_required
 def result_page(request):
+    current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
+
     context_dict = {
-        'teams': [
-            {
-                'team_name': 'Team 1',
-                'group_size': 16,
-                'manage_name': 'Casey',
-                'team_members'
-                'id': 123,  # unique ID
-            },
-        ],
-        'students':[
-            {
-                'student_name' : 'student1',
-                'student_id' : '1',
-                'group_id' : 123,
-            },
-            {
-                'student_name': 'student2',
-                'student_id': '2',
-                'group_id': 123,
-            },
-            {
-                'student_name': 'student3',
-                'student_id': '3',
-                'group_id': 123,
-            },
-        ]
+        'assigned_team': current_user.assigned_team,
+        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'current_user_id': request.user.id
     }
+
     return render(request, 'allocationapp/result_page.html', context=context_dict)
