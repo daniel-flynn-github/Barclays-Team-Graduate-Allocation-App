@@ -8,21 +8,19 @@
 {% block body_block %}
     <div class="container-fluid text-center">
         <div id="voteResult">
-            {% if teams %}
-                    {% for team in teams %}
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <strong> Welcome to {{ team.team_name }}</strong>
-                                    </div>
-                                </div>
-                                <br/>
-                                <div class="row" id="{{ team.id }}">
-                                    <div class="col-md-6">Manage: {{ team.manage_name }}</div>
-                                    <div class="col-md-6">Team Size: {{ team.group_size }}</div>
-                                </div>
-                    {% endfor %}
+            {% if assigned_team %}
+                <div class="row">
+                    <div class="col-md-12">
+                        You've been assigned to<strong> {{ assigned_team.name }}</strong>!
+                    </div>
+                </div>
+                <br/>
+                <div class="row" id="{{ team.id }}">
+                    <div class="col-md-6">Manager: <strong><a href="mailto:{{ assigned_team.manager.user.email }}">{{ assigned_team.manager.user.email }}</a></strong></div>
+                    <div class="col-md-6">Team Size: <strong>{{ assigned_team.capacity }}</strong></div>
+                </div>
             {% else %}
-                The team is not exists.
+                The team does not exist.
             {% endif %}
         </div>
     <br/>
@@ -33,16 +31,20 @@
                 <div class="panel-heading" role="tab" id="headingOne">
                     <h3 class="panel-title">
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="dropdown">
-                            See Your Team member</a>
+                            View your team members</a>
                     </h3>
                 </div>
                 <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                     <div class="panel-body">
-                        {% if students %}
-                            {% for student in students %}
+                        {% if assigned_team_members %}
+                            {% for team_member in assigned_team_members %}
                                 <br/>
                                 <div id="student">
-                                    <td>{{ student.student_name }}</td>
+                                    {% if team_member.user.id == current_user_id %}
+                                        <td><strong>{{ team_member.user.first_name }} {{ team_member.user.last_name }} | {{ team_member.user.email }} (you)</strong></td>
+                                    {% else %}
+                                        <td>{{ team_member.user.first_name }} {{ team_member.user.last_name }} | {{ team_member.user.email }}</td>
+                                    {% endif %}
                                 </div>
                             {% endfor %}
                         {% endif %}
