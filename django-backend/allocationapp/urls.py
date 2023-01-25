@@ -10,4 +10,6 @@ urlpatterns = [
     path('vote_submitted/', views.vote_submitted, name="vote_submitted"),
     path('result_page/', views.result_page, name="result_page"),
     path('upload/', views.upload_file, name='upload'),
+    path('upload/create/', views.populate_db, name = 'create'),
+    path('upload/reset/', views.reset, name = 'reset')
 ]

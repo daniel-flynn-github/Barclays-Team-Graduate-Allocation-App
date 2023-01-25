@@ -1,25 +1,63 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password
 from .custom_decorators import check_graduate_status, check_admin_status
 from .models import *
 import json
+import csv
 
-from allocationapp.models import Grad_CSV
+#from allocationapp.models import Grad_CSV, Graduate, Manager
 from allocationapp.forms import GradCSVForm
+from django.contrib.auth.models import AbstractUser
 
 def upload_file(request):
     if request.method == 'POST':
         form = GradCSVForm(request.POST, request.FILES)
         if form.is_valid():
-            newcsv = Grad_CSV(csvfile = request.FILES['csvfile'])
+            if Grad_CSV.objects.all().count() > 0:
+                Grad_CSV.objects.all().delete()
+            newcsv = Grad_CSV(csvfile = request.FILES['csvfile'], pk = 1)
             newcsv.save()
             return redirect(reverse('allocationapp:upload'))
     else:
         form = GradCSVForm
     all_csv = Grad_CSV.objects.all()
-    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv})
+    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
 
+def populate_db(request):
+    csv_file = Grad_CSV.objects.get(pk=1).csvfile
+    path = csv_file.path
+    print(type(path))
+    with open(path) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            new_user, created = CustomUser.objects.get_or_create(
+                first_name = row[0],
+                last_name = row[1],
+                email = row[2],
+                password = make_password(CustomUser.objects.make_random_password())
+            )
+            if row[3] == 'graduate':
+                Graduate.objects.get_or_create(
+                    user = new_user
+                )
+            if row[3] == 'manager':
+                Manager.objects.get_or_create(
+                    user=new_user
+                )
+    allcsv = Grad_CSV.objects.all()
+    return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv})
+
+def reset(request):
+    grads = Graduate.objects.all()
+    managers  = Manager.objects.all()
+    Grad_CSV.objects.all().delete()
+    for grad in grads:
+        CustomUser.objects.get(id = grad.user_id).delete()
+    for manager in managers:
+        CustomUser.objects.get(id = manager.user_id).delete()
+    return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': ''})
 
 def index(request):
     return redirect(reverse('allocationapp:index'))
