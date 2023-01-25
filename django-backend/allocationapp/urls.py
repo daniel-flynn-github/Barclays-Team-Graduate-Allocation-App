@@ -9,5 +9,6 @@ urlpatterns = [
     path('cast_votes/', views.cast_votes, name='cast_votes'),
     path('vote_submitted/', views.vote_submitted, name="vote_submitted"),
     path('result_page/', views.result_page, name="result_page"),
-
+    path('manager_view_teams/', views.manager_view_teams, name='manager_view_teams'),
+    path('edit_team/<int:team_id>/', views.manager_edit_team, name='manager_edit_team'),
 ]
