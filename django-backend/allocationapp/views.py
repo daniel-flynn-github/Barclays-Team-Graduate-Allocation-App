@@ -11,13 +11,7 @@ def index(request):
 
 @login_required
 def cast_votes(request):
-    if request.method == "GET":
-        context_dict = {
-            'teams': Team.objects.all()
-        }
-
-        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
-    else:
+    if request.method == "POST":
         votes = json.loads(request.POST.get('votes'))
         current_user = request.user
         
@@ -29,7 +23,13 @@ def cast_votes(request):
                 )
             p.save()
 
-        return redirect(reverse('allocationapp:cast_votes'))
+        return redirect(reverse('allocationapp:vote_submitted'))
+    else:
+        context_dict = {
+            'teams': Team.objects.all()
+        }
+
+        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
 @login_required
 def vote_submitted(request):

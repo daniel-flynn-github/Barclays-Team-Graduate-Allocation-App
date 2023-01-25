@@ -1,11 +1,9 @@
 $('#cast-votes-form').on('submit', function(event){
     event.preventDefault();
-    console.log("form submitted!")  // sanity check
     cast_votes();
 });
 
 function cast_votes() {
-    console.log("cast votes is working!"); // sanity check
 
     // Get all the teams, and pair them with their votes
     // This is an object of the form {teamID: votes, ...}
@@ -26,8 +24,8 @@ function cast_votes() {
 
         // handle a successful response
         success : function(json) {
-            console.log(json); // log the returned json to the console
             console.log("success"); // another sanity check
+            return window.location.href = "/allocation/vote_submitted/";
         },
 
         // handle a non-successful response
