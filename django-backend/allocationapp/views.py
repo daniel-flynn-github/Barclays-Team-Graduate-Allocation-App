@@ -6,7 +6,7 @@ from .models import *
 import json
 
 def index(request):
-    return redirect(reverse('allocationapp:cast_votes'))
+    return redirect(reverse('allocationapp:index'))
 
 @login_required
 def cast_votes(request):
@@ -25,8 +25,9 @@ def cast_votes(request):
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
 
-        print(check_graduate_status(request.user))
-        print(check_admin_status(request.user))
+        if not (check_graduate_status(request.user)):
+            # Redirect if the user is not a GRADUATE.
+            return redirect(reverse('allocationapp:index'))
 
         context_dict = {
             'teams': Team.objects.all()
@@ -36,13 +37,20 @@ def cast_votes(request):
 
 @login_required
 def vote_submitted(request):
+    if not (check_graduate_status(request.user)):
+        # Redirect if the user is not a GRADUATE.
+        return redirect(reverse('allocationapp:index'))
+
     context_dict = {}
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 @login_required
 def result_page(request):
-    current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
+    if not (check_graduate_status(request.user)):
+        # Redirect if the user is not a GRADUATE.
+        return redirect(reverse('allocationapp:index'))
 
+    current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
