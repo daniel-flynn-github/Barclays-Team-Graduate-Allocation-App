@@ -75,6 +75,10 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+
+            'libraries':{
+                'template_filters': 'allocationapp.template_filters',
+            }
         },
     },
 ]

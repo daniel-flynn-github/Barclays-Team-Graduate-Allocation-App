@@ -1,5 +1,6 @@
 {% extends 'allocationapp/base.html' %}
 {% load static %}
+{% load template_filters %}
 
 {% block title_block %}
     View team details
@@ -57,6 +58,20 @@
                                     <tr>
                                         <th>Description</th>
                                         <td>{{ team.description }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Team Members</th>
+                                        <td>
+                                            {% if team_members|lookup:team.id %}
+                                                <ul>
+                                                    {% for grad in team_members|lookup:team.id %}
+                                                        <li>{{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a></li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% else %}
+                                                Allocation probably hasn't been run -- no team members.
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     </tbody>
                                 </table>

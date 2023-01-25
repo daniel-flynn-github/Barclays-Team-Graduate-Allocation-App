@@ -17,8 +17,15 @@ def manager_view_teams(request):
             # Redirect if the user is not a MANAGER.
             return redirect(reverse('allocationapp:index'))
         
+        teams = Team.objects.filter(manager=Manager.objects.get(user=CustomUser.objects.get(id=request.user.id)))
+        team_members = {}
+
+        for team in teams:
+            team_members[team.id] = Graduate.objects.filter(assigned_team=Team.objects.get(id=team.id))
+
         context_dict = {
-            'teams': Team.objects.filter(manager=Manager.objects.get(user=CustomUser.objects.get(id=request.user.id)))
+            'teams': teams,
+            'team_members': team_members,
         }
 
         return render(request, 'allocationapp/manager_teams.html', context=context_dict)
