@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
+from .custom_decorators import check_graduate_status, check_admin_status
 from .models import *
-from .forms import PreferencesForm
 import json
 
 def index(request):
@@ -25,6 +24,10 @@ def cast_votes(request):
 
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
+
+        print(check_graduate_status(request.user))
+        print(check_admin_status(request.user))
+
         context_dict = {
             'teams': Team.objects.all()
         }
