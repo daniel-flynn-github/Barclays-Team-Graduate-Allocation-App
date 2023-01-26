@@ -74,11 +74,12 @@
                                             {% if graduates_with_no_team %}
                                                 <form action="#" method="POST">
                                                     {% csrf_token %}
-                                                    <select name="" id="" class="form-control">
+                                                    <select name="selected_grad" id="" class="form-control">
                                                         {% for grad in graduates_with_no_team %}
                                                             <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
                                                         {% endfor %}
                                                     </select>
+                                                    <input type="hidden" value="{{ team.id }}" name="team_id" />
 
                                                     <button class="btn btn-success" type="submit">Add to team</button>
                                                 </form>

@@ -31,6 +31,17 @@ def manager_view_teams(request):
 
         return render(request, 'allocationapp/manager_teams.html', context=context_dict)
 
+    else:
+        selected_grad_id = request.POST['selected_grad']
+        team_id = request.POST['team_id']
+
+        Graduate.objects.filter(user=CustomUser.objects.get(id=int(selected_grad_id))).update(
+            assigned_team=Team.objects.get(id=int(team_id))
+        )
+
+        return redirect(reverse('allocationapp:manager_view_teams'))
+
+
 
 @login_required
 def delete_team_member(request, user_id):
