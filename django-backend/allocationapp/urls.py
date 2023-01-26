@@ -12,4 +12,7 @@ urlpatterns = [
     path('manager_view_teams/', views.manager_view_teams, name='manager_view_teams'),
     path('edit_team/<int:team_id>/', views.manager_edit_team, name='manager_edit_team'),
     path('delete_team_member/<int:user_id>/', views.delete_team_member, name='delete_team_member'),
+    path('upload/', views.upload_file, name='upload'),
+    path('upload/create/', views.populate_db, name = 'create'),
+    path('upload/reset/', views.reset, name = 'reset')
 ]

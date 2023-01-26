@@ -23,3 +23,9 @@ class PreferencesForm(forms.Form):
     class Meta:
         model = Preference
         fields = ['gradId', 'teamId', 'weight']
+
+class GradCSVForm(forms.Form):
+    csvfile = forms.FileField(
+        label = 'Select a file',
+        help_text = ''
+    )
