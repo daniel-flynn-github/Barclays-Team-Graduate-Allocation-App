@@ -4,12 +4,10 @@ from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .models import *
+from .forms import GradCSVForm
+
 import json
 import csv
-
-#from allocationapp.models import Grad_CSV, Graduate, Manager
-from allocationapp.forms import GradCSVForm
-from django.contrib.auth.models import AbstractUser
 
 def upload_file(request):
     if request.method == 'POST':
@@ -56,10 +54,10 @@ def rs():
     managers  = Manager.objects.all()
     if grads:
         for grad in grads:
-            CustomUser.objects.get(id = grad.user_id).delete()
+            CustomUser.objects.get(id = grad.user.id).delete()
     if managers:
         for manager in managers:
-            CustomUser.objects.get(id = manager.user_id).delete()
+            CustomUser.objects.get(id = manager.user.id).delete()
 
 
 def reset(request):
