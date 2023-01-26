@@ -76,10 +76,6 @@ def manager_view_teams(request):
     # Similar to the cast votes page -- a manager can view all of their team(s) here
     # and edit them as needed. This is essentially the managers "Homepage"
     if request.method == "GET":
-        if not (check_manager_status(request.user)):
-            # Redirect if the user is not a MANAGER.
-            return redirect(reverse('allocationapp:index'))
-        
         teams = Team.objects.filter(manager=Manager.objects.get(user=CustomUser.objects.get(id=request.user.id)))
         team_members = {}
 
@@ -166,11 +162,6 @@ def cast_votes(request):
 
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
-
-        if not (check_graduate_status(request.user)):
-            # Redirect if the user is not a GRADUATE.
-            return redirect(reverse('allocationapp:manager_view_teams'))
-
         context_dict = {
             'teams': Team.objects.all()
         }
@@ -179,19 +170,11 @@ def cast_votes(request):
 
 @login_required
 def vote_submitted(request):
-    if not (check_graduate_status(request.user)):
-        # Redirect if the user is not a GRADUATE.
-        return redirect(reverse('allocationapp:manager_view_teams'))
-
     context_dict = {}
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 @login_required
 def result_page(request):
-    if not (check_graduate_status(request.user)):
-        # Redirect if the user is not a GRADUATE.
-        return redirect(reverse('allocationapp:manager_view_teams'))
-
     current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
