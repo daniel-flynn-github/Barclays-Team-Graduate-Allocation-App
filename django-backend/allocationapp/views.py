@@ -59,7 +59,6 @@ def rs():
         for manager in managers:
             CustomUser.objects.get(id = manager.user.id).delete()
 
-
 def reset(request):
     rs()
     Grad_CSV.objects.all().delete()
@@ -98,13 +97,10 @@ def manager_view_teams(request):
 
         return redirect(reverse('allocationapp:manager_view_teams'))
 
-
-
 @login_required
 def delete_team_member(request, user_id):
     Graduate.objects.filter(user=CustomUser.objects.get(id=user_id)).update(assigned_team=None)
     return redirect(reverse('allocationapp:manager_view_teams'))
-
 
 @login_required
 def manager_edit_team(request, team_id):
