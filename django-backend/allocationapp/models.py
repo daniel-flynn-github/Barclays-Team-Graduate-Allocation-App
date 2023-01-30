@@ -49,12 +49,12 @@ class Technology(models.Model):
 
 class Team(models.Model):
     name = models.CharField(max_length=128)
-    description = models.CharField(max_length=512, null=True, blank=True)
+    description = models.CharField(max_length=512, blank=True)
     capacity = models.IntegerField()
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING)
-    skills = models.ManyToManyField(Skill)
-    technologies = models.ManyToManyField(Technology)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE, blank=True)
+    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, blank=True)
+    skills = models.ManyToManyField(Skill, blank=True)
+    technologies = models.ManyToManyField(Technology, blank=True)
 
     class Meta():
         verbose_name_plural = "Teams"
