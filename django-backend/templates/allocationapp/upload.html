@@ -1,9 +1,14 @@
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Minimal Django File Upload Example</title>   
-    </head>
-    <body>
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Admin Make New Vote
+{% endblock %}
+
+{% block body_block %}
+    <div class="input-group mb-3">
+    <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    </div>
     <!-- List of uploaded documents -->
     {% if all_csv %}
         <ul>
@@ -32,5 +37,4 @@
         <p>User table populated</p>
     {% endif %}
     <a class="btn" href = "{% url 'allocationapp:reset' %}">Reset Database</a>
-    </body>
-</html> 
+{% endblock %}

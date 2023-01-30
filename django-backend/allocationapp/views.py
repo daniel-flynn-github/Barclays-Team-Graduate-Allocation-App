@@ -133,3 +133,5 @@ def create_vote(request):
         ],
     }
     return render(request, 'allocationapp/admin_create_vote.html',context=context_dict)
+
+
