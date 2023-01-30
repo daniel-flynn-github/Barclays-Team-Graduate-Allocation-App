@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from .custom_decorators import check_graduate_status, check_admin_status
+from . import allocation
 from .models import *
 import json
 import csv
@@ -121,3 +122,20 @@ def result_page(request):
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
+
+@login_required
+def get_allocation(request):
+    # Get the user asking for allocation
+    user = request.user
+    if (check_graduate_status(request.user)): 
+        return redirect(reverse('allocationapp:cast_votes'))
+    # Call the allocation algorithm and store results in json format in allocation_list
+    allocation_results = allocation.run_allocation()
+    for team,team_members in allocation_results.items():
+        for grad in team_members:
+            graduate = Graduate.objects.get(user=grad.id)
+            graduate.assigned_team = team.id
+            graduate.save()
+    return redirect(reverse('allocationapp:cast_votes'))
+
+    #return JsonResponse(allocation_list)
