@@ -147,8 +147,13 @@ def manager_edit_team(request, team_id):
 @login_required
 def cast_votes(request):
     if request.method == "POST":
-        votes = json.loads(request.POST.get('votes'))
         current_user = request.user
+
+        # If this grad has already cast their votes, instead of creating a set of new records, we
+        # delete their old ones first.
+        Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
+
+        votes = json.loads(request.POST.get('votes'))
         
         for team_id in votes:
             p = Preference(
