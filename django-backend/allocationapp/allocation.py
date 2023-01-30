@@ -5,13 +5,7 @@ import itertools
 
 from allocationapp.models import Graduate, Team, Preference
 
-allGraduates = list(Graduate.objects.all())
-allTeams = list(Team.objects.all())
-total_vacancies = 0
-for team in allTeams:
-    total_vacancies += team.capacity
 lower_bound = 3
-vacancies_on_lower_bound = len(allTeams) * lower_bound
 
 def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
     G = nx.DiGraph()
@@ -28,13 +22,19 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
 
     for grad in graduates:
         for team in teams:
-            G.add_edge(grad, team, weight=Preference.objects.get(gradId=grad.id, teamId=team.id).weight) #to be changed
+            G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight) #to be changed
 
     flowDict = nx.min_cost_flow(G)
 
     return flowDict
 
-def run_allocation():
+def run_allocation(allGraduates, allTeams):
+    # allGraduates = list(Graduate.objects.all())
+    # allTeams = list(Team.objects.all())
+    total_vacancies = 0
+    for team in allTeams:
+        total_vacancies += team.capacity
+    vacancies_on_lower_bound = len(allTeams) * lower_bound
     if len(allGraduates) > total_vacancies:
         print("Error: not enough spaces for graduates")
         exit()
@@ -44,11 +44,19 @@ def run_allocation():
         exit()
 
     if len(allGraduates) == total_vacancies:
-        allocation_result = run_min_cost_max_flow(allGraduates,allTeams)
+        first_run_allocation = run_min_cost_max_flow(allGraduates,allTeams)
+        allocation_result = {team:[] for team in allTeams}
+
+        for grad in first_run_allocation:
+            for team in first_run_allocation[grad]:
+                if(first_run_allocation[grad][team] == 1):
+                    grad.assigned_team = team
+                    grad.save()
+                    allocation_result[team].append(grad)
     elif len(allGraduates) > vacancies_on_lower_bound:
-        randomly_shuffled_grads = random.shuffle(allGraduates)
-        randomly_sampled_grads_for_first_run = randomly_shuffled_grads[:lower_bound*len(allTeams)]
-        randomly_sampled_grads_for_second_run = randomly_shuffled_grads[lower_bound*len(allTeams):]
+        random.shuffle(allGraduates)
+        randomly_sampled_grads_for_first_run = allGraduates[:lower_bound*len(allTeams)]
+        randomly_sampled_grads_for_second_run = allGraduates[lower_bound*len(allTeams):]
         first_run_allocation = run_min_cost_max_flow(randomly_sampled_grads_for_first_run, allTeams, with_lower_bound=True)
         remaining_spaces = total_vacancies - vacancies_on_lower_bound
         remaining_teams = {}
@@ -70,9 +78,13 @@ def run_allocation():
         for grad in first_run_allocation:
             for team in first_run_allocation[grad]:
                 if(first_run_allocation[grad][team] == 1):
+                    grad.assigned_team = team
+                    grad.save()
                     allocation_result[team].append(grad)
             for team in second_run_allocation[grad]:
                 if(second_run_allocation[grad][team] == 1):
+                    grad.assigned_team = team
+                    grad.save()
                     allocation_result[team].append(grad)
     
     return allocation_result

@@ -192,12 +192,12 @@ def get_allocation(request):
     if (check_graduate_status(request.user)): 
         return redirect(reverse('allocationapp:cast_votes'))
     # Call the allocation algorithm and store results in json format in allocation_list
-    allocation_results = allocation.run_allocation()
-    for team,team_members in allocation_results.items():
-        for grad in team_members:
-            graduate = Graduate.objects.get(user=grad.id)
-            graduate.assigned_team = team.id
-            graduate.save()
+    allocation_results = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+    # for team,team_members in allocation_results.items():
+    #     for grad in team_members:
+    #         graduate = Graduate.objects.get(user=CustomUser.objects.get(grad.user))
+    #         graduate.assigned_team = team
+    #         graduate.save()
     return redirect(reverse('allocationapp:cast_votes'))
 
     #return JsonResponse(allocation_list)
