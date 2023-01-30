@@ -5,8 +5,8 @@ import itertools
 
 from allocationapp.models import Graduate, Team, Preference
 
-allGraduates = Graduate.objects.all()
-allTeams = Team.objects.all()
+allGraduates = list(Graduate.objects.all())
+allTeams = list(Team.objects.all())
 total_vacancies = 0
 for team in allTeams:
     total_vacancies += team.capacity
