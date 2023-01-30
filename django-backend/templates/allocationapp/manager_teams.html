@@ -1,0 +1,100 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+{% load template_filters %}
+
+{% block title_block %}
+    View team details
+{% endblock %}
+
+{% block body_block %}
+    <div class="container p-4">
+        <div id="accordion">
+            <h2>You manage these teams:</h2>
+            {% if teams %}
+                {% for team in teams %}
+                    <div class="card mb-3 p-0">
+                        <div class="card-header card-header-team" id="heading_{{ team.id }}">
+                            <div class="container">
+                                <div class="row">
+                                    <div class="col">
+                                        <h5 class="mb-0">
+                                            <button class="btn btn-link team_name_btn" data-toggle="collapse" data-target="#collapse_{{ team.id }}" aria-expanded="true" aria-controls="collapse_{{ team.id }}">
+                                                {{ team.name }}
+                                            </button>
+                                        </h5>
+                                    </div>
+
+                                    <div class="col text-right">
+                                        <div class="div">
+                                            <a class="btn btn-warning" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div id="collapse_{{ team.id }}" class="collapse team_details_collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
+                            <div class="card-body p-0">
+                                <table class="table table-striped team_details_table">
+                                    <tbody>
+                                    <tr>
+                                        <div class="container">
+                                            <th>Department</th>
+                                            <td>{{ team.department.name }}</td>
+                                        </div>
+                                    </tr>
+                                    <tr>
+                                        <th>Technologies</th>
+                                        <td>{{ team.technologies.all|join:", " }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Skills</th>
+                                        <td>{{ team.skills.all|join:", " }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Group Size</th>
+                                        <td>{{ team.capacity }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Description</th>
+                                        <td>{{ team.description }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Team Members</th>
+                                        <td>
+                                            <ul>
+                                                {% for grad in team_members|lookup:team.id %}
+                                                    <li>
+                                                        {{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a>
+                                                        <a href="{% url 'allocationapp:delete_team_member' grad.user.id %}" class="btn btn-danger">X</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+
+                                            {% if graduates_with_no_team %}
+                                                <form action="#" method="POST">
+                                                    {% csrf_token %}
+                                                    <select name="selected_grad" id="" class="form-control">
+                                                        {% for grad in graduates_with_no_team %}
+                                                            <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <input type="hidden" value="{{ team.id }}" name="team_id" />
+
+                                                    <button class="btn btn-success" type="submit">Add to team</button>
+                                                </form>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <h2>You're not in charge of any teams. This is likely an error, so please contact an admin.</h2>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
