@@ -67,14 +67,26 @@ class TestGetAllocation(TestCase):
         self.assertEqual(Team.objects.get(name="team1").capacity, 3)
         self.assertEqual(Team.objects.get(name="team2").capacity, 4)
         self.assertEqual(Team.objects.get(name="team3").capacity, 5)
-        self.assertEqual(len(allocation.allGraduates), 2)
-        self.assertEqual(len(allocation.allTeams), 2)
-        self.assertEqual(allocation.vacancies_on_lower_bound, 9)
+        #self.assertEqual(len(allocation.allGraduates), 2)
+        #self.assertEqual(len(allocation.allTeams), 2)
+        # self.assertEqual(allocation.randomly_sampled_grads_for_first_run, 9)
         #self.assertEqual(allocation.total_vacancies, 12)
-        response = allocation.run_allocation()
+        response = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
         print(response)
-        #self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team3"))
-        #self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team3"))
+        # grad = Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1"))
+        # team = Team.objects.get(name="team1")
+        # grad.assigned_team = team
+        # grad.save
+
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team2"))
+        # self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team3"))
+        # self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team2"))
         # self.assertEqual(response.status_code, 200)
         # self.assertJSONEqual(
         #     str(response.content, encoding='utf8'),
