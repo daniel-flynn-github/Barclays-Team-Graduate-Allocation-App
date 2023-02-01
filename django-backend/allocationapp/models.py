@@ -88,8 +88,8 @@ class TeamCSV(models.Model):
     csvfile = models.FileField(upload_to='documents/team CSVs')
 
 class Preference(models.Model):
-    grad = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
-    team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    grad = models.ForeignKey(Graduate, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     def __str__(self):

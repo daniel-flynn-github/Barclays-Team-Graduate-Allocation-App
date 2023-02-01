@@ -4,6 +4,9 @@ from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from . import allocation
+from allauth.account.forms import ResetPasswordForm
+from django.conf import settings
+from django.http import HttpRequest
 from .models import *
 from .forms import GradCSVForm,TeamCSVForm
 
@@ -90,20 +93,35 @@ def team_reset(request):
     Department.objects.all().delete()
     form = TeamCSVForm
     return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
+def send_password_reset(user: settings.AUTH_USER_MODEL):
+    request = HttpRequest()
+    request.user = user
+    if settings.DEBUG:
+        request.META['HTTP_HOST'] = '127.0.0.1:8000'
+    else:
+        request.META['HTTP_HOST'] = 'www.mysite.com'
+
+    form = ResetPasswordForm({"email": user.email})
+    if form.is_valid():
+        form.save(request)
 
 def rs():
     grads = Graduate.objects.all()
     managers  = Manager.objects.all()
+    print("number of grads: " + str(len(grads)))
     if grads:
         for grad in grads:
-            CustomUser.objects.get(id = grad.user.id).delete()
+            temp_id = grad.user.id
+            grad.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
     if managers:
         for manager in managers:
-            CustomUser.objects.get(id = manager.user.id).delete()
+            temp_id = manager.user.id
+            manager.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
 
 def reset(request):
     rs()
-    Grad_CSV.objects.all().delete()
     form = GradCSVForm
     return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
