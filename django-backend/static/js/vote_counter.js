@@ -19,6 +19,7 @@ function countVotes(team_id) {
     document.getElementById("remove_vote_team_" + team_id).hidden = false;
     document.getElementById("voteCount_" + team_id).innerHTML = voteCounts[team_id];
     localStorage.setItem("voteCountsObject", JSON.stringify(voteCounts));
+    pluralize(team_id);
 }
 
 function removeVotes(team_id) {
@@ -35,6 +36,7 @@ function removeVotes(team_id) {
 
     document.getElementById("voteCount_" + team_id).innerHTML = voteCounts[team_id];
     localStorage.setItem("voteCountsObject", JSON.stringify(voteCounts));
+    pluralize(team_id);
 }
 
 function resetVotes() {
@@ -52,4 +54,15 @@ function resetVotes() {
 
     // Reset the JSON object for votes back to 0
     localStorage.setItem("voteCountsObject", "{}");
+}
+
+function pluralize(team_id) {
+    // Runs everytime a vote is added of removed
+    // Changes the text to "vote" or "votes" as needed
+    var voteCounts = JSON.parse(localStorage.getItem("voteCountsObject"));
+    if (voteCounts[team_id] == 1) {
+        document.getElementById("vote_text_" + team_id).innerHTML = 'vote';
+    } else {
+        document.getElementById("vote_text_" + team_id).innerHTML = 'votes';
+    }
 }
