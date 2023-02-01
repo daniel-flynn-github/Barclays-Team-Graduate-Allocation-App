@@ -52,7 +52,7 @@ class Team(models.Model):
     description = models.CharField(max_length=512, null=True, blank=True)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING)
+    manager = models.ForeignKey(Manager, on_delete=models.SET_NULL, blank = True, null = True)
     skills = models.ManyToManyField(Skill)
     technologies = models.ManyToManyField(Technology)
 
@@ -85,8 +85,8 @@ class Grad_CSV(models.Model):
     csvfile = models.FileField(upload_to='documents/grad CSVs')
 
 class Preference(models.Model):
-    grad = models.ForeignKey(Graduate, on_delete=models.DO_NOTHING)
-    team = models.ForeignKey(Team, on_delete=models.DO_NOTHING)
+    grad = models.ForeignKey(Graduate, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
     weight = models.PositiveIntegerField(validators=[MinValueValidator(0), MaxValueValidator(5)])
 
     def __str__(self):
