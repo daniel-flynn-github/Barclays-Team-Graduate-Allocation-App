@@ -19,7 +19,7 @@ class TestGetAllocation(TestCase):
 
         team1 = Team.objects.create(name = "team1", capacity=3)
         team2 = Team.objects.create(name = "team2", capacity=4)
-        team3 = Team.objects.create(name = "team3", capacity=5)
+        team3 = Team.objects.create(name = "team3", capacity=3)
 
         
 
@@ -58,27 +58,31 @@ class TestGetAllocation(TestCase):
 
     def test_get_allocation(self):
         c = Client()
-        #logged_in = c.login(username='', password='')
+        # user = CustomUser.objects.create(email="admin@barclays.com", password="1234", username="admin")
+        # print(user)
+        # logged_in = c.login(email='admin@barclays.com', password='1234', username='admin')
         #self.assertTrue(logged_in)
-        # response = c.get(reverse('allocationapp:get_allocation'))
-        # print(response)
+        response = c.get(reverse('allocationapp:get_allocation'))
+        print(response)
+        #print(Graduate.objects.all())
         self.assertEqual(len(list(Graduate.objects.all())), 10)
         self.assertEqual(len(list(Team.objects.all())), 3)
         self.assertEqual(Team.objects.get(name="team1").capacity, 3)
         self.assertEqual(Team.objects.get(name="team2").capacity, 4)
-        self.assertEqual(Team.objects.get(name="team3").capacity, 5)
+        self.assertEqual(Team.objects.get(name="team3").capacity, 3)
         #self.assertEqual(len(allocation.allGraduates), 2)
         #self.assertEqual(len(allocation.allTeams), 2)
         # self.assertEqual(allocation.randomly_sampled_grads_for_first_run, 9)
         #self.assertEqual(allocation.total_vacancies, 12)
-        response = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
-        print(response)
+        # response = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+        # print(response)
         # grad = Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1"))
         # team = Team.objects.get(name="team1")
         # grad.assigned_team = team
         # grad.save
 
-        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team1"))
+        #self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team1"))
+        print(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team)
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team2"))

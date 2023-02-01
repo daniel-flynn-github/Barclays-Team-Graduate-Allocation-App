@@ -22,7 +22,7 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
 
     for grad in graduates:
         for team in teams:
-            G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight) #to be changed
+            G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight)
 
     flowDict = nx.min_cost_flow(G)
 
