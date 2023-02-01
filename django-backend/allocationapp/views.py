@@ -3,6 +3,9 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
+from allauth.account.forms import ResetPasswordForm
+from django.conf import settings
+from django.http import HttpRequest
 from .models import *
 from .forms import GradCSVForm
 
@@ -24,7 +27,7 @@ def upload_file(request):
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
 
 def populate_db(request):
-    rs()
+    delete_grad_and_manager()
     csv_file = Grad_CSV.objects.get(pk=1).csvfile
     path = csv_file.path
     print(type(path))
@@ -49,19 +52,37 @@ def populate_db(request):
     form = GradCSVForm()
     return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
 
-def rs():
+
+def send_password_reset(user: settings.AUTH_USER_MODEL):
+    request = HttpRequest()
+    request.user = user
+    if settings.DEBUG:
+        request.META['HTTP_HOST'] = '127.0.0.1:8000'
+    else:
+        # TEMPORARY filler url must be  changed to real link when website is hosted
+        request.META['HTTP_HOST'] = 'www.mysite.com'
+
+    form = ResetPasswordForm({"email": user.email})
+    if form.is_valid():
+        form.save(request)
+
+#utility function to delete graduate and manager objects
+def delete_grad_and_manager():
     grads = Graduate.objects.all()
     managers  = Manager.objects.all()
     if grads:
         for grad in grads:
-            CustomUser.objects.get(id = grad.user.id).delete()
+            temp_id = grad.user.id
+            grad.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
     if managers:
         for manager in managers:
-            CustomUser.objects.get(id = manager.user.id).delete()
+            temp_id = manager.user.id
+            manager.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
 
 def reset(request):
-    rs()
-    Grad_CSV.objects.all().delete()
+    delete_grad_and_manager()
     form = GradCSVForm
     return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
