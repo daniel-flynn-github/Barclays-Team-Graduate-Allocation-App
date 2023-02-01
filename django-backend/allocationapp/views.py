@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
-from . import allocation
+from .allocation import run_allocation
 from allauth.account.forms import ResetPasswordForm
 from django.conf import settings
 from django.http import HttpRequest
@@ -49,6 +49,7 @@ def populate_db(request):
                 Manager.objects.get_or_create(
                     user=new_user
                 )
+            send_password_reset(new_user)
     allcsv = Grad_CSV.objects.all()
     form = GradCSVForm()
     return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
@@ -85,6 +86,11 @@ def team_populate_db(request):
                 department = dep,
                 manager = Manager.objects.get(user_id = manager_user.id)
             )
+    grads = Graduate.objects.all()
+    teams = Team.objects.all()
+    for grad in grads:
+        for team in teams:
+            Preference.objects.get_or_create(grad = grad, team = team, weight = 5)
     allcsv = TeamCSV.objects.all()
     form = TeamCSVForm()
     return render(request,'allocationapp/teamupload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
@@ -93,6 +99,7 @@ def team_reset(request):
     Department.objects.all().delete()
     form = TeamCSVForm
     return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
+
 def send_password_reset(user: settings.AUTH_USER_MODEL):
     request = HttpRequest()
     request.user = user
@@ -246,6 +253,6 @@ def result_page(request):
 @login_required
 def get_allocation(request):
     # Run alg
-    allocation_results = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+    run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
     # redirect to result page
     return redirect(reverse('allocationapp:result_page'))
