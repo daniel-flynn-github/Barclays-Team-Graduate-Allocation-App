@@ -6,6 +6,7 @@ from django.contrib.auth.hashers import make_password
 from allauth.account.forms import ResetPasswordForm
 from django.conf import settings
 from django.http import HttpRequest
+from . import allocation
 from .models import *
 from .forms import GradCSVForm
 
@@ -203,3 +204,10 @@ def result_page(request):
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
+
+@login_required
+def get_allocation(request):
+    # Run alg
+    allocation_results = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+    # redirect to result page
+    return redirect(reverse('allocationapp:result_page'))
