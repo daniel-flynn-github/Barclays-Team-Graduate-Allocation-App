@@ -27,7 +27,7 @@ def upload_file(request):
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
 
 def populate_db(request):
-    rs()
+    delete_grad_and_manager()
     csv_file = Grad_CSV.objects.get(pk=1).csvfile
     path = csv_file.path
     print(type(path))
@@ -52,22 +52,24 @@ def populate_db(request):
     form = GradCSVForm()
     return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
 
+
 def send_password_reset(user: settings.AUTH_USER_MODEL):
     request = HttpRequest()
     request.user = user
     if settings.DEBUG:
         request.META['HTTP_HOST'] = '127.0.0.1:8000'
     else:
+        # TEMPORARY filler url must be  changed to real link when website is hosted
         request.META['HTTP_HOST'] = 'www.mysite.com'
 
     form = ResetPasswordForm({"email": user.email})
     if form.is_valid():
         form.save(request)
 
-def rs():
+#utility function to delete graduate and manager objects
+def delete_grad_and_manager():
     grads = Graduate.objects.all()
     managers  = Manager.objects.all()
-    print("number of grads: " + str(len(grads)))
     if grads:
         for grad in grads:
             temp_id = grad.user.id
@@ -80,7 +82,7 @@ def rs():
             CustomUser.objects.filter(id = temp_id).delete()
 
 def reset(request):
-    rs()
+    delete_grad_and_manager()
     form = GradCSVForm
     return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
