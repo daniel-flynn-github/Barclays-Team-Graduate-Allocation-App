@@ -142,9 +142,8 @@ def manager_edit_team(request, team_id):
 
 @login_required
 def cast_votes(request):
+    current_user = request.user
     if request.method == "POST":
-        current_user = request.user
-
         # If this grad has already cast their votes, instead of creating a set of new records, we
         # delete their old ones first.
         Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
@@ -169,7 +168,10 @@ def cast_votes(request):
 
 @login_required
 def vote_submitted(request):
-    context_dict = {}
+    current_user = request.user
+    context_dict = {
+        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first()
+    }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 @login_required
