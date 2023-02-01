@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
+from . import allocation
 from .models import *
 from .forms import GradCSVForm
 
@@ -184,3 +185,10 @@ def result_page(request):
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
+
+@login_required
+def get_allocation(request):
+    # Run alg
+    allocation_results = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+    # redirect to result page
+    return redirect(reverse('allocationapp:result_page'))
