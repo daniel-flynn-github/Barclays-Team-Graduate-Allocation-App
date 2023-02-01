@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .models import *
-from .forms import GradCSVForm
+from .forms import GradCSVForm,TeamCSVForm
 
 import json
 import csv
@@ -48,6 +48,47 @@ def populate_db(request):
     allcsv = Grad_CSV.objects.all()
     form = GradCSVForm()
     return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
+
+def team_upload_file(request):
+    if request.method == 'POST':
+        form = TeamCSVForm(request.POST, request.FILES)
+        if form.is_valid():
+            if TeamCSV.objects.all().count() > 0:
+                TeamCSV.objects.all().delete()
+            newcsv = TeamCSV(csvfile = request.FILES['csvfile'], pk = 1)
+            newcsv.save()
+            return redirect(reverse('allocationapp:teamupload'))
+    else:
+        form = TeamCSVForm
+    all_csv = TeamCSV.objects.all()
+    return render(request, 'allocationapp/teamupload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
+
+def team_populate_db(request):
+    TeamCSV
+    csv_file = TeamCSV.objects.get(pk=1).csvfile
+    path = csv_file.path
+    with open(path) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            dep, created = Department.objects.get_or_create(
+                name = row[3]
+            )
+            manager_user = CustomUser.objects.get(email = row[4])
+            new_team, created = Team.objects.get_or_create(
+                name = row[0],
+                description = row[1],
+                capacity = row[2],
+                department = dep,
+                manager = Manager.objects.get(user_id = manager_user.id)
+            )
+    allcsv = TeamCSV.objects.all()
+    form = TeamCSVForm()
+    return render(request,'allocationapp/teamupload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
+
+def team_reset(request):
+    Department.objects.all().delete()
+    form = TeamCSVForm
+    return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
 def rs():
     grads = Graduate.objects.all()

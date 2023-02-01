@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Team Upload</title>   
+    </head>
+    <body>
+    <!-- List of uploaded documents -->
+    {% if all_csv %}
+        <ul>
+        {% for csv in all_csv %}
+            <b>{{ csv.file.name }}</b>
+            <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No documents.</p>
+    {% endif %}
+
+        <!-- Upload form. Note enctype attribute! -->
+        <form action="{% url 'allocationapp:teamupload' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <p>{{ form.non_field_errors }}</p>
+            <p>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</p>
+            <p>
+                {{ form.csvfile.errors }}
+                {{ form.csvfile }}
+            </p>
+            <p><input type="submit" value="Upload" /></p>
+        </form>
+    <a class="btn" href = "{% url 'allocationapp:teamcreate' %}">Populate Team Database </a>
+    {% if populated %}
+        <p>Team table populated</p>
+    {% endif %}
+    <a class="btn" href = "{% url 'allocationapp:teamreset' %}">Reset Team Database</a>
+    </body>
+</html> 
