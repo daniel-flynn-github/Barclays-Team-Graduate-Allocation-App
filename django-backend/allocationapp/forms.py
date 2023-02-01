@@ -30,4 +30,10 @@ class GradCSVForm(forms.Form):
         help_text = ''
     )
 
+class TeamCSVForm(forms.Form):
+    csvfile = forms.FileField(
+        label = 'Select a file',
+        help_text = ''
+    )
+
 

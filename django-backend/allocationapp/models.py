@@ -52,9 +52,9 @@ class Team(models.Model):
     description = models.CharField(max_length=512, null=True, blank=True)
     capacity = models.IntegerField()
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
-    manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=True)
-    skills = models.ManyToManyField(Skill, null=True, blank=True)
-    technologies = models.ManyToManyField(Technology, null=True, blank=True)
+    manager = models.ForeignKey(Manager, on_delete=models.SET_NULL, blank=True, null=True)
+    skills = models.ManyToManyField(Skill, blank = True)
+    technologies = models.ManyToManyField(Technology, blank = True)
 
     class Meta():
         verbose_name_plural = "Teams"
@@ -83,6 +83,9 @@ class Admin(models.Model):
 
 class Grad_CSV(models.Model):
     csvfile = models.FileField(upload_to='documents/grad CSVs')
+
+class TeamCSV(models.Model):
+    csvfile = models.FileField(upload_to='documents/team CSVs')
 
 class Preference(models.Model):
     grad = models.ForeignKey(Graduate, on_delete=models.CASCADE)

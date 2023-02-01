@@ -5,7 +5,7 @@ import itertools
 
 from allocationapp.models import Preference
 
-lower_bound = 3
+lower_bound = 1
 
 # function using networkx library to run a min_cost_max_flow
 # with_lower_bound attribute is False by default, if true the algorithm is run capping the team capacities at the lower bound
@@ -42,6 +42,7 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
     return flowDict
 
 def run_allocation(allGraduates, allTeams, testing=False):
+    print("running")
 
     total_vacancies = 0
     for team in allTeams:
@@ -68,7 +69,7 @@ def run_allocation(allGraduates, allTeams, testing=False):
                     grad.save()
                     allocation_result[team].append(grad)
     # alg will need to be run twice when there are more vacancies than graduates
-    elif len(allGraduates) > vacancies_on_lower_bound:
+    elif len(allGraduates) >= vacancies_on_lower_bound:
         # randomly shuffle graduates to randomise who gets picked for first or second run
         # (since first-run people are more likely to get their preferred team)
         if (not testing):
@@ -108,5 +109,4 @@ def run_allocation(allGraduates, allTeams, testing=False):
                     grad.assigned_team = team
                     grad.save()
                     allocation_result[team].append(grad)
-    
-    return allocation_result
+        print(allocation_result)
