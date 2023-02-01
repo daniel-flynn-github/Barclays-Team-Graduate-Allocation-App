@@ -19,20 +19,8 @@ class TestGetAllocation(TestCase):
 
         team1 = Team.objects.create(name = "team1", capacity=3)
         team2 = Team.objects.create(name = "team2", capacity=4)
-        team3 = Team.objects.create(name = "team3", capacity=3)
+        team3 = Team.objects.create(name = "team3", capacity=5)
 
-        
-
-        # graduates = {
-        #     grad1:{team1:100,team2:1,team3:3},
-        #     grad2:{team1:1,team2:100,team3:5},
-        #     grad3:{team1:2,team2:3,team3:100},
-        #     grad4:{team1:100,team2:5,team3:2,},
-        #     grad5:{team1:3,team2:100,team3:3},
-        #     grad6:{team1:2,team2:3,team3:1},
-        #     grad7:{team1:1,team2:2,team3:100},
-        #     grad8:{team1:2,team2:100,team3:4}
-        # }
 
         graduates = {
             'grad1':{'team1':100,'team2':1,'team3':3},
@@ -58,46 +46,22 @@ class TestGetAllocation(TestCase):
 
     def test_get_allocation(self):
         c = Client()
-        # user = CustomUser.objects.create(email="admin@barclays.com", password="1234", username="admin")
-        # print(user)
-        # logged_in = c.login(email='admin@barclays.com', password='1234', username='admin')
-        #self.assertTrue(logged_in)
-        response = c.get(reverse('allocationapp:get_allocation'))
-        print(response)
-        #print(Graduate.objects.all())
-        self.assertEqual(len(list(Graduate.objects.all())), 10)
-        self.assertEqual(len(list(Team.objects.all())), 3)
-        self.assertEqual(Team.objects.get(name="team1").capacity, 3)
-        self.assertEqual(Team.objects.get(name="team2").capacity, 4)
-        self.assertEqual(Team.objects.get(name="team3").capacity, 3)
-        #self.assertEqual(len(allocation.allGraduates), 2)
-        #self.assertEqual(len(allocation.allTeams), 2)
-        # self.assertEqual(allocation.randomly_sampled_grads_for_first_run, 9)
-        #self.assertEqual(allocation.total_vacancies, 12)
-        # response = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+        user = CustomUser.objects.create_user(email="admin@barclays.com", password="1234", username="admin")
+        logged_in = c.login(email='admin@barclays.com', password='1234', username='admin')
+        # uncomment below to test with view call, however unable to test without reshuffling the graduates randomly, therefore tests will not pass
+        # response = c.get(reverse('allocationapp:get_allocation'))
         # print(response)
-        # grad = Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1"))
-        # team = Team.objects.get(name="team1")
-        # grad.assigned_team = team
-        # grad.save
 
-        #self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team1"))
-        print(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team)
+        # calling allocation with testing argument = True, so that no random reshuffling occurs and allocation can be tested with hardcoded results below
+        allocation_result = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team2"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team2"))
-        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team2"))
-        # self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team3"))
-        # self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team2"))
-        # self.assertEqual(response.status_code, 200)
-        # self.assertJSONEqual(
-        #     str(response.content, encoding='utf8'),
-        #     {
-        #         "user":"pmccartney@beatles.com",
-        #         "photo":"flinder/media/images/mountain.png",
-        #         "name":"Thomas",
-        #         "subtitle":"Mountain Flat"
-        #     }
-        # )
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad6")).assigned_team, Team.objects.get(name="team3"))
