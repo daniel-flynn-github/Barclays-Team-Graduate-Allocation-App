@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
-from .custom_decorators import check_graduate_status, check_admin_status
 from . import allocation
 from .models import *
 from .forms import GradCSVForm
