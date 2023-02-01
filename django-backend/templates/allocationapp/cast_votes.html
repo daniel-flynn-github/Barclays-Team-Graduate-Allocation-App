@@ -42,15 +42,15 @@
                                             <span class="vote_text"><span class="vote_count_value" id="voteCount_{{ team.id }}">0</span> <span id="vote_text_{{ team.id }}">votes</span></span>
 
                                             <!-- Only shows if there are > 0 votes -->
-                                            <div hidden="true" class="btn btn_vote text-danger remove_vote_btn" onclick="removeVotes('{{ team.id }}')" id="remove_vote_team_{{ team.id }}">
-                                                <i class="bi bi-x-circle"></i>
+                                            <div hidden="true" class="btn btn_vote text-warning remove_vote_btn" onclick="removeVotes('{{ team.id }}')" id="remove_vote_team_{{ team.id }}">
+                                                <i class="bi bi-hand-thumbs-down"></i>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-            
+
                         <div id="collapse_{{ team.id }}" class="collapse team_details_collapse" aria-labelledby="heading_{{ team.id }}" data-parent="#accordion">
                             <div class="card-body p-0">
                                 <table class="table table-striped team_details_table">
