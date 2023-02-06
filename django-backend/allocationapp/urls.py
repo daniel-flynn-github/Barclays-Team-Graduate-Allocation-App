@@ -15,5 +15,8 @@ urlpatterns = [
     path('delete_team_member/<int:user_id>/', views.delete_team_member, name='delete_team_member'),
     path('upload/', views.upload_file, name='upload'),
     path('upload/create/', views.populate_db, name = 'create'),
-    path('upload/reset/', views.reset, name = 'reset')
+    path('upload/reset/', views.reset, name = 'reset'),
+    path('teamupload/', views.team_upload_file, name='teamupload'),
+    path('teamupload/create/', views.team_populate_db, name = 'teamcreate'),
+    path('teamupload/reset/', views.team_reset, name = 'teamreset')
 ]

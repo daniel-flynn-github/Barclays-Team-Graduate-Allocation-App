@@ -164,3 +164,6 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 LOGIN_REDIRECT_URL = 'allocationapp:cast_votes'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
+
+EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
