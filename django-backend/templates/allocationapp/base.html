@@ -36,10 +36,10 @@
 
             <div>
                 {% if user.is_authenticated %}
-                <form action="/accounts/logout/" method="POST">
-                    {% csrf_token %}
-                    <button class="btn btn-sm btn-warning">Logout</button>
-                </form>
+                    <form action="/accounts/logout/" method="POST">
+                        {% csrf_token %}
+                        <button class="btn btn-sm btn-warning">Logout</button>
+                    </form>
                 {% endif %}
             </div>
         </nav>
