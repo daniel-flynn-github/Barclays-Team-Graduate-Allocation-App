@@ -210,9 +210,8 @@ def manager_edit_team(request, team_id):
 
 @login_required
 def cast_votes(request):
+    current_user = request.user
     if request.method == "POST":
-        current_user = request.user
-
         # If this grad has already cast their votes, instead of creating a set of new records, we
         # delete their old ones first.
         Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
@@ -230,14 +229,17 @@ def cast_votes(request):
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
         context_dict = {
-            'teams': Team.objects.all()
+            'teams': Team.objects.all(),
         }
 
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
 @login_required
 def vote_submitted(request):
-    context_dict = {}
+    current_user = request.user
+    context_dict = {
+        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+    }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 @login_required
@@ -246,7 +248,7 @@ def result_page(request):
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id
+        'current_user_id': request.user.id,
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
