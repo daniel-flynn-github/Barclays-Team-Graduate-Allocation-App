@@ -1,58 +1,97 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE',
-                      'tango_with_django_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'allocationapp.settings')
 
 import django
 from random import randint
 django.setup()
 
-from allocationapp.models import CustomUser, Manager, Team, Graduate, Admin, Preference
+from allocationapp.models import *
 
 def populate():
     users = [
-        {'username' = 'user1', 'email' = 'user1@email.com'},
-        {'username' = 'user2', 'email' = 'user2@email.com'},
-        {'username' = 'user3', 'email' = 'user3@email.com'},
-        {'username' = 'user4', 'email' = 'user4@email.com'},
-        {'username' = 'user5', 'email' = 'user5@email.com'},
-        {'username' = 'user6', 'email' = 'user6@email.com'},
-        {'username' = 'user7', 'email' = 'user7@email.com'},
-        {'username' = 'user8', 'email' = 'user8@email.com'},
-        {'username' = 'user9', 'email' = 'user9@email.com'},
-        {'username' = 'user10', 'email' = 'user10@email.com'},
-        {'username' = 'user11', 'email' = 'user11@email.com'},
-        {'username' = 'user12', 'email' = 'user12@email.com'},
-        {'username' = 'user13', 'email' = 'user13@email.com'},
-        {'username' = 'user14', 'email' = 'user14@email.com'},
-        {'username' = 'user15', 'email' = 'user15@email.com'}
-        {'username' = 'user16', 'email' = 'user16@email.com'}
+        # Create all the grads (12)
+        {'username': 'grad1', 'email': 'grad1@email.com', 'level': 'graduate'},
+        {'username': 'grad2', 'email': 'grad2@email.com', 'level': 'graduate'},
+        {'username': 'grad3', 'email': 'grad3@email.com', 'level': 'graduate'},
+        {'username': 'grad4', 'email': 'grad4@email.com', 'level': 'graduate'},
+        {'username': 'grad5', 'email': 'grad5@email.com', 'level': 'graduate'},
+        {'username': 'grad6', 'email': 'grad6@email.com', 'level': 'graduate'},
+        {'username': 'grad7', 'email': 'grad7@email.com', 'level': 'graduate'},
+        {'username': 'grad8', 'email': 'grad8@email.com', 'level': 'graduate'},
+        {'username': 'grad9', 'email': 'grad9@email.com', 'level': 'graduate'},
+        {'username': 'grad10', 'email': 'grad10@email.com', 'level': 'graduate'},
+        {'username': 'grad11', 'email': 'grad11@email.com', 'level': 'graduate'},
+        {'username': 'grad12', 'email': 'grad12@email.com', 'level': 'graduate'},
+
+        # Create all the managers (3)
+        {'username': 'manager1', 'email': 'manager1@email.com', 'level': 'manager'},
+        {'username': 'manager2', 'email': 'manager2@email.com', 'level': 'manager'},
+        {'username': 'manager3', 'email': 'manager3@email.com', 'level': 'manager'},
+
+        # Create an admin
+        {'username': 'admin', 'email': 'admin@email.com', 'level': 'admin'},
+    ]
+
+    departments = [
+        {'name': 'Data Analytics'},
+        {'name': 'Banking Security'},
+        {'name': 'Business Banking'},
+    ]
+
+    skills = [
+        {'name': 'Data Science'},
+        {'name': 'Mathematics'},
+        {'name': 'Programming'},
+        {'name': 'Critical Thinking'},
+    ]
+
+    technologies = [
+        {'name': 'Python'},
+        {'name': 'Java'},
+        {'name': 'C/C++'},
+        {'name': 'GoLang'},
     ]
 
     teams = [
-        {'name' = 'team1', 'description' = 'this is team 1', 'capacity' = 5}
-        {'name' = 'team2', 'description' = 'this is team 2', 'capacity' = 6}
-        {'name' = 'team3', 'description' = 'this is team 3', 'capacity' = 2}
-        {'name' = 'team4', 'description' = 'this is team 4', 'capacity' = 7}
+        {
+            'name': 'Barclays Div 1',
+            'description': 'This is a team!',
+            'capacity': 16,
+        },
     ]
 
     for user in users:
-        u = CustomerUser.objects.get_or_create(username = user['username'], email = user['email'])
-        if user['username'] == 'user1' or 'user5' or 'user10' or 'user15':
-            Manager.objects.get_or_create(user = u)
-        if user['username'] == 'user16':
-            Admin.objects.get_or_create(user = u)
-        else:
-            Graduate.objects.get_or_create(user = u)
+        add_user(user)
 
-    for team in teams:
-        t = Team.objects.get_or_create(name = team['name'], description = team['description'], capacity = team['capacity'])
+    for department in departments:
+        add_department(department)
 
-    grads = Graduate.objects.all()
-    teams = Team.objects.all()
-    Managers = 
-    slice = len(grads)/len(teams)
-    for grad in grads:
+    for skill in skills:
+        add_skill(skill)
+
+    for technology in technologies:
+        add_technology(technology)
 
 
+def add_user(user_dict):
+    user = CustomUser.objects.create(username=user_dict.get('username'), email=user_dict.get('email'))
+    status = user_dict.get('level')
 
+    if status == 'graduate':
+        Graduate.objects.create(user=user)
+    elif status == 'manager':
+        Manager.objects.create(user=user)
+    else:
+        Admin.objects.create(user=user)
 
+def add_department(department_dict):
+    Department.objects.create(name=department_dict.get('name'))
+
+def add_skill(skill_dict):
+    Skill.objects.create(name=skill_dict.get('name'))
+
+def add_technology(technology_dict):
+    Technology.objects.create(name=technology_dict.get('name'))
+
+if __name__ == "__main__":
+    populate()
