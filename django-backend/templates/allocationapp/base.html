@@ -38,6 +38,7 @@
                 {% if user.is_authenticated %}
                     <form action="/accounts/logout/" method="POST">
                         {% csrf_token %}
+                        <span class="mr-1">Logged in as <strong>{{ user.first_name }} {{ user.last_name }}</strong></span>
                         <button class="btn btn-sm btn-warning">Logout</button>
                     </form>
                 {% endif %}

@@ -229,7 +229,7 @@ def cast_votes(request):
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
         context_dict = {
-            'teams': Team.objects.all()
+            'teams': Team.objects.all(),
         }
 
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
@@ -238,7 +238,7 @@ def cast_votes(request):
 def vote_submitted(request):
     current_user = request.user
     context_dict = {
-        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first()
+        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
     }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
@@ -248,7 +248,7 @@ def result_page(request):
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id
+        'current_user_id': request.user.id,
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
