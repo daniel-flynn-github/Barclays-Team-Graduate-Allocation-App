@@ -8,30 +8,27 @@ from allocationapp.models import *
 from django.contrib.auth.hashers import make_password
 import random
 
+NUM_GRADS_TO_CREATE = 30
+
 def populate():
     users = [
-        # Create all the grads (12)
-        {'username': 'grad1', 'email': 'grad1@email.com', 'level': 'graduate'},
-        {'username': 'grad2', 'email': 'grad2@email.com', 'level': 'graduate'},
-        {'username': 'grad3', 'email': 'grad3@email.com', 'level': 'graduate'},
-        {'username': 'grad4', 'email': 'grad4@email.com', 'level': 'graduate'},
-        {'username': 'grad5', 'email': 'grad5@email.com', 'level': 'graduate'},
-        {'username': 'grad6', 'email': 'grad6@email.com', 'level': 'graduate'},
-        {'username': 'grad7', 'email': 'grad7@email.com', 'level': 'graduate'},
-        {'username': 'grad8', 'email': 'grad8@email.com', 'level': 'graduate'},
-        {'username': 'grad9', 'email': 'grad9@email.com', 'level': 'graduate'},
-        {'username': 'grad10', 'email': 'grad10@email.com', 'level': 'graduate'},
-        {'username': 'grad11', 'email': 'grad11@email.com', 'level': 'graduate'},
-        {'username': 'grad12', 'email': 'grad12@email.com', 'level': 'graduate'},
-
         # Create all the managers (3)
         {'username': 'manager1', 'email': 'manager1@email.com', 'level': 'manager'},
         {'username': 'manager2', 'email': 'manager2@email.com', 'level': 'manager'},
         {'username': 'manager3', 'email': 'manager3@email.com', 'level': 'manager'},
 
-        # Create an admin
+        # Create an admin (1)
         {'username': 'admin', 'email': 'admin@email.com', 'level': 'admin'},
     ]
+
+    # Create all the graduates (30 as of now)
+    for i in range(1, NUM_GRADS_TO_CREATE + 1):
+        grad = {
+            'username': f'grad{i}', 
+            'email': f'grad{i}@email.com', 
+            'level': 'graduate'
+        }
+        users.append(grad)
 
     departments = [
         {'name': 'Data Analytics'},
@@ -60,7 +57,7 @@ def populate():
             'capacity': 16,
             'department': 'Data Analytics',
             'manager': 'manager1',
-            'lower_bound': 1,
+            'lower_bound': 3,
         },
         {
             'name': 'Barclays Div 2',
@@ -68,7 +65,7 @@ def populate():
             'capacity': 20,
             'department': 'Data Analytics',
             'manager': 'manager2',
-            'lower_bound': 1,
+            'lower_bound': 3,
         },
         {
             'name': 'Barclays Div 3',
@@ -76,7 +73,7 @@ def populate():
             'capacity': 8,
             'department': 'Banking Security',
             'manager': 'manager3',
-            'lower_bound': 1,
+            'lower_bound': 3,
         },
         {
             'name': 'Barclays Div 4',
@@ -84,7 +81,7 @@ def populate():
             'capacity': 14,
             'department': 'Business Banking',
             'manager': 'manager3',
-            'lower_bound': 1,
+            'lower_bound': 3,
         },
     ]
 
@@ -104,6 +101,7 @@ def populate():
         add_team(team, skills, technologies)
 
     cast_mock_preferences()
+    assign_previous_teams(teams)
 
 
 def add_user(user_dict):
@@ -164,6 +162,13 @@ def cast_mock_preferences():
     for graduate in graduates:
         for team in teams:
             Preference.objects.create(grad=graduate, team=team, weight=random.randint(0, 5))
+
+def assign_previous_teams(teams):
+    # Assign a previous team to 50% of the graduates.
+    graduates = Graduate.objects.all()
+    for graduate in graduates[:(len(graduates) - (NUM_GRADS_TO_CREATE//2))]:
+        graduate.assigned_team = Team.objects.get(id=random.randint(1, len(teams)))
+        graduate.save()
 
 if __name__ == "__main__":
     populate()
