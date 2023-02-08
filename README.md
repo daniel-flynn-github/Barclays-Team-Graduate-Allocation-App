@@ -5,10 +5,18 @@ For our third year team project, Barclays tasked us to develop an application th
 We took this broad requirement and developed it as a Django webapp that takes in data input by an admin and matches graduates to teams based on their expressed preference using a maximum-flow minimum-cost algorithm taken from the NetworkX Python library.
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+The project was built using python 3.8 and all the project dependencies can be installed by running `pip3 install -r requirements.txt` while in the 'django-backend' folder.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+The general workflow of the app is as following:
+- An admin creates an account and uploads/enters all the data necessary for the allocation to happen
+    - There is the possibility to upload a csv file for Graduates and Teams. After the file is uploaded, the database will be populated with the data extracted from the csvs.
+    - Alternatively the admin can enter teams and graduates manually
+- All the graduates input in the system will receive an email with an auto-generated password that they can use to login into the webapp. They will be prompted to change the password on their first access
+- Graduates will be prompted with all the possible teams that have been input by the admin and they will be able to access information about the teams, which can guide them in expressing their preference. Their preference is expressed in a form of inputting from 0 to 5 thumbs up, which will impact the allocation of graduates to a particular team
+- The admin will run the allocation once all the preferences have been received
+- Graduates will be able to log back in to check which team they have been assigned to
+- Managers can see their managed teams and can add and drop people from their teams manually
 
 
 ## Authors
