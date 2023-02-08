@@ -71,7 +71,7 @@ def run_allocation(allGraduates, allTeams, testing=False):
                     grad.save()
                     allocation_result[team].append(grad)
     # alg will need to be run twice when there are more vacancies than graduates
-    elif len(allGraduates) > vacancies_on_lower_bound:
+    elif len(allGraduates) >= vacancies_on_lower_bound:
         # randomly shuffle graduates to randomise who gets picked for first or second run
         # (since first-run people are more likely to get their preferred team)
         if (not testing):
@@ -111,5 +111,4 @@ def run_allocation(allGraduates, allTeams, testing=False):
                     grad.assigned_team = team
                     grad.save()
                     allocation_result[team].append(grad)
-    
-    return allocation_result
+        print(allocation_result)

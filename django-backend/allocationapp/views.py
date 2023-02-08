@@ -3,9 +3,12 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
-from . import allocation
+from .allocation import run_allocation
+from allauth.account.forms import ResetPasswordForm
+from django.conf import settings
+from django.http import HttpRequest
 from .models import *
-from .forms import GradCSVForm
+from .forms import GradCSVForm,TeamCSVForm
 
 import json
 import csv
@@ -25,7 +28,7 @@ def upload_file(request):
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
 
 def populate_db(request):
-    rs()
+    delete_grad_and_manager()
     csv_file = Grad_CSV.objects.get(pk=1).csvfile
     path = csv_file.path
     print(type(path))
@@ -46,23 +49,87 @@ def populate_db(request):
                 Manager.objects.get_or_create(
                     user=new_user
                 )
+            send_password_reset(new_user)
     allcsv = Grad_CSV.objects.all()
     form = GradCSVForm()
     return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
 
-def rs():
+def team_upload_file(request):
+    if request.method == 'POST':
+        form = TeamCSVForm(request.POST, request.FILES)
+        if form.is_valid():
+            if TeamCSV.objects.all().count() > 0:
+                TeamCSV.objects.all().delete()
+            newcsv = TeamCSV(csvfile = request.FILES['csvfile'], pk = 1)
+            newcsv.save()
+            return redirect(reverse('allocationapp:teamupload'))
+    else:
+        form = TeamCSVForm
+    all_csv = TeamCSV.objects.all()
+    return render(request, 'allocationapp/teamupload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
+
+def team_populate_db(request):
+    TeamCSV
+    csv_file = TeamCSV.objects.get(pk=1).csvfile
+    path = csv_file.path
+    with open(path) as f:
+        reader = csv.reader(f)
+        for row in reader:
+            dep, created = Department.objects.get_or_create(
+                name = row[3]
+            )
+            manager_user = CustomUser.objects.get(email = row[4])
+            new_team, created = Team.objects.get_or_create(
+                name = row[0],
+                description = row[1],
+                capacity = row[2],
+                department = dep,
+                manager = Manager.objects.get(user_id = manager_user.id)
+            )
+    grads = Graduate.objects.all()
+    teams = Team.objects.all()
+    for grad in grads:
+        for team in teams:
+            Preference.objects.get_or_create(grad = grad, team = team, weight = 5)
+    allcsv = TeamCSV.objects.all()
+    form = TeamCSVForm()
+    return render(request,'allocationapp/teamupload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
+
+def team_reset(request):
+    Department.objects.all().delete()
+    form = TeamCSVForm
+    return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
+
+def send_password_reset(user: settings.AUTH_USER_MODEL):
+    request = HttpRequest()
+    request.user = user
+    if settings.DEBUG:
+        request.META['HTTP_HOST'] = '127.0.0.1:8000'
+    else:
+        # TEMPORARY filler url must be  changed to real link when website is hosted
+        request.META['HTTP_HOST'] = 'www.mysite.com'
+
+    form = ResetPasswordForm({"email": user.email})
+    if form.is_valid():
+        form.save(request)
+
+#utility function to delete graduate and manager objects
+def delete_grad_and_manager():
     grads = Graduate.objects.all()
     managers  = Manager.objects.all()
     if grads:
         for grad in grads:
-            CustomUser.objects.get(id = grad.user.id).delete()
+            temp_id = grad.user.id
+            grad.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
     if managers:
         for manager in managers:
-            CustomUser.objects.get(id = manager.user.id).delete()
+            temp_id = manager.user.id
+            manager.delete()
+            CustomUser.objects.filter(id = temp_id).delete()
 
 def reset(request):
-    rs()
-    Grad_CSV.objects.all().delete()
+    delete_grad_and_manager()
     form = GradCSVForm
     return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
@@ -143,9 +210,8 @@ def manager_edit_team(request, team_id):
 
 @login_required
 def cast_votes(request):
+    current_user = request.user
     if request.method == "POST":
-        current_user = request.user
-
         # If this grad has already cast their votes, instead of creating a set of new records, we
         # delete their old ones first.
         Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
@@ -163,14 +229,17 @@ def cast_votes(request):
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
         context_dict = {
-            'teams': Team.objects.all()
+            'teams': Team.objects.all(),
         }
 
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
 @login_required
 def vote_submitted(request):
-    context_dict = {}
+    current_user = request.user
+    context_dict = {
+        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+    }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 @login_required
@@ -179,7 +248,7 @@ def result_page(request):
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id
+        'current_user_id': request.user.id,
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
@@ -187,6 +256,6 @@ def result_page(request):
 @login_required
 def get_allocation(request):
     # Run alg
-    allocation_results = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+    run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
     # redirect to result page
     return redirect(reverse('allocationapp:result_page'))
