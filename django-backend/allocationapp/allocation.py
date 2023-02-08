@@ -28,17 +28,13 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
                 G.add_node(team, demand=team.capacity)
 
     for grad in graduates:
-        if type(teams) == dict:
-            for team,capacity in teams.items():
-                G.add_edge(grad, team, weight=6 - capacity)
-        else:
-            for team in teams:
+        for team in teams:
+            # 6 - to revert the scale from 1 to 5
+            if (Preference.objects.get(grad=grad, team=team).weight >= 100):
+                G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight)
+            else:
                 # 6 - to revert the scale from 1 to 5
-                if (Preference.objects.get(grad=grad, team=team).weight >= 100):
-                    G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight)
-                else:
-                    # 6 - to revert the scale from 1 to 5
-                    G.add_edge(grad, team, weight=6 - (Preference.objects.get(grad=grad, team=team).weight))
+                G.add_edge(grad, team, weight=6 - (Preference.objects.get(grad=grad, team=team).weight))
 
     flowDict = nx.min_cost_flow(G)
 
