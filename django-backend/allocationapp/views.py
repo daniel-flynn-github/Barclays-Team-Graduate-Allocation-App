@@ -86,6 +86,18 @@ def team_populate_db(request):
                 department = dep,
                 manager = Manager.objects.get(user_id = manager_user.id)
             )
+            technologies = row[5].replace(" ","").split(',')
+            for tech in technologies:
+                t, created = Technology.objects.get_or_create(name  = tech)
+                new_team.technologies.add(t)
+            print(type(row[6]))
+            skills = row[6].split(',')
+            print(skills)
+            for skill in skills:
+                skill.strip()
+                s, created = Skill.objects.get_or_create(name  = skill)
+                new_team.skills.add(s)
+
     grads = Graduate.objects.all()
     teams = Team.objects.all()
     for grad in grads:
@@ -96,6 +108,11 @@ def team_populate_db(request):
     return render(request,'allocationapp/teamupload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
 
 def team_reset(request):
+    teams = Team.objects.all()
+    for team in teams:
+        team.skills.all().delete()
+        team.technologies.all().delete()
+        team.delete()
     Department.objects.all().delete()
     form = TeamCSVForm
     return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
