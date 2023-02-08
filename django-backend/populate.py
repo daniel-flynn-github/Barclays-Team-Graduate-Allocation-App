@@ -1,11 +1,12 @@
 import os
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'allocationapp.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'allocationproject.settings')
 
 import django
-from random import randint
 django.setup()
 
 from allocationapp.models import *
+from django.contrib.auth.hashers import make_password
+import random
 
 def populate():
     users = [
@@ -57,6 +58,33 @@ def populate():
             'name': 'Barclays Div 1',
             'description': 'This is a team!',
             'capacity': 16,
+            'department': 'Data Analytics',
+            'manager': 'manager1',
+            'lower_bound': 1,
+        },
+        {
+            'name': 'Barclays Div 2',
+            'description': 'This is a team!',
+            'capacity': 20,
+            'department': 'Data Analytics',
+            'manager': 'manager2',
+            'lower_bound': 1,
+        },
+        {
+            'name': 'Barclays Div 3',
+            'description': 'This is a team!',
+            'capacity': 8,
+            'department': 'Banking Security',
+            'manager': 'manager3',
+            'lower_bound': 1,
+        },
+        {
+            'name': 'Barclays Div 4',
+            'description': 'This is a team!',
+            'capacity': 14,
+            'department': 'Business Banking',
+            'manager': 'manager3',
+            'lower_bound': 1,
         },
     ]
 
@@ -72,9 +100,23 @@ def populate():
     for technology in technologies:
         add_technology(technology)
 
+    for team in teams:
+        add_team(team, skills, technologies)
+
+    cast_mock_preferences()
+
 
 def add_user(user_dict):
-    user = CustomUser.objects.create(username=user_dict.get('username'), email=user_dict.get('email'))
+    first_names = ['Luke', 'Gianmarco', 'Daniel', 'Yuqi', 'Alaa']
+    last_names = ['Smith', 'McKay', 'Johnstone', 'Hans', 'White']
+
+    user = CustomUser.objects.create(
+        username=user_dict.get('username'), 
+        email=user_dict.get('email'), 
+        password=make_password('testing_1'),
+        first_name=random.choice(first_names),
+        last_name=random.choice(last_names)
+    )
     status = user_dict.get('level')
 
     if status == 'graduate':
@@ -92,6 +134,36 @@ def add_skill(skill_dict):
 
 def add_technology(technology_dict):
     Technology.objects.create(name=technology_dict.get('name'))
+
+def add_team(team_dict, skills, technologies):
+    # Assign the static parameters.
+    added_team = Team.objects.create(
+        name=team_dict.get('name'),
+        description=team_dict.get('description'),
+        capacity=team_dict.get('capacity'),
+        lower_bound=team_dict.get('lower_bound'),
+    )
+
+    # Find the department and manager to assign them.
+    added_team.department = Department.objects.get(name=team_dict.get('department'))
+    added_team.manager = Manager.objects.get(user=CustomUser.objects.get(username=team_dict.get('manager')))
+    added_team.save()
+    
+    # Choose 2 random skills and technologies for each team.
+    chosen_skills = random.sample(skills, 2)
+    chosen_technologies = random.sample(technologies, 2)
+
+    for i in range(2):
+        added_team.skills.add(Skill.objects.get(name=chosen_skills[i].get('name')))
+        added_team.technologies.add(Technology.objects.get(name=chosen_technologies[i].get('name')))
+
+def cast_mock_preferences():
+    teams = Team.objects.all()
+    graduates = Graduate.objects.all()
+
+    for graduate in graduates:
+        for team in teams:
+            Preference.objects.create(grad=graduate, team=team, weight=random.randint(0, 5))
 
 if __name__ == "__main__":
     populate()
