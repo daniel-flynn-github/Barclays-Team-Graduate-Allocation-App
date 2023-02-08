@@ -51,6 +51,7 @@ class Team(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=512, null=True, blank=True)
     capacity = models.IntegerField()
+    lower_bound = models.IntegerField(default=1)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     manager = models.ForeignKey(Manager, on_delete=models.DO_NOTHING, null=True, blank=True)
     skills = models.ManyToManyField(Skill, null=True, blank=True)
