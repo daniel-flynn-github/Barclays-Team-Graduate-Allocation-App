@@ -86,15 +86,14 @@ def team_populate_db(request):
                 department = dep,
                 manager = Manager.objects.get(user_id = manager_user.id)
             )
-            technologies = row[5].replace(" ","").split(',')
+            technologies = row[5].split(',')
             for tech in technologies:
+                tech = tech.strip()
                 t, created = Technology.objects.get_or_create(name  = tech)
                 new_team.technologies.add(t)
-            print(type(row[6]))
             skills = row[6].split(',')
-            print(skills)
             for skill in skills:
-                skill.strip()
+                skill = skill.strip()
                 s, created = Skill.objects.get_or_create(name  = skill)
                 new_team.skills.add(s)
 
