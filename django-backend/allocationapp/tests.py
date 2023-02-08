@@ -6,32 +6,42 @@ from . import allocation
 
 class TestGetAllocation(TestCase):
     def setUp(self):
-        grad1 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad1", email="grad1@barclays.com"))
-        grad2 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad2", email="grad2@barclays.com"))
-        grad3 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad3", email="grad3@barclays.com"))
-        grad4 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad4", email="grad4@barclays.com"))
-        grad5 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad5", email="grad5@barclays.com"))
-        grad6 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad6", email="grad6@barclays.com"))
-        grad7 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad7", email="grad7@barclays.com"))
-        grad8 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad8", email="grad8@barclays.com"))
-        grad9 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad9", email="grad9@barclays.com"))
-        grad10 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad10", email="grad10@barclays.com"))
-
         team1 = Team.objects.create(name = "team1", capacity=3, lower_bound=2)
         team2 = Team.objects.create(name = "team2", capacity=4, lower_bound=3)
         team3 = Team.objects.create(name = "team3", capacity=5, lower_bound=4)
 
+        # grad1 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad1", email="grad1@barclays.com"))
+        # grad2 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad2", email="grad2@barclays.com"))
+        # grad3 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad3", email="grad3@barclays.com"))
+        # grad4 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad4", email="grad4@barclays.com"))
+        # grad5 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad5", email="grad5@barclays.com"))
+        # grad6 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad6", email="grad6@barclays.com"))
+        # grad7 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad7", email="grad7@barclays.com"))
+        # grad8 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad8", email="grad8@barclays.com"))
+        # grad9 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad9", email="grad9@barclays.com"))
+        # grad10 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad10", email="grad10@barclays.com"))
+        grad1 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad1", email="grad1@barclays.com"), assigned_team=Team.objects.get(name="team1"))
+        grad2 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad2", email="grad2@barclays.com"), assigned_team=Team.objects.get(name="team2"))
+        grad3 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad3", email="grad3@barclays.com"), assigned_team=Team.objects.get(name="team3"))
+        grad4 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad4", email="grad4@barclays.com"), assigned_team=Team.objects.get(name="team1"))
+        grad5 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad5", email="grad5@barclays.com"), assigned_team=Team.objects.get(name="team3"))
+        grad6 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad6", email="grad6@barclays.com"), assigned_team=Team.objects.get(name="team1"))
+        grad7 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad7", email="grad7@barclays.com"), assigned_team=Team.objects.get(name="team3"))
+        grad8 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad8", email="grad8@barclays.com"), assigned_team=Team.objects.get(name="team2"))
+        grad9 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad9", email="grad9@barclays.com"), assigned_team=Team.objects.get(name="team2"))
+        grad10 = Graduate.objects.create(user=CustomUser.objects.create(first_name="grad10", email="grad10@barclays.com"))
+
 
         graduates = {
-            'grad1':{'team1':100,'team2':1,'team3':3},
-            'grad2':{'team1':1,'team2':100,'team3':5},
-            'grad3':{'team1':2,'team2':3,'team3':100},
-            'grad4':{'team1':100,'team2':5,'team3':2},
-            'grad5':{'team1':3,'team2':3,'team3':100},
-            'grad6':{'team1':100,'team2':3,'team3':1},
-            'grad7':{'team1':1,'team2':2,'team3':100},
-            'grad8':{'team1':2,'team2':100,'team3':4},
-		    'grad9':{'team1':3,'team2':100,'team3':5},
+            'grad1':{'team1':5,'team2':1,'team3':3},
+            'grad2':{'team1':1,'team2':2,'team3':5},
+            'grad3':{'team1':2,'team2':3,'team3':3},
+            'grad4':{'team1':4,'team2':5,'team3':2},
+            'grad5':{'team1':3,'team2':3,'team3':1},
+            'grad6':{'team1':2,'team2':3,'team3':1},
+            'grad7':{'team1':1,'team2':2,'team3':3},
+            'grad8':{'team1':2,'team2':2,'team3':4},
+		    'grad9':{'team1':3,'team2':1,'team3':5},
 		    'grad10':{'team1':5,'team2':1,'team3':2}
         }
 

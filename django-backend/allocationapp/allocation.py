@@ -5,6 +5,13 @@ import itertools
 
 from allocationapp.models import Preference
 
+def increase_preference_weight_for_previous_team_to_discourage(graduates):
+    for grad in graduates:
+        if grad.assigned_team != None:
+            preference = Preference.objects.get_or_create(grad=grad, team=grad.assigned_team)
+            preference[0].weight += 100 #indexed at 0 because get_or_create returns a tuple (object, bool)
+            preference[0].save()
+
 # function using networkx library to run a min_cost_max_flow
 # with_lower_bound attribute is False by default, if true the algorithm is run capping the team capacities at the lower bound
 def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
@@ -34,13 +41,14 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
                 G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight)
             else:
                 # 6 - to revert the scale from 1 to 5
-                G.add_edge(grad, team, weight=6 - (Preference.objects.get(grad=grad, team=team).weight))
+                G.add_edge(grad, team, weight = 6 - (Preference.objects.get(grad=grad, team=team).weight))
 
     flowDict = nx.min_cost_flow(G)
 
     return flowDict
 
 def run_allocation(allGraduates, allTeams, testing=False):
+    increase_preference_weight_for_previous_team_to_discourage(allGraduates)
     total_vacancies = 0
     vacancies_on_lower_bound = 0
     for team in allTeams:
