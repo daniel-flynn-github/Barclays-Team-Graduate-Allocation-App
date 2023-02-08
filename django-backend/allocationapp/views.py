@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .models import *
-from .forms import GradCSVForm
+from .forms import GradCSVForm, TeamForm
 
 import json
 import csv
@@ -17,11 +17,17 @@ def upload_file(request):
                 Grad_CSV.objects.all().delete()
             newcsv = Grad_CSV(csvfile = request.FILES['csvfile'], pk = 1)
             newcsv.save()
-            return redirect(reverse('allocationapp:upload'))
+        return redirect(reverse('allocationapp:upload'))
     else:
-        form = GradCSVForm
+        form = GradCSVForm()
     all_csv = Grad_CSV.objects.all()
-    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
+    context_dict = {
+        'form': form,
+        'departments': Department.objects.all(),
+        'all_csv': all_csv,
+        'populated': False
+    }
+    return render(request, 'allocationapp/upload.html', context=context_dict)
 
 def populate_db(request):
     rs()
@@ -194,5 +200,23 @@ def create_vote(request):
         ],
     }
     return render(request, 'allocationapp/admin_create_vote.html',context=context_dict)
+@login_required()
+def create_new_team(request):
+    form = TeamForm()
+    if request == 'POST':
+        form = TeamForm(request.POST)
+        if form.is_valid():
+            form.save(commit=True)
+            return redirect('/')
+        else:
+            print(form.errors)
+    context_dict = {
+        'form':form,
+        'departments': Department.objects.all(),
+    }
+
+    print(context_dict['departments'])
+    return render(request, 'allocationapp/upload.html', context=context_dict)
+
 
 

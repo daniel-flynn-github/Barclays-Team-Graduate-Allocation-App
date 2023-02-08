@@ -6,10 +6,51 @@
 {% endblock %}
 
 {% block body_block %}
-    <div class="input-group mb-3">
-    <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
-    </div>
-    <!-- List of uploaded documents -->
+
+    <div class="container-fluid">
+        <h2 id="title">Create a New Team</h2>
+        <div class="form-group">
+             <div class="col-md-6 offset-md-3">
+                 <form role="team_form" method="post" action=".">
+                     {% csrf_token %}
+                        <label class="required" for="group_name"> Group Name:</label>
+                        <input id="group_name" type="text" class="form-control">
+                 <div class="row">
+                    <div class="col">
+                        <label for="group_capacity">Capacity: </label>
+                        <input id="group_capacity" type="text" class="form-control">
+                    </div>
+                      <div class="col">
+                        <label for="group_department">Department: </label>
+                        <div class="input-group mb-3">
+                            <select id = "group_department" class="custom-select" id="inputGroupSelect01">
+                                <option selected>Please Choose...</option>
+                                {% if departments %}
+                                    {% for department in departments %}
+                                        <option value="{{ department.name }}">{{ department.name }}</option>
+                                    {% endfor %}
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                 </div>
+             <div class="row">
+                 <div class="col">
+                      <label for="group_skills">Skills: </label>
+                        <input id="group_skills" type="text" class="form-control">
+                 </div>
+                  <div class="col">
+                      <label for="group_technologies">Technologies:  </label>
+                        <input id="group_technologies" type="text" class="form-control">
+                 </div>
+             </div>
+             <div class="row">
+                    <label for="group_description">Description: </label>
+                    <textarea class="form-control" id="group_description" rows="2" placeholder="Please enter your group description here..."></textarea>
+             </div>
+                 </form>
+        <!-- List of uploaded documents -->
+     <div class="row">
     {% if all_csv %}
         <ul>
         {% for csv in all_csv %}
@@ -18,23 +59,35 @@
         {% endfor %}
         </ul>
     {% else %}
-        <p>No documents.</p>
+        <br>
+        No documents.
     {% endif %}
-
+     </div>
         <!-- Upload form. Note enctype attribute! -->
         <form action="{% url 'allocationapp:upload' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <p>{{ form.non_field_errors }}</p>
-            <p>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</p>
-            <p>
-                {{ form.csvfile.errors }}
-                {{ form.csvfile }}
-            </p>
-            <p><input type="submit" value="Upload" /></p>
+                {% csrf_token %}
+                <p>{{ form.non_field_errors }}</p>
+                <p>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</p>
+                <p>{{ form.csvfile.errors }}{{ form.csvfile }}</p>
+                <p><input type="submit" name="create_db" value="Upload" /></p>
         </form>
-    <a class="btn" href = "{% url 'allocationapp:create' %}">Create Database </a>
-    {% if populated %}
-        <p>User table populated</p>
-    {% endif %}
-    <a class="btn" href = "{% url 'allocationapp:reset' %}">Reset Database</a>
+     </div>
+             <br>
+                 <div class="row">
+                 <div class="col">
+                 <a  class="btn btn-secondary btn-sm" href = "{% url 'allocationapp:create' %}" role="button">Create Database</a>
+                     {% if populated %}
+                        <p>User table populated</p>
+                     {% endif %}
+             </div>
+             <div class="col">
+                 <a  class="btn btn-secondary btn-sm" href = "{% url 'allocationapp:reset' %}" role="button">Reset Database</a>
+            <p><input type="submit" name="submit_db" value="Submit" /></p>
+             </div>
+             </div>
+
+        </div>
+
+    </div>
+
 {% endblock %}
