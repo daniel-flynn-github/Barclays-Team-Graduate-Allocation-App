@@ -4,164 +4,148 @@ from django.contrib.auth.decorators import login_required
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .allocation import run_allocation
-from allauth.account.forms import ResetPasswordForm
 from django.conf import settings
 from django.http import HttpRequest
 from .models import *
-from .forms import GradCSVForm,TeamCSVForm
+from .forms import CSVForm
+from .utilities import *
 
 import json
 import csv
 
+
 def upload_file(request):
     if request.method == 'POST':
-        form = GradCSVForm(request.POST, request.FILES)
+        form = CSVForm(request.POST, request.FILES)
+        print("posted")
         if form.is_valid():
-            if Grad_CSV.objects.all().count() > 0:
-                Grad_CSV.objects.all().delete()
-            newcsv = Grad_CSV(csvfile = request.FILES['csvfile'], pk = 1)
-            newcsv.save()
+            print("valid")
+            if UserCSV.objects.all().count() > 0:
+                UserCSV.objects.all().delete()
+            new_csv = UserCSV(csv_file=request.FILES['csv_file'], pk=1)
+            new_csv.save()
             return redirect(reverse('allocationapp:upload'))
     else:
-        form = GradCSVForm
-    all_csv = Grad_CSV.objects.all()
-    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
+        form = CSVForm
+    all_csv = UserCSV.objects.all()
+    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+
 
 def populate_db(request):
-    delete_grad_and_manager()
-    csv_file = Grad_CSV.objects.get(pk=1).csvfile
+    reset_graduates_managers()
+    csv_file = UserCSV.objects.get(pk=1).csv_file
     path = csv_file.path
-    print(type(path))
     with open(path) as f:
         reader = csv.reader(f)
         for row in reader:
             new_user, created = CustomUser.objects.get_or_create(
-                first_name = row[0],
-                last_name = row[1],
-                email = row[2],
-                password = make_password(CustomUser.objects.make_random_password())
+                first_name=row[0],
+                last_name=row[1],
+                email=row[2],
+                password=make_password(
+                    CustomUser.objects.make_random_password())
             )
             if row[3] == 'graduate':
                 Graduate.objects.get_or_create(
-                    user = new_user
+                    user=new_user
                 )
             if row[3] == 'manager':
                 Manager.objects.get_or_create(
                     user=new_user
                 )
             send_password_reset(new_user)
-    allcsv = Grad_CSV.objects.all()
-    form = GradCSVForm()
-    return render(request,'allocationapp/upload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
+    allcsv = UserCSV.objects.all()
+    form = CSVForm()
+    return render(request, 'allocationapp/upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
+
 
 def team_upload_file(request):
     if request.method == 'POST':
-        form = TeamCSVForm(request.POST, request.FILES)
+        form = CSVForm(request.POST, request.FILES)
         if form.is_valid():
             if TeamCSV.objects.all().count() > 0:
                 TeamCSV.objects.all().delete()
-            newcsv = TeamCSV(csvfile = request.FILES['csvfile'], pk = 1)
-            newcsv.save()
-            return redirect(reverse('allocationapp:teamupload'))
+            new_csv = TeamCSV(csv_file=request.FILES['csv_file'], pk=1)
+            new_csv.save()
+            return redirect(reverse('allocationapp:team_upload'))
     else:
-        form = TeamCSVForm
+        form = CSVForm
     all_csv = TeamCSV.objects.all()
-    return render(request, 'allocationapp/teamupload.html', {'form': form, 'all_csv': all_csv, 'populated' : False})
+    return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+
 
 def team_populate_db(request):
-    TeamCSV
-    csv_file = TeamCSV.objects.get(pk=1).csvfile
+    reset_teams()
+    csv_file = TeamCSV.objects.get(pk=1).csv_file
     path = csv_file.path
     with open(path) as f:
         reader = csv.reader(f)
         for row in reader:
-            dep, created = Department.objects.get_or_create(
-                name = row[3]
+            department, created = Department.objects.get_or_create(
+                name=row[3]
             )
-            manager_user = CustomUser.objects.get(email = row[4])
+            manager_user = CustomUser.objects.get(email=row[4])
             new_team, created = Team.objects.get_or_create(
-                name = row[0],
-                description = row[1],
-                capacity = row[2],
-                department = dep,
-                manager = Manager.objects.get(user_id = manager_user.id)
+                name=row[0],
+                description=row[1],
+                capacity=row[2],
+                department=department,
+                manager=Manager.objects.get(user_id=manager_user.id)
             )
             technologies = row[5].split(',')
-            for tech in technologies:
-                tech = tech.strip()
-                t, created = Technology.objects.get_or_create(name  = tech)
-                new_team.technologies.add(t)
+            for technology in technologies:
+                technology = technology.strip()
+                technology_instance, created = Technology.objects.get_or_create(
+                    name=technology)
+                new_team.technologies.add(technology_instance)
             skills = row[6].split(',')
             for skill in skills:
                 skill = skill.strip()
-                s, created = Skill.objects.get_or_create(name  = skill)
-                new_team.skills.add(s)
+                skill_instance, created = Skill.objects.get_or_create(
+                    name=skill)
+                new_team.skills.add(skill_instance)
 
-    grads = Graduate.objects.all()
+    graduates = Graduate.objects.all()
     teams = Team.objects.all()
-    for grad in grads:
+    for graduate in graduates:
         for team in teams:
-            Preference.objects.get_or_create(grad = grad, team = team, weight = 5)
+            Preference.objects.get_or_create(
+                graduate=graduate, team=team, weight=5)
     allcsv = TeamCSV.objects.all()
-    form = TeamCSVForm()
-    return render(request,'allocationapp/teamupload.html', {'populated' : True, 'all_csv': allcsv, 'form' : form})
+    form = CSVForm()
+    return render(request, 'allocationapp/team_upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
 
-def team_reset(request):
-    teams = Team.objects.all()
-    for team in teams:
-        team.skills.all().delete()
-        team.technologies.all().delete()
-        team.delete()
-    Department.objects.all().delete()
-    form = TeamCSVForm
-    return render(request,'allocationapp/teamupload.html', {'populated' : False, 'allcsv': '', 'form' : form})
 
-def send_password_reset(user: settings.AUTH_USER_MODEL):
-    request = HttpRequest()
-    request.user = user
-    if settings.DEBUG:
-        request.META['HTTP_HOST'] = '127.0.0.1:8000'
-    else:
-        # TEMPORARY filler url must be  changed to real link when website is hosted
-        request.META['HTTP_HOST'] = 'www.mysite.com'
+def reset_teams_view(request):
+    reset_teams()
+    form = CSVForm
+    return render(request, 'allocationapp/team_upload.html', {'populated': False, 'allcsv': '', 'form': form})
 
-    form = ResetPasswordForm({"email": user.email})
-    if form.is_valid():
-        form.save(request)
+# utility function to delete graduate and manager objects
 
-#utility function to delete graduate and manager objects
-def delete_grad_and_manager():
-    grads = Graduate.objects.all()
-    managers  = Manager.objects.all()
-    if grads:
-        for grad in grads:
-            temp_id = grad.user.id
-            grad.delete()
-            CustomUser.objects.filter(id = temp_id).delete()
-    if managers:
-        for manager in managers:
-            temp_id = manager.user.id
-            manager.delete()
-            CustomUser.objects.filter(id = temp_id).delete()
 
-def reset(request):
-    delete_grad_and_manager()
-    form = GradCSVForm
-    return render(request,'allocationapp/upload.html', {'populated' : False, 'allcsv': '', 'form' : form})
+def reset_graduates_managers_view(request):
+    reset_graduates_managers()
+    form = CSVForm
+    return render(request, 'allocationapp/upload.html', {'populated': False, 'allcsv': '', 'form': form})
+
 
 def index(request):
     return redirect(reverse('allocationapp:cast_votes'))
+
 
 @login_required
 def manager_view_teams(request):
     # Similar to the cast votes page -- a manager can view all of their team(s) here
     # and edit them as needed. This is essentially the managers "Homepage"
     if request.method == "GET":
-        teams = Team.objects.filter(manager=Manager.objects.get(user=CustomUser.objects.get(id=request.user.id)))
+        teams = Team.objects.filter(manager=Manager.objects.get(
+            user=CustomUser.objects.get(id=request.user.id)))
         team_members = {}
 
         for team in teams:
-            team_members[team.id] = Graduate.objects.filter(assigned_team=Team.objects.get(id=team.id))
+            team_members[team.id] = Graduate.objects.filter(
+                assigned_team=Team.objects.get(id=team.id))
 
         context_dict = {
             'teams': teams,
@@ -181,10 +165,13 @@ def manager_view_teams(request):
 
         return redirect(reverse('allocationapp:manager_view_teams'))
 
+
 @login_required
 def delete_team_member(request, user_id):
-    Graduate.objects.filter(user=CustomUser.objects.get(id=user_id)).update(assigned_team=None)
+    Graduate.objects.filter(user=CustomUser.objects.get(
+        id=user_id)).update(assigned_team=None)
     return redirect(reverse('allocationapp:manager_view_teams'))
+
 
 @login_required
 def manager_edit_team(request, team_id):
@@ -216,30 +203,33 @@ def manager_edit_team(request, team_id):
             for skill in skills:
                 team.skills.add(int(skill))
 
-            for tech in technologies:
-                team.technologies.add(int(tech))
+            for technology in technologies:
+                team.technologies.add(int(technology))
 
-        return redirect(reverse('allocationapp:manager_view_teams')) 
+        return redirect(reverse('allocationapp:manager_view_teams'))
 
     else:
         return render(request, 'allocationapp/edit_team.html', context=context_dict)
+
 
 @login_required
 def cast_votes(request):
     current_user = request.user
     if request.method == "POST":
-        # If this grad has already cast their votes, instead of creating a set of new records, we
+        # If this graduate has already cast their votes, instead of creating a set of new records, we
         # delete their old ones first.
-        Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
+        Preference.objects.filter(graduate=Graduate.objects.get(
+            user=CustomUser.objects.get(id=current_user.id))).delete()
 
         votes = json.loads(request.POST.get('votes'))
-        
+
         for team_id in votes:
             p = Preference(
-                    team=Team.objects.get(id=int(team_id)), 
-                    weight=votes[team_id], 
-                    grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))
-                )
+                team=Team.objects.get(id=int(team_id)),
+                weight=votes[team_id],
+                graduate=Graduate.objects.get(
+                    user=CustomUser.objects.get(id=current_user.id))
+            )
             p.save()
 
         return redirect(reverse('allocationapp:vote_submitted'))
@@ -250,17 +240,20 @@ def cast_votes(request):
 
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
+
 @login_required
 def vote_submitted(request):
     current_user = request.user
     context_dict = {
-        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+        'current_graduate': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
     }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
+
 @login_required
 def result_page(request):
-    current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
+    current_user = Graduate.objects.get(
+        user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
@@ -268,6 +261,7 @@ def result_page(request):
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
+
 
 @login_required
 def get_allocation(request):
