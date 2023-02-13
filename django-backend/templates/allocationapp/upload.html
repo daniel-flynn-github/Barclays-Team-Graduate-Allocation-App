@@ -68,12 +68,12 @@
             </div>
         </div>
     </div>
-    <div class="row" id="grad_button">
+    <div class="row" id="button_upload">
         <div class="col mr-auto">
             <a class="btn  btn-lg btn-warning" href = "{% url 'allocationapp:teamreset' %}">Upload New Team Information</a>
         </div>
         <div class="col">
-            <a class="btn btn-lg btn-warning" href = "#">Create New Graduates Manually</a>
+            <a class="btn btn-lg btn-warning" href = "{% url 'allocationapp:create_new_grad' %}">Create New Graduates Manually</a>
         </div>
     </div>
 {% endblock %}

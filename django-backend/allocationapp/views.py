@@ -319,3 +319,27 @@ def create_new_team(request):
     context_dict = {'managers': managers, 'departments': departments, 'skills': skills, 'technologies': technologies,
                     'count': range(0, 200)}
     return render(request, 'allocationapp/create_new_team.html', context=context_dict)
+
+
+@login_required()
+def create_new_grad(request):
+    if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        role_id = request.POST['role']
+
+        new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
+                                                             last_name=last_name,
+                                                             email=email,
+                                                             password=make_password(
+                                                                 CustomUser.objects.make_random_password())
+                                                             )
+        if role_id == 1:
+            Manager.objects.get_or_create(user=new_user)
+        if role_id == 2:
+            Graduate.objects.get_or_create(user=new_user)
+        send_password_reset(new_user)
+        return redirect(reverse('allocationapp:upload'))
+
+    return render(request, 'allocationapp/create_new_graduate.html')
