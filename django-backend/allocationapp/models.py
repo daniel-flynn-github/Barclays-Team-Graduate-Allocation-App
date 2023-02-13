@@ -4,8 +4,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class CustomUser(AbstractUser):
     # has ID PK, email, name, last name by default from AbstractUser
-    username = models.CharField(unique=False, blank=True, max_length = 20)
-    email = models.EmailField(unique=True)
+    # username = models.CharField(unique=False, blank=True, max_length = 20)
+    # email = models.EmailField(unique=True)
 
     def __str__(self):
         return f"{self.email} -> uid: {self.id}"
@@ -51,6 +51,7 @@ class Team(models.Model):
     name = models.CharField(max_length=128)
     description = models.CharField(max_length=512, null=True, blank=True)
     capacity = models.IntegerField()
+    lower_bound = models.IntegerField(default=1)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, null=True, blank=True)
     manager = models.ForeignKey(Manager, on_delete=models.SET_NULL, blank=True, null=True)
     skills = models.ManyToManyField(Skill, blank = True)

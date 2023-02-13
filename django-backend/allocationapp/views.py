@@ -91,6 +91,17 @@ def team_populate_db(request):
                 department=dep,
                 manager=Manager.objects.get(user_id=manager_user.id)
             )
+            technologies = row[5].split(',')
+            for tech in technologies:
+                tech = tech.strip()
+                t, created = Technology.objects.get_or_create(name  = tech)
+                new_team.technologies.add(t)
+            skills = row[6].split(',')
+            for skill in skills:
+                skill = skill.strip()
+                s, created = Skill.objects.get_or_create(name  = skill)
+                new_team.skills.add(s)
+
     grads = Graduate.objects.all()
     teams = Team.objects.all()
     for grad in grads:
@@ -102,6 +113,11 @@ def team_populate_db(request):
 
 
 def team_reset(request):
+    teams = Team.objects.all()
+    for team in teams:
+        team.skills.all().delete()
+        team.technologies.all().delete()
+        team.delete()
     Department.objects.all().delete()
     form = TeamCSVForm
     return render(request, 'allocationapp/teamupload.html', {'populated': False, 'allcsv': '', 'form': form})
@@ -225,9 +241,8 @@ def manager_edit_team(request, team_id):
 
 @login_required
 def cast_votes(request):
+    current_user = request.user
     if request.method == "POST":
-        current_user = request.user
-
         # If this grad has already cast their votes, instead of creating a set of new records, we
         # delete their old ones first.
         Preference.objects.filter(grad=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))).delete()
@@ -245,7 +260,7 @@ def cast_votes(request):
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
         context_dict = {
-            'teams': Team.objects.all()
+            'teams': Team.objects.all(),
         }
 
         return render(request, 'allocationapp/cast_votes.html', context=context_dict)
@@ -253,7 +268,10 @@ def cast_votes(request):
 
 @login_required
 def vote_submitted(request):
-    context_dict = {}
+    current_user = request.user
+    context_dict = {
+        'current_grad': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+    }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
 
@@ -264,7 +282,9 @@ def result_page(request):
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(
             assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id
+        'current_user_id': request.user.id,
+        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'current_user_id': request.user.id,
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)

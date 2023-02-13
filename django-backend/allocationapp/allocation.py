@@ -5,7 +5,12 @@ import itertools
 
 from allocationapp.models import Preference
 
-lower_bound = 1
+def increase_preference_weight_for_previous_team_to_discourage(graduates):
+    for grad in graduates:
+        if grad.assigned_team != None:
+            preference = Preference.objects.get_or_create(grad=grad, team=grad.assigned_team)
+            preference[0].weight += 100 #indexed at 0 because get_or_create returns a tuple (object, bool)
+            preference[0].save()
 
 # function using networkx library to run a min_cost_max_flow
 # with_lower_bound attribute is False by default, if true the algorithm is run capping the team capacities at the lower bound
@@ -19,7 +24,7 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
     # each team is a node in the network
     if (with_lower_bound):
         for team in teams:
-            G.add_node(team, demand=lower_bound)
+            G.add_node(team, demand=team.lower_bound)
     else:
         # teams will be a dictionary only if run_min_cost_max_flow is run on the second run of an allocation with a lower bound with more vacancies than graduates
         if type(teams) == dict:
@@ -30,24 +35,25 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
                 G.add_node(team, demand=team.capacity)
 
     for grad in graduates:
-        if type(teams) == dict:
-            for team,capacity in teams.items():
-                G.add_edge(grad, team, weight=capacity)
-        else:
-            for team in teams:
+        for team in teams:
+            # 6 - to revert the scale from 1 to 5
+            if (Preference.objects.get(grad=grad, team=team).weight >= 100):
                 G.add_edge(grad, team, weight=Preference.objects.get(grad=grad, team=team).weight)
+            else:
+                # 6 - to revert the scale from 1 to 5
+                G.add_edge(grad, team, weight = 6 - (Preference.objects.get(grad=grad, team=team).weight))
 
     flowDict = nx.min_cost_flow(G)
 
     return flowDict
 
 def run_allocation(allGraduates, allTeams, testing=False):
-    print("running")
-
+    increase_preference_weight_for_previous_team_to_discourage(allGraduates)
     total_vacancies = 0
+    vacancies_on_lower_bound = 0
     for team in allTeams:
         total_vacancies += team.capacity
-    vacancies_on_lower_bound = len(allTeams) * lower_bound
+        vacancies_on_lower_bound += team.lower_bound
 
     if len(allGraduates) > total_vacancies:
         print("Error: not enough spaces for graduates")
@@ -74,8 +80,8 @@ def run_allocation(allGraduates, allTeams, testing=False):
         # (since first-run people are more likely to get their preferred team)
         if (not testing):
             random.shuffle(allGraduates)
-        randomly_sampled_grads_for_first_run = allGraduates[:lower_bound*len(allTeams)]
-        randomly_sampled_grads_for_second_run = allGraduates[lower_bound*len(allTeams):]
+        randomly_sampled_grads_for_first_run = allGraduates[:vacancies_on_lower_bound]
+        randomly_sampled_grads_for_second_run = allGraduates[vacancies_on_lower_bound:]
         # alg first run
         first_run_allocation = run_min_cost_max_flow(randomly_sampled_grads_for_first_run, allTeams, with_lower_bound=True)
         remaining_spaces = total_vacancies - vacancies_on_lower_bound
@@ -84,7 +90,7 @@ def run_allocation(allGraduates, allTeams, testing=False):
         integers = []
         fractions = {}
         for team in allTeams:
-            frac,whole = math.modf((team.capacity-lower_bound)*(len(randomly_sampled_grads_for_second_run)/remaining_spaces))
+            frac,whole = math.modf((team.capacity-team.lower_bound)*(len(randomly_sampled_grads_for_second_run)/remaining_spaces))
             remaining_teams[team] = int(whole)
             integers.append(whole)
             fractions[team] = frac
