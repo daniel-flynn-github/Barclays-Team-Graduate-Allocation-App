@@ -1,36 +1,79 @@
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>Team Upload</title>   
-    </head>
-    <body>
-    <!-- List of uploaded documents -->
-    {% if all_csv %}
-        <ul>
-        {% for csv in all_csv %}
-            <b>{{ csv.file.name }}</b>
-            <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
-        {% endfor %}
-        </ul>
-    {% else %}
-        <p>No documents.</p>
-    {% endif %}
+{% extends 'allocationapp/base.html' %}
+{% load static %}
 
-        <!-- Upload form. Note enctype attribute! -->
-        <form action="{% url 'allocationapp:teamupload' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <p>{{ form.non_field_errors }}</p>
-            <p>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</p>
-            <p>
-                {{ form.csvfile.errors }}
-                {{ form.csvfile }}
-            </p>
-            <p><input type="submit" value="Upload" /></p>
-        </form>
-    <a class="btn" href = "{% url 'allocationapp:teamcreate' %}">Populate Team Database </a>
-    {% if populated %}
-        <p>Team table populated</p>
-    {% endif %}
-    <a class="btn" href = "{% url 'allocationapp:teamreset' %}">Reset Team Database</a>
-    </body>
-</html> 
+{% block title_block %}
+    Upload files
+{% endblock %}
+
+{% block body_block %}
+    <div class="container">
+        <div class="row">
+            <div class="col align-self-center">
+                <div class="card text-center" id="upload">
+                    <div class="card-header">
+                        <h3>Upload Team Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            {% if all_csv %}
+                                <ul>
+                                    {% for csv in all_csv %}
+                                        <b>{{ csv.file.name }}</b>
+                                        <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p>No documents.</p>
+                            {% endif %}
+                        </h4>
+                        <p class="card-text">
+                        <form action="{% url 'allocationapp:teamupload' %}" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <p>{{ form.non_field_errors }}</p>
+                        <div class="float-left">
+                            <h5>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</h5>
+                        </div>
+                        <br>
+                        <br>
+                        <div class="col-md-8 offset-md-2">
+                            <div class="row">
+                                <div class="col">
+                                    {{ form.csvfile.errors }}
+                                    {{ form.csvfile }}
+                                </div>
+                                <div class="col">
+                                    <input type="submit" value="Upload" />
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                        </p>
+                    </div>
+                    <div class="card-footer text-muted">
+                        <div class="col-md-8 offset-md-2">
+                            <div class="row">
+                                <div class="col">
+                                    <a class="btn btn-primary" href = "{% url 'allocationapp:teamcreate' %}">Populate Team Database </a>
+                                    {% if populated %}
+                                        <p>User table populated</p>
+                                    {% endif %}
+                                </div>
+                                <div class="col">
+                                    <a class="btn btn-primary" href = "{% url 'allocationapp:teamreset' %}">Reset Team Databasee</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="grad_button">
+        <div class="col mr-auto">
+            <a class="btn  btn-lg btn-warning" href = "{% url 'allocationapp:reset' %}">Upload New Graduates Information</a>
+        </div>
+        <div class="col">
+            <a class="btn btn-lg btn-warning" href = "{% url 'allocationapp:create_new_team' %}">Create New Team Manually</a>
+        </div>
+    </div>
+{% endblock %}
