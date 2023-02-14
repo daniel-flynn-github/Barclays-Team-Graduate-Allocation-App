@@ -4,8 +4,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 class CustomUser(AbstractUser):
     # has ID PK, email, name, last name by default from AbstractUser
-    # username = models.CharField(unique=False, blank=True, max_length = 20)
-    # email = models.EmailField(unique=True)
+    username = models.CharField(unique=False, blank=True, max_length = 20)
+    email = models.EmailField(unique=True)
 
     def __str__(self):
         return f"{self.email} -> uid: {self.id}"
