@@ -14,6 +14,7 @@ import json
 import csv
 
 
+
 def upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
@@ -256,6 +257,9 @@ def result_page(request):
         user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
+        'assigned_team_members': Graduate.objects.filter(
+            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'current_user_id': request.user.id,
         'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
         'current_user_id': request.user.id,
     }
@@ -269,3 +273,70 @@ def get_allocation(request):
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
     # redirect to result page
     return redirect(reverse('allocationapp:result_page'))
+
+
+@login_required()
+def create_new_team(request):
+    if request.method == 'POST':
+        name = request.POST['group_name']
+        manager = request.POST['group_manager']
+        department_id = request.POST['group_department']
+        department_input = request.POST['department_input']
+        technologies = request.POST['group_technologies']
+        skills = request.POST['group_skills']
+        capacity = request.POST['group_capacity']
+        description = request.POST['group_description']
+
+        team_info, created = Team.objects.get_or_create(name=name,
+                                                        capacity=int(capacity),
+                                                        description=description,
+                                                        manager=Manager.objects.get(id=int(manager)))
+
+        if department_id == 'other':
+            Department.objects.get_or_create(name=department_input)
+            team_info.department = Department.objects.get(name=department_input)
+        else:
+            team_info.department = Department.objects.get(id=int(department_id))
+
+        skill_split = skills.split(',')
+        tech_spilt = technologies.split(",")
+        for skill in skill_split:
+            skill_info, created = Skill.objects.get_or_create(name=skill)
+            team_info.skills.add(Skill.objects.get(name=skill_info))
+        for technology in tech_spilt:
+            tech_info, created = Technology.objects.get_or_create(name=technology)
+            team_info.technologies.add(Technology.objects.get(name=tech_info))
+
+        team_info.save()
+        return redirect(reverse('allocationapp:manager_view_teams'))
+    departments = Department.objects.all()
+    skills = Skill.objects.all()
+    technologies = Technology.objects.all()
+    managers = Manager.objects.all()
+    context_dict = {'managers': managers, 'departments': departments, 'skills': skills, 'technologies': technologies,
+                    'count': range(0, 200)}
+    return render(request, 'allocationapp/create_new_team.html', context=context_dict)
+
+
+@login_required()
+def create_new_grad(request):
+    if request.method == 'POST':
+        first_name = request.POST['first_name']
+        last_name = request.POST['last_name']
+        email = request.POST['email']
+        role_id = int(request.POST['role'])
+
+        new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
+                                                             last_name=last_name,
+                                                             email=email,
+                                                             password=make_password(
+                                                                 CustomUser.objects.make_random_password())
+                                                             )
+        if role_id == 1:
+            Manager.objects.get_or_create(user=new_user)
+        if role_id == 2:
+            Graduate.objects.get_or_create(user=new_user)
+        send_password_reset(new_user)
+        return redirect(reverse('allocationapp:upload'))
+
+    return render(request, 'allocationapp/create_new_graduate.html')

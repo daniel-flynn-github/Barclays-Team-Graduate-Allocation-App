@@ -1,0 +1,107 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Create a New Team
+{% endblock %}
+
+{% block body_block %}
+     <div class="container-fluid">
+     <br>
+        <h2 id="title">Create a New Team</h2>
+
+        <div class="form-group">
+             <div class="col-md-8 offset-md-2">
+                 <form action=#, method="POST">
+                 {% csrf_token %}
+
+                 <!--    Name   first line -->
+                 <div class="row">
+                     <div class="col">
+                        <label class="required" for="group_name"> Group Name:</label>
+                        <input id="group_name" type="text" class="form-control" name="group_name" required>
+                     </div>
+
+                     <div class="col">
+                         <label class="required" for="group_manager">Manager: </label>
+                         <select id = "group_manager" class="form-control" name="group_manager" required>
+                             {% if managers %}
+                                 {% for manager in managers %}
+                                     <option value="{{ manager.id }}">{{ manager.user.email}}</option>
+                                 {% endfor %}
+                             {% endif %}
+                         </select>
+                    </div>
+                 </div>
+
+                 <!--    Capacity   second line -->
+                 <div class="row">
+                    <div class="col">
+                        <label for="group_capacity">Capacity: </label>
+                        <select class="custom-select" id="group_capacity" name="group_capacity" required>
+                            {% if count %}
+                                {% for i in count %}
+                                    <option value={{ i }}>{{ i }}</option>
+                                {% endfor %}
+                            {% endif %}
+                        </select>
+                    </div>
+
+                  <!--    Department   second line -->
+                     <div class="col">
+                        <label for="group_department">Department: </label>
+                            <div class="input-group mb-3">
+                                <select id = "group_department" class="form-control" name="group_department" required>
+                                    {% if departments %}
+                                        {% for department in departments %}
+                                            <option value="{{ department.id }}">{{ department.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <option value="other">Other (please write department name)</option>
+                                </select>
+                                <input type="text" class="form-control" name="department_input" id="department_text" style="display: none;">
+                            </div>
+                     </div>
+                 </div>
+
+                  <!--    Skills   Third line  -->
+                <div class="row">
+                    <div class="col">
+                        <label for="group_skills">Skills: </label>
+                        <input id="group_skills" type="text" class="form-control" placeholder="Spilt skills using ' , '" name="group_skills" required>
+                         <small class="form-text text-muted">
+                            Please using ' , ' (Comma) to split skills
+                        </small>
+                    </div>
+
+                 <!--    Technologies   Third line -->
+                    <div class="col">
+                        <label for="group_technologies">Technologies:  </label>
+                        <input id="group_technologies" type="text" class="form-control" placeholder="Spilt technologies using ' , '", name="group_technologies" required>
+                        <small class="form-text text-muted">
+                            Please using ' , ' (Comma) to split technologies
+                        </small>
+                    </div>
+                </div>
+                     <!--    Description   fourth line -->
+                <div class="row">
+                    <label for="group_description">Description: </label>
+                    <textarea class="form-control" id="group_description" rows="4" placeholder="Please enter your group description here..." name="group_description"></textarea>
+                </div>
+                     <br>
+                     <div class="row text-center">
+                         <div class="col">
+                              <a class="btn btn-primary "href="{% url 'allocationapp:team_upload' %}">Back to Team Upload</a>
+                          </div>
+                        <div class="col">
+                            <input class="btn btn-primary " type="submit" value="Submit">
+                        </div>
+                         <div class="col">
+                            <input class="btn btn-primary " type="reset" value="Reset">
+                        </div>
+                    </div>
+            </form>
+             </div>
+        </div>
+     </div>
+{% endblock %}

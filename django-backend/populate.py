@@ -161,7 +161,7 @@ def cast_mock_preferences():
 
     for graduate in graduates:
         for team in teams:
-            Preference.objects.create(grad=graduate, team=team, weight=random.randint(0, 5))
+            Preference.objects.create(graduate=graduate, team=team, weight=random.randint(0, 5))
 
 def assign_previous_teams(teams):
     # Assign a previous team to 50% of the graduates.
