@@ -17,8 +17,8 @@ urlpatterns = [
     path('create_new_grad/', views.create_new_grad, name = 'create_new_grad'),
     path('upload/', views.upload_file, name='upload'),
     path('upload/create/', views.populate_db, name = 'create'),
-    path('upload/reset/', views.reset, name = 'reset'),
-    path('teamupload/', views.team_upload_file, name='teamupload'),
-    path('teamupload/create/', views.team_populate_db, name = 'teamcreate'),
-    path('teamupload/reset/', views.team_reset, name = 'teamreset')
+    path('upload/reset/', views.reset_graduates_managers_view, name = 'reset'),
+    path('team_upload/', views.team_upload_file, name='team_upload'),
+    path('team_upload/create/', views.team_populate_db, name = 'team_create'),
+    path('team_upload/reset/', views.reset_teams_view, name = 'team_reset')
 ]

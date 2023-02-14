@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title_block %}
-    Upload files
+    Team CSV Upload
 {% endblock %}
 
 {% block body_block %}
@@ -19,7 +19,7 @@
                                 <ul>
                                     {% for csv in all_csv %}
                                         <b>{{ csv.file.name }}</b>
-                                        <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
+                                        <li><a href="{{ csv.csv_file.url }}">{{ csv.csv_file.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
@@ -27,19 +27,19 @@
                             {% endif %}
                         </h4>
                         <p class="card-text">
-                        <form action="{% url 'allocationapp:teamupload' %}" method="post" enctype="multipart/form-data">
+                        <form action="{% url 'allocationapp:team_upload' %}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <p>{{ form.non_field_errors }}</p>
                         <div class="float-left">
-                            <h5>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</h5>
+                            <h5>{{ form.csv_file.label_tag }} {{ form.csv_file.help_text }}</h5>
                         </div>
                         <br>
                         <br>
                         <div class="col-md-8 offset-md-2">
                             <div class="row">
                                 <div class="col">
-                                    {{ form.csvfile.errors }}
-                                    {{ form.csvfile }}
+                                    {{ form.csv_file.errors }}
+                                    {{ form.csv_file }}
                                 </div>
                                 <div class="col">
                                     <input type="submit" value="Upload" />
@@ -53,13 +53,13 @@
                         <div class="col-md-8 offset-md-2">
                             <div class="row">
                                 <div class="col">
-                                    <a class="btn btn-primary" href = "{% url 'allocationapp:teamcreate' %}">Populate Team Database </a>
+                                    <a class="btn btn-primary" href = "{% url 'allocationapp:team_create' %}">Populate Team Database </a>
                                     {% if populated %}
                                         <p>User table populated</p>
                                     {% endif %}
                                 </div>
                                 <div class="col">
-                                    <a class="btn btn-primary" href = "{% url 'allocationapp:teamreset' %}">Reset Team Databasee</a>
+                                    <a class="btn btn-primary" href = "{% url 'allocationapp:team_reset' %}">Reset Team Databasee</a>
                                 </div>
                             </div>
                         </div>
@@ -70,7 +70,7 @@
     </div>
     <div class="row" id="button_upload">
         <div class="col mr-auto">
-            <a class="btn  btn-lg btn-warning" href = "{% url 'allocationapp:reset' %}">Upload New Graduates Information</a>
+            <a class="btn  btn-lg btn-warning" href = "{% url 'allocationapp:upload' %}">Upload New User Information</a>
         </div>
         <div class="col">
             <a class="btn btn-lg btn-warning" href = "{% url 'allocationapp:create_new_team' %}">Create New Team Manually</a>

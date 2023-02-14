@@ -55,11 +55,11 @@ class TestGetAllocation(TestCase):
           
 
     def test_get_allocation(self):
-        c = Client()
+        client = Client()
         user = CustomUser.objects.create_user(email="admin@barclays.com", password="1234", username="admin")
-        logged_in = c.login(email='admin@barclays.com', password='1234', username='admin')
+        logged_in = client.login(email='admin@barclays.com', password='1234', username='admin')
         # uncomment below to test with view call, however unable to test without reshuffling the graduates randomly, therefore tests will not pass
-        # c.get(reverse('allocationapp:get_allocation'))
+        # client.get(reverse('allocationapp:get_allocation'))
         # print(response)
 
         # calling allocation with testing argument = True, so that no random reshuffling occurs and allocation can be tested with hardcoded results below

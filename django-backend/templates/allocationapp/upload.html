@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block title_block %}
-    Upload files
+    User CSV Upload
 {% endblock %}
 
 {% block body_block %}
@@ -19,7 +19,7 @@
                                 <ul>
                                     {% for csv in all_csv %}
                                         <b>{{ csv.file.name }}</b>
-                                        <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
+                                        <li><a href="{{ csv.csv_file.url }}">{{ csv.csv_file.name }}</a></li>
                                     {% endfor %}
                                 </ul>
                             {% else %}
@@ -27,28 +27,29 @@
                             {% endif %}
                         </h4>
                         <p class="card-text">
-                        <form action="{% url 'allocationapp:upload' %}" method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <p>{{ form.non_field_errors }}</p>
-                        <div class="float-left">
-                            <h5>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</h5>
-                        </div>
-                        <br>
-                        <br>
-                        <div class="col-md-8 offset-md-2">
-                            <div class="row">
-                                <div class="col">
-                                    {{ form.csvfile.errors }}
-                                    {{ form.csvfile }}
+                            <form action="{% url 'allocationapp:upload' %}" method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <p>{{ form.non_field_errors }}</p>
+                                <div class="float-left">
+                                    <h5>{{ form.csv_file.label_tag }} {{ form.csv_file.help_text }}</h5>
                                 </div>
-                                <div class="col">
-                                    <input type="submit" value="Upload" />
+                                    <br>
+                                    <br>
+                                <div class="col-md-8 offset-md-2">
+                                    <div class="row">
+                                        <div class="col">
+                                            {{ form.csv_file.errors }}
+                                            {{ form.csv_file }}
+                                        </div>
+                                        <div class="col">
+                                            <input type="submit" value="Upload" />
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    </form>
+                            </form>
                         </p>
                     </div>
+
                     <div class="card-footer text-muted">
                         <div class="col-md-6 offset-md-3">
                             <div class="row">
@@ -68,6 +69,7 @@
             </div>
         </div>
     </div>
+    
     <div class="row" id="button_upload">
         <div class="col mr-auto">
             <a class="btn  btn-lg btn-warning" href = "{% url 'allocationapp:teamreset' %}">Upload New Team Information</a>
