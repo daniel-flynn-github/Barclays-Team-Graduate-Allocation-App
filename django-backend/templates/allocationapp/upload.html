@@ -1,7 +1,7 @@
 <html>
     <head>
         <meta charset="utf-8">
-        <title>Minimal Django File Upload Example</title>   
+        <title>User CSV Upload</title>   
     </head>
     <body>
     <!-- List of uploaded documents -->
@@ -9,7 +9,7 @@
         <ul>
         {% for csv in all_csv %}
             <b>{{ csv.file.name }}</b>
-            <li><a href="{{ csv.csvfile.url }}">{{ csv.csvfile.name }}</a></li>
+            <li><a href="{{ csv.csv_file.url }}">{{ csv.csv_file.name }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
@@ -20,10 +20,10 @@
         <form action="{% url 'allocationapp:upload' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <p>{{ form.non_field_errors }}</p>
-            <p>{{ form.csvfile.label_tag }} {{ form.csvfile.help_text }}</p>
+            <p>{{ form.csv_file.label_tag }} {{ form.csv_file.help_text }}</p>
             <p>
-                {{ form.csvfile.errors }}
-                {{ form.csvfile }}
+                {{ form.csv_file.errors }}
+                {{ form.csv_file }}
             </p>
             <p><input type="submit" value="Upload" /></p>
         </form>
