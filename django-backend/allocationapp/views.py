@@ -56,9 +56,10 @@ def cast_votes(request):
 @login_required
 @user_passes_test(is_grad, login_url='/allocation/')
 def vote_submitted(request):
-    current_user = request.user
+    current_graduate = Graduate.objects.filter(user=CustomUser.objects.get(id=request.user.id)).first()
     context_dict = {
-        'current_graduate': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+        'current_graduate': current_graduate,
+        'assigned_team': current_graduate.assigned_team,
     }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
@@ -66,8 +67,7 @@ def vote_submitted(request):
 @login_required
 @user_passes_test(is_grad, login_url='/allocation/')
 def result_page(request):
-    current_user = Graduate.objects.get(
-        user=CustomUser.objects.get(id=request.user.id))
+    current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': Graduate.objects.filter(
