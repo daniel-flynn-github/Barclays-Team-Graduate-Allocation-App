@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.hashers import make_password
 from .allocation import run_allocation
@@ -18,8 +19,12 @@ def index(request):
         return redirect(reverse('allocationapp:manager_view_teams'))
     elif is_grad(request.user):
         return redirect(reverse('allocationapp:cast_votes'))
-    else:
+    elif is_admin(request.user):
         return redirect(reverse('allocationapp:upload'))
+    else:
+        # You're logged in as the superuser, to avoid issues, we log you out so you can login with a webapp account.
+        logout(request)
+        return redirect(reverse('allocationapp:index'))
 
 
 #  ---- Begin GRADUATE views ----
