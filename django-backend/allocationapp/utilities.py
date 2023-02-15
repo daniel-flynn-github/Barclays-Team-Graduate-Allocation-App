@@ -47,3 +47,27 @@ def send_password_reset(user: settings.AUTH_USER_MODEL):
     form = ResetPasswordForm({"email": user.email})
     if form.is_valid():
         form.save(request)
+
+
+def is_grad(current_user):
+    try:
+        Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id))
+        return True
+    except:
+        return False
+
+
+def is_manager(current_user):
+    try:
+        Manager.objects.get(user=CustomUser.objects.get(id=current_user.id))
+        return True
+    except:
+        return False
+
+
+def is_admin(current_user):
+    try:
+        Admin.objects.get(user=CustomUser.objects.get(id=current_user.id))
+        return True
+    except:
+        return False

@@ -1,11 +1,9 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .allocation import run_allocation
-from django.conf import settings
-from django.http import HttpRequest
 from .models import *
 from .forms import CSVForm
 from .utilities import *
@@ -13,8 +11,161 @@ from .utilities import *
 import json
 import csv
 
+@login_required
+def index(request):
+    # After user tries to access a page they aren't allowed to access,
+    # they get redirected here and then further redirected to their correct page.
+    if is_manager(request.user):
+        return redirect(reverse('allocationapp:manager_view_teams'))
+    elif is_grad(request.user):
+        return redirect(reverse('allocationapp:cast_votes'))
+    else:
+        return redirect(reverse('allocationapp:upload'))
 
 
+#  ---- Begin GRADUATE views ----
+@login_required
+@user_passes_test(is_grad, login_url='/allocation/')
+def cast_votes(request):
+    current_user = request.user
+    if request.method == "POST":
+        # If this graduate has already cast their votes, instead of creating a set of new records, we
+        # delete their old ones first.
+        Preference.objects.filter(graduate=Graduate.objects.get(
+            user=CustomUser.objects.get(id=current_user.id))).delete()
+
+        votes = json.loads(request.POST.get('votes'))
+
+        for team_id in votes:
+            p = Preference(
+                team=Team.objects.get(id=int(team_id)),
+                weight=votes[team_id],
+                graduate=Graduate.objects.get(
+                    user=CustomUser.objects.get(id=current_user.id))
+            )
+            p.save()
+
+        return redirect(reverse('allocationapp:vote_submitted'))
+    else:
+        context_dict = {
+            'teams': Team.objects.all(),
+        }
+
+        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+
+
+@login_required
+@user_passes_test(is_grad, login_url='/allocation/')
+def vote_submitted(request):
+    current_user = request.user
+    context_dict = {
+        'current_graduate': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
+    }
+    return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
+
+
+@login_required
+@user_passes_test(is_grad, login_url='/allocation/')
+def result_page(request):
+    current_user = Graduate.objects.get(
+        user=CustomUser.objects.get(id=request.user.id))
+    context_dict = {
+        'assigned_team': current_user.assigned_team,
+        'assigned_team_members': Graduate.objects.filter(
+            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'current_user_id': request.user.id,
+        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'current_user_id': request.user.id,
+    }
+
+    return render(request, 'allocationapp/result_page.html', context=context_dict)
+
+
+# ---- Begin MANAGER views ----
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def manager_view_teams(request):
+    # Similar to the cast votes page -- a manager can view all of their team(s) here
+    # and edit them as needed. This is essentially the managers "Homepage"
+    if request.method == "GET":
+        teams = Team.objects.filter(manager=Manager.objects.get(
+            user=CustomUser.objects.get(id=request.user.id)))
+        team_members = {}
+
+        for team in teams:
+            team_members[team.id] = Graduate.objects.filter(
+                assigned_team=Team.objects.get(id=team.id))
+
+        context_dict = {
+            'teams': teams,
+            'team_members': team_members,
+            'graduates_with_no_team': Graduate.objects.filter(assigned_team=None),
+        }
+
+        return render(request, 'allocationapp/manager_teams.html', context=context_dict)
+
+    else:
+        selected_grad_id = request.POST['selected_grad']
+        team_id = request.POST['team_id']
+
+        Graduate.objects.filter(user=CustomUser.objects.get(id=int(selected_grad_id))).update(
+            assigned_team=Team.objects.get(id=int(team_id))
+        )
+
+        return redirect(reverse('allocationapp:manager_view_teams'))
+
+
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def delete_team_member(request, user_id):
+    Graduate.objects.filter(user=CustomUser.objects.get(
+        id=user_id)).update(assigned_team=None)
+    return redirect(reverse('allocationapp:manager_view_teams'))
+
+
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def manager_edit_team(request, team_id):
+    context_dict = {
+        'team': Team.objects.get(id=team_id),
+        'departments': Department.objects.all(),
+        'technologies': Technology.objects.all(),
+        'skills': Skill.objects.all(),
+    }
+
+    if request.method == 'POST':
+        department_id = request.POST['department_id']
+        technologies = request.POST.getlist('chosen_technologies')
+        skills = request.POST.getlist('chosen_skills')
+        capacity = request.POST['chosen_capacity']
+        description = request.POST['chosen_description']
+
+        teams = Team.objects.filter(id=team_id)
+        teams.update(
+            department=Department.objects.get(id=int(department_id)),
+            capacity=int(capacity),
+            description=description,
+        )
+
+        for team in teams:
+            team.technologies.clear()
+            team.skills.clear()
+
+            for skill in skills:
+                team.skills.add(int(skill))
+
+            for technology in technologies:
+                team.technologies.add(int(technology))
+
+        return redirect(reverse('allocationapp:manager_view_teams'))
+
+    else:
+        return render(request, 'allocationapp/edit_team.html', context=context_dict)
+
+
+# ---- Begin ADMIN views ----
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
@@ -32,6 +183,8 @@ def upload_file(request):
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
 
 
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def populate_db(request):
     reset_graduates_managers()
     csv_file = UserCSV.objects.get(pk=1).csv_file
@@ -60,6 +213,8 @@ def populate_db(request):
     return render(request, 'allocationapp/upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
 
 
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def team_upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
@@ -75,6 +230,8 @@ def team_upload_file(request):
     return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
 
 
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def team_populate_db(request):
     reset_teams()
     csv_file = TeamCSV.objects.get(pk=1).csv_file
@@ -117,157 +274,24 @@ def team_populate_db(request):
     return render(request, 'allocationapp/team_upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
 
 
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def reset_teams_view(request):
     reset_teams()
     form = CSVForm
     return render(request, 'allocationapp/team_upload.html', {'populated': False, 'allcsv': '', 'form': form})
 
-# utility function to delete graduate and manager objects
 
-
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def reset_graduates_managers_view(request):
     reset_graduates_managers()
     form = CSVForm
     return render(request, 'allocationapp/upload.html', {'populated': False, 'allcsv': '', 'form': form})
 
 
-def index(request):
-    return redirect(reverse('allocationapp:cast_votes'))
-
-
 @login_required
-def manager_view_teams(request):
-    # Similar to the cast votes page -- a manager can view all of their team(s) here
-    # and edit them as needed. This is essentially the managers "Homepage"
-    if request.method == "GET":
-        teams = Team.objects.filter(manager=Manager.objects.get(
-            user=CustomUser.objects.get(id=request.user.id)))
-        team_members = {}
-
-        for team in teams:
-            team_members[team.id] = Graduate.objects.filter(
-                assigned_team=Team.objects.get(id=team.id))
-
-        context_dict = {
-            'teams': teams,
-            'team_members': team_members,
-            'graduates_with_no_team': Graduate.objects.filter(assigned_team=None),
-        }
-
-        return render(request, 'allocationapp/manager_teams.html', context=context_dict)
-
-    else:
-        selected_grad_id = request.POST['selected_grad']
-        team_id = request.POST['team_id']
-
-        Graduate.objects.filter(user=CustomUser.objects.get(id=int(selected_grad_id))).update(
-            assigned_team=Team.objects.get(id=int(team_id))
-        )
-
-        return redirect(reverse('allocationapp:manager_view_teams'))
-
-
-@login_required
-def delete_team_member(request, user_id):
-    Graduate.objects.filter(user=CustomUser.objects.get(
-        id=user_id)).update(assigned_team=None)
-    return redirect(reverse('allocationapp:manager_view_teams'))
-
-
-@login_required
-def manager_edit_team(request, team_id):
-    context_dict = {
-        'team': Team.objects.get(id=team_id),
-        'departments': Department.objects.all(),
-        'technologies': Technology.objects.all(),
-        'skills': Skill.objects.all(),
-    }
-
-    if request.method == 'POST':
-        department_id = request.POST['department_id']
-        technologies = request.POST.getlist('chosen_technologies')
-        skills = request.POST.getlist('chosen_skills')
-        capacity = request.POST['chosen_capacity']
-        description = request.POST['chosen_description']
-
-        teams = Team.objects.filter(id=team_id)
-        teams.update(
-            department=Department.objects.get(id=int(department_id)),
-            capacity=int(capacity),
-            description=description,
-        )
-
-        for team in teams:
-            team.technologies.clear()
-            team.skills.clear()
-
-            for skill in skills:
-                team.skills.add(int(skill))
-
-            for technology in technologies:
-                team.technologies.add(int(technology))
-
-        return redirect(reverse('allocationapp:manager_view_teams'))
-
-    else:
-        return render(request, 'allocationapp/edit_team.html', context=context_dict)
-
-
-@login_required
-def cast_votes(request):
-    current_user = request.user
-    if request.method == "POST":
-        # If this graduate has already cast their votes, instead of creating a set of new records, we
-        # delete their old ones first.
-        Preference.objects.filter(graduate=Graduate.objects.get(
-            user=CustomUser.objects.get(id=current_user.id))).delete()
-
-        votes = json.loads(request.POST.get('votes'))
-
-        for team_id in votes:
-            p = Preference(
-                team=Team.objects.get(id=int(team_id)),
-                weight=votes[team_id],
-                graduate=Graduate.objects.get(
-                    user=CustomUser.objects.get(id=current_user.id))
-            )
-            p.save()
-
-        return redirect(reverse('allocationapp:vote_submitted'))
-    else:
-        context_dict = {
-            'teams': Team.objects.all(),
-        }
-
-        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
-
-
-@login_required
-def vote_submitted(request):
-    current_user = request.user
-    context_dict = {
-        'current_graduate': Graduate.objects.filter(user=CustomUser.objects.get(id=current_user.id)).first(),
-    }
-    return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
-
-
-@login_required
-def result_page(request):
-    current_user = Graduate.objects.get(
-        user=CustomUser.objects.get(id=request.user.id))
-    context_dict = {
-        'assigned_team': current_user.assigned_team,
-        'assigned_team_members': Graduate.objects.filter(
-            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id,
-        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id,
-    }
-
-    return render(request, 'allocationapp/result_page.html', context=context_dict)
-
-
-@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def get_allocation(request):
     # Run alg
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
@@ -275,7 +299,8 @@ def get_allocation(request):
     return redirect(reverse('allocationapp:result_page'))
 
 
-@login_required()
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def create_new_team(request):
     if request.method == 'POST':
         name = request.POST['group_name']
@@ -318,7 +343,8 @@ def create_new_team(request):
     return render(request, 'allocationapp/create_new_team.html', context=context_dict)
 
 
-@login_required()
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
 def create_new_grad(request):
     if request.method == 'POST':
         first_name = request.POST['first_name']
