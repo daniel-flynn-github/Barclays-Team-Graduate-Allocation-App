@@ -1,7 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .custom_decorators import *
 from django.contrib.auth.hashers import make_password
 from .allocation import run_allocation
 from .models import *
