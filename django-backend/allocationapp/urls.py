@@ -19,7 +19,7 @@ urlpatterns = [
 
     # Admin URLs
     path('admin/create_new_team/',views.create_new_team, name = 'create_new_team'),
-    path('admin/create_new_grad/', views.create_new_grad, name = 'create_new_grad'),
+    path('admin/create_new_user/', views.create_new_grad, name = 'create_new_grad'),
     path('admin/user_upload/', views.upload_file, name='upload'),
     path('admin/user_upload/create/', views.populate_db, name = 'create'),
     path('admin/user_upload/reset/', views.reset_graduates_managers_view, name = 'reset'),
