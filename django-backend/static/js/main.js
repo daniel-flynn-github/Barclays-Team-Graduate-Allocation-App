@@ -25,7 +25,7 @@ function cast_votes() {
         // handle a successful response
         success : function(json) {
             console.log("success"); // another sanity check
-            return window.location.href = "/allocation/vote_submitted/";
+            return window.location.href = "/allocation/graduate/vote_submitted/";
         },
 
         // handle a non-successful response
