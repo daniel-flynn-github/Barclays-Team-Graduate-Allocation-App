@@ -1,20 +1,36 @@
-build-job:
+default:
+
+  before_script:
+    - apt -y update
+    - apt -y install apt-utils
+    - apt -y install net-tools python3.8 python3-pip mysql-client libmysqlclient-dev
+    - apt -y upgrade
+    - pip3 install -r requirements.txt
+
+
+
+#build-job:
+#  stage: build
+#  script:
+#    - echo "Hello, $GITLAB_USER_LOGIN!"
+
+migrations:
   stage: build
   script:
-    - echo "Hello, $GITLAB_USER_LOGIN!"
+    - python3 manage.py makemigrations
+    # - python3 manage.py makemigrations myapp
+    - python3 manage.py migrate
+    - python3 manage.py check
 
-test-job1:
+
+django-tests:
   stage: test
   script:
-    - echo "This job tests something"
+    # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
+    # - echo "GRANT ALL on *.* to '${MYSQL_USER}';"| mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h mysql
+    # use python3 explicitly. see https://wiki.ubuntu.com/Python/3
+    - python3 manage.py test
 
-test-job2:
-  stage: test
-  script:
-    - echo "This job tests something, but takes more time than test-job1."
-    - echo "After the echo commands complete, it runs the sleep command for 20 seconds"
-    - echo "which simulates a test that runs 20 seconds longer than test-job1"
-    - sleep 20
 
 deploy-prod:
   stage: deploy
