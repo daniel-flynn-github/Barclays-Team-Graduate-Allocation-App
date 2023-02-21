@@ -1,3 +1,5 @@
+image: python:latest
+
 default:
 
   before_script:
