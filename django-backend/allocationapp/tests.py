@@ -48,7 +48,7 @@ class TestGetAllocation(TestCase):
 
         for grad,pref_list in graduates.items():
             for team,weight in pref_list.items():
-                Preference.objects.create(grad=Graduate.objects.get(user=CustomUser.objects.get(first_name=grad)), 
+                Preference.objects.create(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name=grad)), 
                                         team = Team.objects.get(name=team),
                                         weight = weight)
 
