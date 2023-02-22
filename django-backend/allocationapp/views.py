@@ -81,12 +81,14 @@ def result_page(request):
         return redirect(reverse('allocationapp:cast_votes'))
 
     current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
+    assigned_team_members = None
+    if current_user.assigned_team:
+        # If a user is removed manually from a team, after the allocation is run, this stops errors from happening.
+        assigned_team_members = Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id))
+
     context_dict = {
         'assigned_team': current_user.assigned_team,
-        'assigned_team_members': Graduate.objects.filter(
-            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id,
-        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'assigned_team_members': assigned_team_members,
         'current_user_id': request.user.id,
     }
 
