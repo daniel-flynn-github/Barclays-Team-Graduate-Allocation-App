@@ -8,12 +8,16 @@
 {% block body_block %}
    <div class="container mt-5 text-center">
       <div id="voteSubmitted" class="mb-3">
-         <p>Your votes have been <strong>submitted</strong>. You will be notified via email when the results are posted.</p>
+         {% if not assigned_team %}
+            <p>Your votes have been <strong>submitted</strong>. You will be notified via email when the results are posted.</p>
+         {% else %}
+            <p>Results have been <strong>posted</strong>. Click the button below to view your team!</p>
+         {% endif %}
       </div>
 
       <div class="row">
          <div class="col-8">
-            <a href="{% url 'allocationapp:result_page' %}" class="btn btn-success btn-vote-submitted">See Results</a>
+            <a href="{% url 'allocationapp:result_page' %}" class="btn btn-success btn-vote-submitted {%if not assigned_team%}disabled{%endif%}">See Results</a>
          </div>
 
          <div class="col-4">
