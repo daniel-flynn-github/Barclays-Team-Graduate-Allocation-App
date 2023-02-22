@@ -61,7 +61,18 @@
                                             </label>
                                         </div>
                                     {% endfor %}
+                                        
+                                    <br>
 
+                                    <div class="row">
+                                        <div class="col-9">
+                                            <input id="new_tech_textbox" value="" class="form-control" type="text" placeholder="Add new technology...">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <a href="#" class="btn btn-success w-100" onclick="addTech('{{ team.id }}')">Add<a>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             <tr>

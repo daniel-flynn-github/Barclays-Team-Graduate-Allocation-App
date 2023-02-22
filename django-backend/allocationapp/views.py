@@ -192,6 +192,22 @@ def add_new_skill(request, team_id, skill_name):
     return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
 
 
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def add_new_technology(request, team_id, tech_name):
+    # TODO: security risk: a manager can post a tech to a team they do not manage!
+
+    # Add the new skill to the database.
+    technology, new_tech_created = Technology.objects.get_or_create(name=tech_name)
+
+    # Then add this new skill to the team.
+    if new_tech_created:
+        team = Team.objects.get(id=int(team_id))
+        team.technologies.add(technology)
+
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+
+
 # ---- Begin ADMIN views ----
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
