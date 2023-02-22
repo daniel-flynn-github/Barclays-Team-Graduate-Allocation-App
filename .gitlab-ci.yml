@@ -36,7 +36,7 @@ django-tests:
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     path: 
-      - . 
+      - ./*
     reports:
       coverage_report:
         coverage_format: cobertura
