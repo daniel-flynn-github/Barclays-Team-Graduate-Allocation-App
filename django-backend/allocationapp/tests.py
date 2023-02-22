@@ -1,6 +1,7 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from .models import *
-from django.test import Client
+from .views import *
+from django.urls import reverse
 from . import allocation
 
 class TestModelStringRepresentations(TestCase):
@@ -88,11 +89,32 @@ class TestTeamModel(TestCase):
 
 class TestClientLogin(TestCase):
     def setUp(self):
-        user = CustomUser.objects.create_user(email="admin@barclays.com", password="1234", username="admin")
+        CustomUser.objects.create_user(email="admin@barclays.com", password="1234", username="admin")
     def testLogin(self):
         client = Client()
         logged_in = client.login(email='admin@barclays.com', password='1234', username='admin')
         self.assertTrue(logged_in)
+
+class TestIndexView(TestCase):
+    def setUp(self):
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad", email="grad@barclays.com", username="grad", password="1234"))
+        Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager", email="manager@barclays.com", username="manager", password="1234"))
+        Admin.objects.create(user=CustomUser.objects.create_user(first_name="admin", email="admin@barclays.com", username="admin", password="1234"))
+
+    def testAdminIndex(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        response = self.client.get(reverse("allocationapp:index"))
+        self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+    
+    def testManagerIndex(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        response = self.client.get(reverse("allocationapp:index"))
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
+    
+    def testGraduateIndex(self):
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        response = self.client.get(reverse("allocationapp:index"))
+        self.assertRedirects(response, reverse('allocationapp:cast_votes'), status_code=302, target_status_code=200)
 
 class TestAllocation(TestCase):
     def setUp(self):
