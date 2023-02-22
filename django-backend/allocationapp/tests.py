@@ -3,6 +3,38 @@ from .models import *
 from django.test import Client
 from . import allocation
 
+class TestModelStringRepresentations(TestCase):
+    def setUp(self):
+        Team.objects.create(name = "team", capacity=3, lower_bound=2)
+        Graduate.objects.create(user=CustomUser.objects.create(first_name="grad", email="grad@barclays.com"), assigned_team=Team.objects.get(name="team"))
+        Department.objects.create(name="mock_department")
+        Manager.objects.create(user=CustomUser.objects.create(first_name="manager", email="manager@barclays.com"))
+        Skill.objects.create(name="problem solving")
+        Technology.objects.create(name="Python")
+        Admin.objects.create(user=CustomUser.objects.create(first_name="admin", email="admin@barclays.com"))
+        Preference.objects.create(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")), 
+                                    team = Team.objects.get(name="team"),
+                                    weight = 3)
+    
+    def testStringRepresentations(self):
+        team = Team.objects.get(name="team")
+        self.assertEqual(str(team), f"'{team.name}' -> teamID: {team.id}")
+        grad = Graduate.objects.get(user=CustomUser.objects.get(first_name="grad"))
+        self.assertEqual(str(grad), f"GRADUATE | {grad.user}")
+        department = Department.objects.get(name="mock_department")
+        self.assertEqual(str(department), f"{department.name} Department")
+        manager = Manager.objects.get(user=CustomUser.objects.get(first_name="manager"))
+        self.assertEqual(str(manager), f"MANAGER | {manager.user}")
+        skill = Skill.objects.get(name="problem solving")
+        self.assertEqual(str(skill), f"{skill.name}")
+        technology = Technology.objects.get(name="Python")
+        self.assertEqual(str(technology), f"{technology.name}")
+        admin = Admin.objects.get(user=CustomUser.objects.get(first_name="admin"))
+        self.assertEqual(str(admin), f"ADMIN | {admin.user}")
+        preference = Preference.objects.get(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")), 
+                                        team = Team.objects.get(name="team"))
+        self.assertEqual(str(preference), f"{preference.graduate.user.email} -> {preference.weight} votes for {preference.team.name}")
+
 class TestGraduateModel(TestCase):
     def setUp(self):
         team = Team.objects.create(name = "team", capacity=3, lower_bound=2)
