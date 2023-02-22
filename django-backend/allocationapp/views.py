@@ -55,7 +55,10 @@ def cast_votes(request):
             'teams': Team.objects.all(),
         }
 
-        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+        if allocation_run():
+            return redirect(reverse('allocationapp:vote_submitted'))
+        else:
+            return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
 
 @login_required
@@ -65,6 +68,7 @@ def vote_submitted(request):
     context_dict = {
         'current_graduate': current_graduate,
         'assigned_team': current_graduate.assigned_team,
+        'allocation_run': allocation_run(),
     }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
@@ -72,6 +76,10 @@ def vote_submitted(request):
 @login_required
 @user_passes_test(is_grad, login_url='/allocation/')
 def result_page(request):
+
+    if not allocation_run():
+        return redirect(reverse('allocationapp:cast_votes'))
+
     current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
     context_dict = {
         'assigned_team': current_user.assigned_team,
@@ -297,8 +305,17 @@ def reset_graduates_managers_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def get_allocation(request):
+
+    if allocation_run():
+        return redirect(reverse('allocationapp:upload'))
+
     # Run alg
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+
+    # Update global allocation state
+    AllocationState.objects.all().delete()
+    AllocationState.objects.create(has_allocated=True)
+
     # redirect to result page
     return redirect(reverse('allocationapp:result_page'))
 
