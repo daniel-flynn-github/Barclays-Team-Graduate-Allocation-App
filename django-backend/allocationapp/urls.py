@@ -15,6 +15,7 @@ urlpatterns = [
     # Manager URLs
     path('manager/view_teams/', views.manager_view_teams, name='manager_view_teams'),
     path('manager/edit_team/<int:team_id>/', views.manager_edit_team, name='manager_edit_team'),
+    path('manager/edit_team/add_skill/<int:team_id>/<str:skill_name>/', views.add_new_skill, name='manager_add_skill'),
     path('manager/delete_team_member/<int:user_id>/', views.delete_team_member, name='delete_team_member'),
 
     # Admin URLs

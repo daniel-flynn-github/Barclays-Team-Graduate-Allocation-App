@@ -76,7 +76,6 @@ def vote_submitted(request):
 @login_required
 @user_passes_test(is_grad, login_url='/allocation/')
 def result_page(request):
-
     if not allocation_run():
         return redirect(reverse('allocationapp:cast_votes'))
 
@@ -177,6 +176,22 @@ def manager_edit_team(request, team_id):
         return render(request, 'allocationapp/edit_team.html', context=context_dict)
 
 
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def add_new_skill(request, team_id, skill_name):
+    # TODO: security risk: a manager can post a skill to a team they do not manage!
+
+    # Add the new skill to the database.
+    skill, new_skill_created = Skill.objects.get_or_create(name=skill_name)
+
+    # Then add this new skill to the team.
+    if new_skill_created:
+        team = Team.objects.get(id=int(team_id))
+        team.skills.add(skill)
+
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+
+
 # ---- Begin ADMIN views ----
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
@@ -240,6 +255,7 @@ def team_upload_file(request):
             return redirect(reverse('allocationapp:team_upload'))
     else:
         form = CSVForm
+
     all_csv = TeamCSV.objects.all()
     return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
 
