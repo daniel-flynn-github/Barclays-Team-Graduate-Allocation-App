@@ -65,8 +65,14 @@
                                             <ul>
                                                 {% for grad in team_members|lookup:team.id %}
                                                     <li>
-                                                        {{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a>
-                                                        <a href="{% url 'allocationapp:delete_team_member' grad.user.id %}" class="btn btn-danger">X</a>
+                                                        <div class="row">
+                                                            <div class="col">
+                                                                {{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a>
+                                                            </div>
+                                                            <div class="col">
+                                                                <a href="{% url 'allocationapp:delete_team_member' grad.user.id %}" class="btn btn-danger delete-btn">&times;</a>
+                                                            </div>
+                                                        </div>
                                                     </li>
                                                 {% endfor %}
                                             </ul>
