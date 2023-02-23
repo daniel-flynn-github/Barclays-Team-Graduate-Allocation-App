@@ -11,6 +11,7 @@ from .utilities import *
 import json
 import csv
 
+
 @login_required
 def index(request):
     # After user tries to access a page they aren't allowed to access,
@@ -20,7 +21,7 @@ def index(request):
     elif is_grad(request.user):
         return redirect(reverse('allocationapp:cast_votes'))
     elif is_admin(request.user):
-        return redirect(reverse('allocationapp:upload'))
+        return redirect(reverse('allocationapp:portal'))
     else:
         # You're logged in as the superuser, to avoid issues, we log you out so you can login with a webapp account.
         logout(request)
@@ -78,7 +79,8 @@ def result_page(request):
         'assigned_team_members': Graduate.objects.filter(
             assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
         'current_user_id': request.user.id,
-        'assigned_team_members': Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'assigned_team_members': Graduate.objects.filter(
+            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
         'current_user_id': request.user.id,
     }
 
@@ -124,7 +126,7 @@ def manager_view_teams(request):
 def delete_team_member(request, user_id):
     Graduate.objects.filter(user=CustomUser.objects.get(
         id=user_id)).update(assigned_team=None)
-    return redirect(reverse('allocationapp:manager_view_teams'))
+    return redirect(reverse('allocationapp:allocation_already_run'))
 
 
 @login_required
@@ -300,7 +302,7 @@ def get_allocation(request):
     # Run alg
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
     # redirect to result page
-    return redirect(reverse('allocationapp:result_page'))
+    return redirect(reverse('allocationapp:allocation_already_run'))
 
 
 @login_required
@@ -370,3 +372,14 @@ def create_new_grad(request):
         return redirect(reverse('allocationapp:upload'))
 
     return render(request, 'allocationapp/create_new_graduate.html')
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def admin_portal(request):
+    return render(request, 'allocationapp/admin_portal.html')
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def allocation_already_run(request):
+    return render(request, 'allocationapp/allocation_already_run.html')
