@@ -135,7 +135,9 @@
         </div>
         <h1 class="text-center" id="or">Click below to allocate users to teams</h1>
         <div class="row d-flex justify-content-center align-items-center">
-                <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
+            <!-- TODO: this will be integrated with the code for checking whether an allocation has already been run. -->
+            <!-- Currently on another branch, not on main yet. -->
+            <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
         </div>
     </div>
 {% endblock %}

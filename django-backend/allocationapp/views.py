@@ -303,8 +303,10 @@ def reset_graduates_managers_view(request):
 def get_allocation(request):
     # Run alg
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
-    # redirect to result page
-    return redirect(reverse('allocationapp:allocation_already_run'))
+    
+    # TODO: will also return a message to say allocation has been run
+    # TODO: integrate this with code for checking whether allocation has been run already -- on another branch right now.
+    return redirect(reverse('allocationapp:portal'))
 
 
 @login_required
@@ -380,8 +382,3 @@ def create_new_grad(request):
 @user_passes_test(is_admin, login_url='/allocation/')
 def admin_portal(request):
     return render(request, 'allocationapp/admin_portal.html')
-
-@login_required
-@user_passes_test(is_admin, login_url='/allocation/')
-def allocation_already_run(request):
-    return render(request, 'allocationapp/allocation_already_run.html')

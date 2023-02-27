@@ -28,5 +28,4 @@ urlpatterns = [
     path('admin/team_upload/reset/', views.reset_teams_view, name = 'team_reset'),
     path('admin/run_allocation/', views.get_allocation, name="get_allocation"),
     path('admin/portal/', views.admin_portal, name = "portal"),
-    path('admin/allocation_already_run', views.allocation_already_run, name = "allocation_already_run"),
 ]
