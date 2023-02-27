@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import logout
@@ -126,8 +127,8 @@ def manager_view_teams(request):
 def delete_team_member(request, user_id):
     Graduate.objects.filter(user=CustomUser.objects.get(
         id=user_id)).update(assigned_team=None)
-    return redirect(reverse('allocationapp:allocation_already_run'))
-
+    response_data = {'success': True}
+    return JsonResponse(response_data)
 
 @login_required
 @user_passes_test(is_manager, login_url='/allocation/')

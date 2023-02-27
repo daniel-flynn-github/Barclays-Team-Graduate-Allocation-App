@@ -65,7 +65,7 @@
                                             <ul>
                                                 {% for grad in team_members|lookup:team.id %}
                                                     <li>
-                                                        <div class="row">
+                                                        <div class="row" id="grad_row_{{ grad.user.id }}">
                                                             <div class="col">
                                                                 {{ grad.user.first_name }} {{ grad.user.last_name }} | <a href="mailto:{{ grad.user.email }}">{{ grad.user.email }}</a>
                                                             </div>
