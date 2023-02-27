@@ -8,7 +8,7 @@
 {% block body_block %}
     <div class="container-fluid">
         <h1 class="text-center" id="title">
-            You want to Upload ?
+            Upload Users and Teams via CSV
         </h1>
         <div class="accordion">
             <div class="card" id="user_card_header">
@@ -31,7 +31,7 @@
                 <div id="collapse_user_format" class="collapse" aria-labelledby="collapse_user_format" data-parent="#collapse_user_format">
                     <div class="card-body">
                          <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                             <strong>Please create your User CSV according to this format, other formats are not accepted!!</strong>
+                             <strong>Please create your User CSV file according to this format. Other formats are not accepted!</strong>
                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                  <span aria-hidden="true">&times;</span>
                              </button>
@@ -61,12 +61,12 @@
                             <tr>
                                 <td>Luke</td>
                                 <td>Smith</td>
-                                <td>manage@mail.com</td>
+                                <td>manager@mail.com</td>
                                 <td>manager</td>
                             </tr>
                             </tbody>
                         </table>
-                        <span class="badge badge-danger">Noticed: Only using <strong>"graduate" </strong>and <strong>"manager"</strong>, other formats are not accepted!</span>
+                        <span class="badge badge-danger">Notice: Only accepts <strong>"graduate" </strong>and <strong>"manager"</strong> roles, other formats are not accepted.</span>
                     </div>
                 </div>
             </div>
@@ -90,7 +90,7 @@
                 <div id="collapse_team_format" class="collapse" aria-labelledby="collapse_user_format" data-parent="#collapse_user_format">
                     <div class="card-body">
                          <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                             <strong>Please create your Team CSV according to this format, other formats are not accepted!!</strong>
+                             <strong>Please create your Team CSV file according to this format. Other formats are not accepted!</strong>
                              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                                  <span aria-hidden="true">&times;</span>
                              </button>
@@ -128,12 +128,12 @@
                             </tr>
                             </tbody>
                         </table>
-                        <span class="badge badge-danger">Noticed: Please use <strong>" , " (Comma)</strong> to spilt technologies and skills!</span>
+                        <span class="badge badge-danger">Notice: Please use <strong>" , " (comma)</strong> to spilt technologies and skills.</span>
                     </div>
                 </div>
             </div>
         </div>
-        <h1 class="text-center" id="or">Or ?</h1>
+        <h1 class="text-center" id="or">Click below to allocate users to teams</h1>
         <div class="row d-flex justify-content-center align-items-center">
                 <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
         </div>

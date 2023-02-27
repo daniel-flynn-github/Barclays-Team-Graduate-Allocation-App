@@ -130,6 +130,7 @@ def delete_team_member(request, user_id):
     response_data = {'success': True}
     return JsonResponse(response_data)
 
+
 @login_required
 @user_passes_test(is_manager, login_url='/allocation/')
 def manager_edit_team(request, team_id):
