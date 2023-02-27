@@ -431,4 +431,7 @@ def create_new_grad(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def admin_portal(request):
-    return render(request, 'allocationapp/admin_portal.html')
+    context = {
+        'allocation_ran': allocation_run(),
+    }
+    return render(request, 'allocationapp/admin_portal.html', context=context)
