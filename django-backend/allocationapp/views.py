@@ -229,16 +229,16 @@ def add_new_technology(request, team_id, tech_name):
 def upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
-        print("posted")
-        if form.is_valid():
-            print("valid")
+        
+        if form.is_valid() and len(request.FILES['csv_file']) > 0:
             if UserCSV.objects.all().count() > 0:
                 UserCSV.objects.all().delete()
             new_csv = UserCSV(csv_file=request.FILES['csv_file'], pk=1)
             new_csv.save()
+            messages.success(request, 'Successfully uploaded CSV file.')
             return redirect(reverse('allocationapp:upload'))
         else:
-            print("not valid")
+            messages.error(request, 'Could not upload this CSV file. Please check you have selected a valid file!')
             form = CSVForm()
     else:
         form = CSVForm()
@@ -250,7 +250,11 @@ def upload_file(request):
 @user_passes_test(is_admin, login_url='/allocation/')
 def populate_db(request):
     reset_graduates_managers()
-    csv_file = UserCSV.objects.get(pk=1).csv_file
+    try:
+        csv_file = UserCSV.objects.get(pk=1).csv_file
+    except:
+        messages.error(request, 'You cannot populate the database without first uploading a CSV!')
+        return redirect(reverse('allocationapp:upload'))
     path = csv_file.path
     with open(path) as f:
 
@@ -293,7 +297,8 @@ def populate_db(request):
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
-            print(problems)
+            messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
+            return redirect(reverse('allocationapp:upload'))
 
         else:
             for row in petl_reader:
@@ -313,9 +318,9 @@ def populate_db(request):
                         user=new_user
                     )
                 send_password_reset(new_user)
-    allcsv = UserCSV.objects.all()
-    form = CSVForm()
-    return render(request, 'allocationapp/upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
+
+    messages.success(request, 'Successfully populated the database from CSV!')
+    return redirect(reverse('allocationapp:upload'))
 
 
 @login_required
@@ -323,14 +328,17 @@ def populate_db(request):
 def team_upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid() and len(request.FILES['csv_file']) > 0:
             if TeamCSV.objects.all().count() > 0:
                 TeamCSV.objects.all().delete()
             new_csv = TeamCSV(csv_file=request.FILES['csv_file'], pk=1)
             new_csv.save()
+            messages.success(request, 'Successfully uploaded CSV file.')
             return redirect(reverse('allocationapp:team_upload'))
+        else:
+            messages.error(request, 'Could not upload this CSV file. Please check you have selected a valid file!')
     else:
-        form = CSVForm
+        form = CSVForm()
 
     all_csv = TeamCSV.objects.all()
     return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
@@ -340,7 +348,11 @@ def team_upload_file(request):
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_populate_db(request):
     reset_teams()
-    csv_file = TeamCSV.objects.get(pk=1).csv_file
+    try:
+        csv_file = TeamCSV.objects.get(pk=1).csv_file
+    except:
+        messages.error(request, 'You cannot populate the database without first uploading a CSV!')
+        return redirect(reverse('allocationapp:team_upload'))
     path = csv_file.path
     with open(path) as f:
 
@@ -369,7 +381,8 @@ def team_populate_db(request):
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
-            print(problems)
+            messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
+            return redirect(reverse('allocationapp:team_upload'))
 
         else:
             for row in petl_reader:
@@ -403,25 +416,33 @@ def team_populate_db(request):
             for team in teams:
                 Preference.objects.get_or_create(
                     graduate=graduate, team=team, weight=5)
-    allcsv = TeamCSV.objects.all()
-    form = CSVForm()
-    return render(request, 'allocationapp/team_upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
+    
+    messages.success(request, 'Successfully populated the database from CSV!')
+    return redirect(reverse('allocationapp:team_upload'))
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_teams_view(request):
-    reset_teams()
-    form = CSVForm
-    return render(request, 'allocationapp/team_upload.html', {'populated': False, 'allcsv': '', 'form': form})
+    try:
+        reset_teams()
+        TeamCSV.objects.all().delete()
+        messages.success(request, 'Successfully reset the teams database!')
+    except:
+        messages.error(request, 'Could not reset the database!')
+    return redirect(reverse('allocationapp:team_upload'))
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_graduates_managers_view(request):
-    reset_graduates_managers()
-    form = CSVForm
-    return render(request, 'allocationapp/upload.html', {'populated': False, 'allcsv': '', 'form': form})
+    try:
+        reset_graduates_managers()
+        UserCSV.objects.all().delete()
+        messages.success(request, 'Successfully reset the users database!')
+    except:
+        messages.error(request, 'Could not reset the database!')
+    return redirect(reverse('allocationapp:upload'))
 
 
 @login_required
