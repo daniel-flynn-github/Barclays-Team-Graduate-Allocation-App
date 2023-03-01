@@ -42,7 +42,7 @@
             {% if teams %}
                 {% for team in teams %}
                     <li class="nav-item">
-                        <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit Teams</a>
+                        <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit {{ team.name }}</a>
                     </li>
             {% endfor %}
         {% endif %}
