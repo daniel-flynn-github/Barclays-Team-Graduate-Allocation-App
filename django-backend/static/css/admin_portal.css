@@ -1,0 +1,26 @@
+#user_format{
+    color: white;
+}
+#team_format{
+    color: white;
+}
+#user_card_header{
+    margin-top: 40px;
+}
+#team_card_hader{
+    margin-top: 20px;
+}
+#title{
+    margin-top: 20px;
+    color: #00395d;
+}
+#or{
+    margin-top: 40px;
+    color: #00395d;
+}
+#run_btn{
+    margin-top: 30px;
+    font-size: 1.5rem;
+    padding: 1rem 3rem;
+    margin-bottom: 40px;
+}
