@@ -127,4 +127,4 @@ def run_allocation(all_graduates, all_teams, testing=False):
                     graduate.assigned_team = team
                     graduate.save()
                     allocation_result[team].append(graduate)
-        print(allocation_result)
+        #print(allocation_result)

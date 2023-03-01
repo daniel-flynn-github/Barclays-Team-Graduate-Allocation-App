@@ -1,0 +1,143 @@
+{% extends 'allocationapp/base.html' %}
+{% load static %}
+
+{% block title_block %}
+    Admin Portal
+{% endblock %}
+
+{% block body_block %}
+    <div class="container-fluid">
+        <h1 class="text-center" id="title">
+            Upload Users and Teams via CSV
+        </h1>
+        <div class="accordion">
+            <div class="card" id="user_card_header">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left team_name_btn" type="button" data-toggle="collapse" data-target="#collapse_user_format" aria-expanded="true" aria-controls="collapse_user_format">
+                            <div class="row">
+                                <div class="col">
+                                    User CSV Format
+                                </div>
+                                <div class="col">
+                                     <a class="btn btn-warning" href="{% url 'allocationapp:upload' %}">Upload Users CSV</a>
+                                    <a class="btn btn-warning" href = "{% url 'allocationapp:create_new_grad' %}">Create New User Manually</a>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                </div>
+
+                <div id="collapse_user_format" class="collapse" aria-labelledby="collapse_user_format" data-parent="#collapse_user_format">
+                    <div class="card-body">
+                         <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                             <strong>Please create your User CSV file according to this format. Other formats are not accepted!</strong>
+                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                 <span aria-hidden="true">&times;</span>
+                             </button>
+                         </div>
+                        <table class="table table-bordered" id="user_format">
+                            <thead>
+                                <tr>
+                                    <th scope="col">First Name</th>
+                                    <th scope="col">Last Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Role</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Mark</td>
+                                <td>Otto</td>
+                                <td>grad01@email.com</td>
+                                <td>graduate</td>
+                            </tr>
+                            <tr>
+                                <td>Yuqi</td>
+                                <td>Johnstone</td>
+                                <td>grad02@email.com</td>
+                                <td>graduate</td>
+                            </tr>
+                            <tr>
+                                <td>Luke</td>
+                                <td>Smith</td>
+                                <td>manager@mail.com</td>
+                                <td>manager</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <span class="badge badge-danger">Notice: Only accepts <strong>"graduate" </strong>and <strong>"manager"</strong> roles, other formats are not accepted.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card" id="team_card_hader">
+                <div class="card-header">
+                    <h2 class="mb-0">
+                        <button class="btn btn-link btn-block text-left collapsed team_name_btn" type="button" data-toggle="collapse" data-target="#collapse_team_format" aria-expanded="false" aria-controls="collapse_team_format">
+                            <div class="row">
+                                <div class="col">
+                                    Team CSV Format
+                                </div>
+                                <div class="col">
+                                     <a class="btn btn-warning" href="{% url 'allocationapp:team_upload' %}">Upload Teams CSV</a>
+                                    <a class="btn btn-warning" href = "{% url 'allocationapp:create_new_team' %}">Create New Team Manually</a>
+                                </div>
+                            </div>
+                        </button>
+                    </h2>
+                </div>
+                <div id="collapse_team_format" class="collapse" aria-labelledby="collapse_user_format" data-parent="#collapse_user_format">
+                    <div class="card-body">
+                         <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                             <strong>Please create your Team CSV file according to this format. Other formats are not accepted!</strong>
+                             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                 <span aria-hidden="true">&times;</span>
+                             </button>
+                         </div>
+                        <table class="table table-bordered" id="team_format">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Team Name</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Capacity</th>
+                                    <th scope="col">Department</th>
+                                    <th scope="col">Manager Email</th>
+                                    <th scope="col">Technologies</th>
+                                    <th scope="col">Skills</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>Team 1</td>
+                                <td>This is team 1 description</td>
+                                <td>12</td>
+                                <td>Data Analytics</td>
+                                <td>manager1@mail.com</td>
+                                <td>Python, Django</td>
+                                <td>mathematics</td>
+                            </tr>
+                            <tr>
+                                <td>Team 2</td>
+                                <td>This is team 2 description</td>
+                                <td>20</td>
+                                <td>Banking Security</td>
+                                <td>manager3@mail.com</td>
+                                <td>C,C++,OpenCL</td>
+                                <td>design,human computer interaction</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <span class="badge badge-danger">Notice: Please use <strong>" , " (comma)</strong> to spilt technologies and skills.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <h1 class="text-center" id="or">Click below to allocate users to teams</h1>
+        <div class="row d-flex justify-content-center align-items-center">
+            <!-- TODO: this will be integrated with the code for checking whether an allocation has already been run. -->
+            <!-- Currently on another branch, not on main yet. -->
+            <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
+        </div>
+    </div>
+{% endblock %}
