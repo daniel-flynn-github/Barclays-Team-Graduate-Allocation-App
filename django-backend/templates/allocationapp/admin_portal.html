@@ -7,6 +7,17 @@
 
 {% block body_block %}
     <div class="container-fluid">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show text-left">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <h1 class="text-center" id="title">
             Upload Users and Teams via CSV
         </h1>

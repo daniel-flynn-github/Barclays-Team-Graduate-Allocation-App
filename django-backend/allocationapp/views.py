@@ -179,6 +179,8 @@ def manager_edit_team(request, team_id):
             for technology in technologies:
                 team.technologies.add(int(technology))
 
+        messages.success(request, f'Successfully updated {teams.first().name}!')
+
         return redirect(reverse('allocationapp:manager_view_teams'))
 
     else:
@@ -359,9 +361,7 @@ def get_allocation(request):
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
 
-    
-    # TODO: will also return a message to say allocation has been run
-    # TODO: integrate this with code for checking whether allocation has been run already -- on another branch right now.
+    messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:portal'))
 
 

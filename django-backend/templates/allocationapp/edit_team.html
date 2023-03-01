@@ -10,8 +10,11 @@
 <div class="container p-4">
     {% if messages %}
         {% for message in messages %}
-            <div class="alert alert-warning">
+            <div class="alert alert-warning alert-dismissible fade show">
                 <strong>{{ message }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
         {% endfor %}
     {% endif %}
