@@ -8,6 +8,14 @@
 {% block body_block %}
 
 <div class="container p-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning">
+                <strong>{{ message }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div id="accordion">
         <div class="card mb-3 p-0">
             <div class="card-header card-header-team" id="heading_{{ team.id }}">

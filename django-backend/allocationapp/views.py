@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.hashers import make_password
@@ -155,6 +156,11 @@ def manager_edit_team(request, team_id):
         skills = request.POST.getlist('chosen_skills')
         capacity = request.POST['chosen_capacity']
         description = request.POST['chosen_description']
+
+        # Don't allow the manager to give a team 0 skills and/or technologies.
+        if len(skills) == 0 or len(technologies) == 0:
+            messages.error(request, 'Teams must have at least 1 skill & 1 technology!')
+            return redirect(request.path)
 
         teams = Team.objects.filter(id=team_id)
         teams.update(
