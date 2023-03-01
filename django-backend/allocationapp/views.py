@@ -482,6 +482,11 @@ def create_new_team(request):
                                                         manager=Manager.objects.get(id=int(manager)))
 
         if department_id == 'other':
+
+            if len(department_input) == 0:
+                messages.error(request, 'You need to specify a department name.')
+                return redirect(reverse('allocationapp:create_new_team'))
+
             Department.objects.get_or_create(name=department_input)
             team_info.department = Department.objects.get(name=department_input)
         else:
@@ -497,7 +502,10 @@ def create_new_team(request):
             team_info.technologies.add(Technology.objects.get(name=tech_info))
 
         team_info.save()
-        return redirect(reverse('allocationapp:manager_view_teams'))
+
+        messages.success(request, f'Added {name} to the database.')
+        return redirect(reverse('allocationapp:create_new_team'))
+    
     departments = Department.objects.all()
     skills = Skill.objects.all()
     technologies = Technology.objects.all()
@@ -516,18 +524,25 @@ def create_new_grad(request):
         email = request.POST['email']
         role_id = int(request.POST['role'])
 
-        new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
-                                                             last_name=last_name,
-                                                             email=email,
-                                                             password=make_password(
-                                                                 CustomUser.objects.make_random_password())
-                                                             )
+        try:
+            new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
+                                                                last_name=last_name,
+                                                                email=email,
+                                                                password=make_password(
+                                                                    CustomUser.objects.make_random_password())
+                                                                )
+        except:
+            messages.error(request, f'The email address {email} is already present within the database.')
+            return redirect(reverse('allocationapp:create_new-grad'))
+
         if role_id == 1:
             Manager.objects.get_or_create(user=new_user)
         if role_id == 2:
             Graduate.objects.get_or_create(user=new_user)
         send_password_reset(new_user)
-        return redirect(reverse('allocationapp:upload'))
+
+        messages.success(request, f'Added {first_name} {last_name} to the database!')
+        return redirect(reverse('allocationapp:create_new_grad'))
 
     return render(request, 'allocationapp/create_new_graduate.html')
 
