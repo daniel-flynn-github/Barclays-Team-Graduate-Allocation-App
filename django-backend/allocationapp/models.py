@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
+from .validators import validate_is_csv
 
 
 class CustomUser(AbstractUser):
@@ -93,11 +94,11 @@ class Admin(models.Model):
 
 
 class UserCSV(models.Model):
-    csv_file = models.FileField(upload_to='documents/graduate CSVs')
+    csv_file = models.FileField(upload_to='documents/graduate CSVs', validators=(validate_is_csv,))
 
 
 class TeamCSV(models.Model):
-    csv_file = models.FileField(upload_to='documents/team CSVs')
+    csv_file = models.FileField(upload_to='documents/team CSVs', validators=(validate_is_csv,))
 
 
 class Preference(models.Model):
@@ -109,3 +110,7 @@ class Preference(models.Model):
     def __str__(self):
         return f"{self.graduate.user.email} -> {self.weight} votes for {self.team.name}"
 
+
+class AllocationState(models.Model):
+    has_allocated = models.BooleanField(default=False)
+    

@@ -20,11 +20,13 @@
                     <div class="col-md-6">Team Size: <strong>{{ assigned_team.capacity }}</strong></div>
                 </div>
             {% else %}
-                The team does not exist.
+                <p>You have no assigned team. Please contact your manager ASAP.</p>
+                <small>(This may be due to you being manually moved around teams currently)</small> 
             {% endif %}
         </div>
     <br/>
 
+    {% if assigned_team_members %}
     <div id="member">
         <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
             <div class="panel panel-default">
@@ -53,5 +55,6 @@
             </div>
         </div>
     </div>
+    {% endif %}
     </div>
 {% endblock %}

@@ -4,13 +4,17 @@ from django.urls import reverse
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.hashers import make_password
+from django.core.validators import validate_email
 from .allocation import run_allocation
 from .models import *
 from .forms import CSVForm
 from .utilities import *
 
+
+
 import json
 import csv
+import petl
 
 
 @login_required
@@ -57,7 +61,10 @@ def cast_votes(request):
             'teams': Team.objects.all(),
         }
 
-        return render(request, 'allocationapp/cast_votes.html', context=context_dict)
+        if allocation_run():
+            return redirect(reverse('allocationapp:vote_submitted'))
+        else:
+            return render(request, 'allocationapp/cast_votes.html', context=context_dict)
 
 
 @login_required
@@ -67,6 +74,7 @@ def vote_submitted(request):
     context_dict = {
         'current_graduate': current_graduate,
         'assigned_team': current_graduate.assigned_team,
+        'allocation_run': allocation_run(),
     }
     return render(request, 'allocationapp/vote_submitted.html', context=context_dict)
 
@@ -74,14 +82,18 @@ def vote_submitted(request):
 @login_required
 @user_passes_test(is_grad, login_url='/allocation/')
 def result_page(request):
+    if not allocation_run():
+        return redirect(reverse('allocationapp:cast_votes'))
+
     current_user = Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id))
+    assigned_team_members = None
+    if current_user.assigned_team:
+        # If a user is removed manually from a team, after the allocation is run, this stops errors from happening.
+        assigned_team_members = Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id))
+
     context_dict = {
         'assigned_team': current_user.assigned_team,
-        'assigned_team_members': Graduate.objects.filter(
-            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
-        'current_user_id': request.user.id,
-        'assigned_team_members': Graduate.objects.filter(
-            assigned_team=Team.objects.get(id=current_user.assigned_team.id)),
+        'assigned_team_members': assigned_team_members,
         'current_user_id': request.user.id,
     }
 
@@ -171,6 +183,38 @@ def manager_edit_team(request, team_id):
         return render(request, 'allocationapp/edit_team.html', context=context_dict)
 
 
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def add_new_skill(request, team_id, skill_name):
+    # TODO: security risk: a manager can post a skill to a team they do not manage!
+
+    # Add the new skill to the database.
+    skill, new_skill_created = Skill.objects.get_or_create(name=skill_name)
+
+    # Then add this new skill to the team.
+    if new_skill_created:
+        team = Team.objects.get(id=int(team_id))
+        team.skills.add(skill)
+
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+
+
+@login_required
+@user_passes_test(is_manager, login_url='/allocation/')
+def add_new_technology(request, team_id, tech_name):
+    # TODO: security risk: a manager can post a tech to a team they do not manage!
+
+    # Add the new skill to the database.
+    technology, new_tech_created = Technology.objects.get_or_create(name=tech_name)
+
+    # Then add this new skill to the team.
+    if new_tech_created:
+        team = Team.objects.get(id=int(team_id))
+        team.technologies.add(technology)
+
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+
+
 # ---- Begin ADMIN views ----
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
@@ -185,8 +229,11 @@ def upload_file(request):
             new_csv = UserCSV(csv_file=request.FILES['csv_file'], pk=1)
             new_csv.save()
             return redirect(reverse('allocationapp:upload'))
+        else:
+            print("not valid")
+            form = CSVForm()
     else:
-        form = CSVForm
+        form = CSVForm()
     all_csv = UserCSV.objects.all()
     return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
 
@@ -198,24 +245,66 @@ def populate_db(request):
     csv_file = UserCSV.objects.get(pk=1).csv_file
     path = csv_file.path
     with open(path) as f:
-        reader = csv.reader(f)
-        for row in reader:
-            new_user, created = CustomUser.objects.get_or_create(
-                first_name=row[0],
-                last_name=row[1],
-                email=row[2],
-                password=make_password(
-                    CustomUser.objects.make_random_password())
-            )
-            if row[3] == 'graduate':
-                Graduate.objects.get_or_create(
-                    user=new_user
+
+        emails = []
+        def name_constraints(value):
+            if value is not None and type(value) == str and len(value) < 128:
+               return True
+            else:
+               return False
+        
+        def email_constraints(value):
+            if value is not None and name_constraints(value) and value.lower().strip() not in emails:
+                try:
+                    validate_email(value)
+                except:
+                    return False
+                emails.append(value)
+                return True
+            else:
+                return False
+
+        def role_constraints(value):
+            if value is not None and value.lower().strip() == 'manager' or value.lower().strip() == 'graduate':
+                return True
+            else:
+                return False
+            
+
+        petl_table = petl.fromcsv(path, encoding='utf-8-sig')
+        headers = ('first name','last name','email','role')
+
+        constraints = [
+            dict(first_name_constraint='first_name_constraint', field='first name', assertion=name_constraints),
+            dict(last_name_constraint='last_name_constraint', field='last name', assertion=name_constraints),
+            dict(email_constraint='email_constraint', field='email', assertion=email_constraints),
+            dict(role_constraint='role_constraint', field='role', assertion=role_constraints)
+        ]
+
+        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        petl_reader = petl.data(petl_table)
+
+        if petl.nrows(problems) != 0:
+            print(problems)
+
+        else:
+            for row in petl_reader:
+                new_user, created = CustomUser.objects.get_or_create(
+                    first_name=row[0],
+                    last_name=row[1],
+                    email=row[2].lower().strip(),
+                    password=make_password(
+                        CustomUser.objects.make_random_password())
                 )
-            if row[3] == 'manager':
-                Manager.objects.get_or_create(
-                    user=new_user
-                )
-            send_password_reset(new_user)
+                if row[3].lower().strip() == 'graduate':
+                    Graduate.objects.get_or_create(
+                        user=new_user
+                    )
+                elif row[3].lower().strip() == 'manager':
+                    Manager.objects.get_or_create(
+                        user=new_user
+                    )
+                send_password_reset(new_user)
     allcsv = UserCSV.objects.all()
     form = CSVForm()
     return render(request, 'allocationapp/upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
@@ -234,6 +323,7 @@ def team_upload_file(request):
             return redirect(reverse('allocationapp:team_upload'))
     else:
         form = CSVForm
+
     all_csv = TeamCSV.objects.all()
     return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
 
@@ -245,38 +335,66 @@ def team_populate_db(request):
     csv_file = TeamCSV.objects.get(pk=1).csv_file
     path = csv_file.path
     with open(path) as f:
-        reader = csv.reader(f)
-        for row in reader:
-            department, created = Department.objects.get_or_create(
-                name=row[3]
-            )
-            manager_user = CustomUser.objects.get(email=row[4])
-            new_team, created = Team.objects.get_or_create(
-                name=row[0],
-                description=row[1],
-                capacity=row[2],
-                department=department,
-                manager=Manager.objects.get(user_id=manager_user.id)
-            )
-            technologies = row[5].split(',')
-            for technology in technologies:
-                technology = technology.strip()
-                technology_instance, created = Technology.objects.get_or_create(
-                    name=technology)
-                new_team.technologies.add(technology_instance)
-            skills = row[6].split(',')
-            for skill in skills:
-                skill = skill.strip()
-                skill_instance, created = Skill.objects.get_or_create(
-                    name=skill)
-                new_team.skills.add(skill_instance)
 
-    graduates = Graduate.objects.all()
-    teams = Team.objects.all()
-    for graduate in graduates:
-        for team in teams:
-            Preference.objects.get_or_create(
-                graduate=graduate, team=team, weight=5)
+        def manager_constraints(value):
+            managers = Manager.objects.all()
+            manager_emails = [manager.user.email for manager in managers]
+            if value is not None and value.lower().strip() in manager_emails:
+                return True
+            else:
+                return False
+
+        petl_table = petl.fromcsv(path, encoding='utf-8-sig')
+        headers = ('team name','team description','capacity','department','manager','technologies','skills')
+
+        constraints = [
+            dict(team_name_constraint='team_name_constraint', field='team name', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(team_description_constraint='team_description_constraint', field='team description', assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(capacity_constraint='capacity_constraint', field='capacity', assertion=lambda x: x != None and x.strip().isnumeric() and int(x) > 0),
+            dict(capacity_constraint='department_constraint', field='department', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(manager_constraint='manager_constraint', field='manager', assertion=manager_constraints),
+            dict(technologies_constraint='technologies_constraint', field='technologies', assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(skills_constraint='skills_constraint', field='skills', assertion=lambda x: type(x) == str and len(x) <= 512)
+        ]
+
+        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        petl_reader = petl.data(petl_table)
+
+        if petl.nrows(problems) != 0:
+            print(problems)
+
+        else:
+            for row in petl_reader:
+                department, created = Department.objects.get_or_create(
+                    name=row[3]
+                )
+                manager_user = CustomUser.objects.get(email=row[4].lower().strip())
+                new_team, created = Team.objects.get_or_create(
+                    name=row[0],
+                    description=row[1],
+                    capacity=row[2],
+                    department=department,
+                    manager=Manager.objects.get(user_id=manager_user.id)
+                )
+                technologies = row[5].split(',')
+                for technology in technologies:
+                    technology = technology.strip()
+                    technology_instance, created = Technology.objects.get_or_create(
+                        name=technology)
+                    new_team.technologies.add(technology_instance)
+                skills = row[6].split(',')
+                for skill in skills:
+                    skill = skill.strip()
+                    skill_instance, created = Skill.objects.get_or_create(
+                        name=skill)
+                    new_team.skills.add(skill_instance)
+
+        graduates = Graduate.objects.all()
+        teams = Team.objects.all()
+        for graduate in graduates:
+            for team in teams:
+                Preference.objects.get_or_create(
+                    graduate=graduate, team=team, weight=5)
     allcsv = TeamCSV.objects.all()
     form = CSVForm()
     return render(request, 'allocationapp/team_upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
@@ -301,8 +419,17 @@ def reset_graduates_managers_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def get_allocation(request):
+
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     # Run alg
     run_allocation(list(Graduate.objects.all()), list(Team.objects.all()))
+
+    # Update global allocation state
+    AllocationState.objects.all().delete()
+    AllocationState.objects.create(has_allocated=True)
+
     
     # TODO: will also return a message to say allocation has been run
     # TODO: integrate this with code for checking whether allocation has been run already -- on another branch right now.
@@ -381,4 +508,7 @@ def create_new_grad(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def admin_portal(request):
-    return render(request, 'allocationapp/admin_portal.html')
+    context = {
+        'allocation_ran': allocation_run(),
+    }
+    return render(request, 'allocationapp/admin_portal.html', context=context)
