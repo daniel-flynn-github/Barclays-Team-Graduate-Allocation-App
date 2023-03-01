@@ -104,7 +104,7 @@ class TestIndexView(TestCase):
     def testAdminIndex(self):
         self.client.login(email='admin@barclays.com', password='1234', username='admin')
         response = self.client.get(reverse("allocationapp:index"))
-        self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+        self.assertRedirects(response, reverse('allocationapp:portal'), status_code=302, target_status_code=200)
     
     def testManagerIndex(self):
         self.client.login(email='manager@barclays.com', password='1234', username='manager')
