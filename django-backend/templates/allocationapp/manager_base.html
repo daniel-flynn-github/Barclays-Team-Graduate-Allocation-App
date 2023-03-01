@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+{% load static %}
+
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>
+            Allocator(Grad) -
+            {% block title_block %}
+            {% endblock %}
+        </title>
+
+        <!-- Load bootstrap config files -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
+
+        <!-- Load bootstrap icons -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css">
+
+        <!-- Load custom CSS files -->
+        <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" href="{% static 'css/vote_submitted.css' %}">
+        <link rel="stylesheet" href="{% static 'css/result_page.css' %}">
+        <link rel="stylesheet" href="{% static 'css/upload.css' %}">
+        <link rel="stylesheet" href="{% static 'css/admin_portal.css' %}">
+
+        <!-- Load custom JS scripts -->
+        <script src="{% static 'js/vote_counter.js' %}"></script>
+    </head>
+
+    <body>
+        <nav class="navbar justify-content-between navbar-expand-lg navbar-light">
+            <div>
+                <a class="navbar-brand mb-0 h1" href="{% url 'allocationapp:manager_view_teams' %}">Allocator</a>
+            </div>
+        <ul class="nav nav-tabs mr-auto">
+            <li class="nav-item">
+                <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_view_teams' %}">View Teams</a>
+            </li>
+            {% if teams %}
+                {% for team in teams %}
+                    <li class="nav-item">
+                        <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit Teams</a>
+                    </li>
+            {% endfor %}
+        {% endif %}
+        </ul>
+            <div class="form-line">
+                {% if user.is_authenticated %}
+                    <form action="/accounts/logout/" method="POST">
+                        {% csrf_token %}
+                        <span class="mr-1">Logged in as <strong>{{ user.first_name }} {{ user.last_name }} (Manager)</strong></span>
+                        <button class="btn btn-sm btn-warning">Logout</button>
+                    </form>
+                {% endif %}
+            </div>
+        </nav>
+          {% block body_block %}
+        {% endblock %}
+
+        <!-- More bootstrap scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct" crossorigin="anonymous"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+        <script src="{% static 'js/create_new_team.js' %}"></script>
+        <script src="{% static 'js/manager_teams.js' %}"></script>
+    </body>
+</html>
