@@ -1,6 +1,13 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser, Preference
+from .validators import validate_is_csv
+
+class ValidateCSVField(forms.FileField):
+
+    def validate(self,value):
+        super().validate(value)
+        validate_is_csv(value)
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -28,7 +35,8 @@ class PreferencesForm(forms.Form):
 
 
 class CSVForm(forms.Form):
-    csv_file = forms.FileField(
+    csv_file = ValidateCSVField(
         label='Select a file',
         help_text=''
     )
+
