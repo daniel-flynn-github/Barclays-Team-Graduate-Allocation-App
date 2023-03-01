@@ -110,3 +110,7 @@ class Preference(models.Model):
     def __str__(self):
         return f"{self.graduate.user.email} -> {self.weight} votes for {self.team.name}"
 
+
+class AllocationState(models.Model):
+    has_allocated = models.BooleanField(default=False)
+    

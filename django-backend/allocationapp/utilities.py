@@ -71,3 +71,11 @@ def is_admin(current_user):
         return True
     except:
         return False
+
+
+def allocation_run():
+    allocation_state = AllocationState.objects.first()
+    if allocation_state:
+        return allocation_state.has_allocated
+    else:
+        return False
