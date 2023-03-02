@@ -4,7 +4,6 @@ $('#cast-votes-form').on('submit', function(event){
 });
 
 function cast_votes() {
-
     // Get all the teams, and pair them with their votes
     // This is an object of the form {teamID: votes, ...}
     var preferences = {};
@@ -19,7 +18,6 @@ function cast_votes() {
         type : "POST", // http method
         data : {
             votes : JSON.stringify(preferences),
-
         }, // data sent with the post request
 
         // handle a successful response
@@ -38,8 +36,6 @@ function cast_votes() {
 };
 
 $(function() {
-
-
     // This function gets cookie with a given name
     function getCookie(name) {
         var cookieValue = null;
