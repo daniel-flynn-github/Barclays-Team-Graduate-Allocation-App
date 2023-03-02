@@ -8,6 +8,17 @@
 {% block body_block %}
 
 <div class="container p-4">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning alert-dismissible fade show">
+                <strong>{{ message }}</strong>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
     <div id="accordion">
         <div class="card mb-3 p-0">
             <div class="card-header card-header-team" id="heading_{{ team.id }}">
@@ -66,11 +77,11 @@
 
                                     <div class="row">
                                         <div class="col-9">
-                                            <input id="new_tech_textbox" value="" class="form-control" type="text" placeholder="Add new technology...">
+                                            <input onkeyup="checkInput('tech')" id="new_tech_textbox" value="" class="form-control" type="text" placeholder="Add new technology...">
                                         </div>
 
                                         <div class="col-3">
-                                            <a href="#" class="btn btn-success w-100" onclick="addTech('{{ team.id }}')">Add<a>
+                                            <a href="#" class="btn btn-success w-100 disabled" id="tech_btn" onclick="addTech('{{ team.id }}')">Add<a>
                                         </div>
                                     </div>
                                 </td>
@@ -91,11 +102,11 @@
 
                                     <div class="row">
                                         <div class="col-9">
-                                            <input id="new_skill_textbox" value="" class="form-control" type="text" placeholder="Add new skill...">
+                                            <input onkeyup="checkInput('skill')" id="new_skill_textbox" value="" class="form-control" type="text" placeholder="Add new skill...">
                                         </div>
 
                                         <div class="col-3">
-                                            <a href="#" class="btn btn-success w-100" onclick="addSkill('{{ team.id }}')">Add<a>
+                                            <a href="#" class="btn btn-success w-100 disabled" id="skill_btn" onclick="addSkill('{{ team.id }}')">Add<a>
                                         </div>
                                     </div>
                                 </td>
@@ -103,13 +114,13 @@
                             <tr>
                                 <th>Group Size</th>
                                 <td>
-                                    <input class="form-control" type="number" name="chosen_capacity" value="{{ team.capacity }}">
+                                    <input class="form-control" type="number" name="chosen_capacity" value="{{ team.capacity }}" min="1">
                                 </td>
                             </tr>
                             <tr>
                                 <th>Description</th>
                                 <td>
-                                    <textarea name="chosen_description" class="form-control" rows="3">{{ team.description }}</textarea>
+                                    <textarea name="chosen_description" class="form-control" rows="3" required>{{ team.description }}</textarea>
                                 </td>
                             </tr>
                             </tbody>    

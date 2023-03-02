@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.hashers import make_password
@@ -169,6 +170,11 @@ def manager_edit_team(request, team_id):
         capacity = request.POST['chosen_capacity']
         description = request.POST['chosen_description']
 
+        # Don't allow the manager to give a team 0 skills and/or technologies.
+        if len(skills) == 0 or len(technologies) == 0:
+            messages.error(request, 'Teams must have at least 1 skill & 1 technology!')
+            return redirect(request.path)
+
         teams = Team.objects.filter(id=team_id)
         teams.update(
             department=Department.objects.get(id=int(department_id)),
@@ -185,6 +191,8 @@ def manager_edit_team(request, team_id):
 
             for technology in technologies:
                 team.technologies.add(int(technology))
+
+        messages.success(request, f'Successfully updated {teams.first().name}!')
 
         return redirect(reverse('allocationapp:manager_view_teams'))
 
@@ -230,16 +238,16 @@ def add_new_technology(request, team_id, tech_name):
 def upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
-        print("posted")
-        if form.is_valid():
-            print("valid")
+        
+        if form.is_valid() and len(request.FILES['csv_file']) > 0:
             if UserCSV.objects.all().count() > 0:
                 UserCSV.objects.all().delete()
             new_csv = UserCSV(csv_file=request.FILES['csv_file'], pk=1)
             new_csv.save()
+            messages.success(request, 'Successfully uploaded CSV file.')
             return redirect(reverse('allocationapp:upload'))
         else:
-            print("not valid")
+            messages.error(request, 'Could not upload this CSV file. Please check you have selected a valid file!')
             form = CSVForm()
     else:
         form = CSVForm()
@@ -251,7 +259,11 @@ def upload_file(request):
 @user_passes_test(is_admin, login_url='/allocation/')
 def populate_db(request):
     reset_graduates_managers()
-    csv_file = UserCSV.objects.get(pk=1).csv_file
+    try:
+        csv_file = UserCSV.objects.get(pk=1).csv_file
+    except:
+        messages.error(request, 'You cannot populate the database without first uploading a CSV!')
+        return redirect(reverse('allocationapp:upload'))
     path = csv_file.path
     with open(path) as f:
 
@@ -294,7 +306,8 @@ def populate_db(request):
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
-            print(problems)
+            messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
+            return redirect(reverse('allocationapp:upload'))
 
         else:
             for row in petl_reader:
@@ -314,9 +327,9 @@ def populate_db(request):
                         user=new_user
                     )
                 send_password_reset(new_user)
-    allcsv = UserCSV.objects.all()
-    form = CSVForm()
-    return render(request, 'allocationapp/upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
+
+    messages.success(request, 'Successfully populated the database from CSV!')
+    return redirect(reverse('allocationapp:upload'))
 
 
 @login_required
@@ -324,14 +337,17 @@ def populate_db(request):
 def team_upload_file(request):
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
-        if form.is_valid():
+        if form.is_valid() and len(request.FILES['csv_file']) > 0:
             if TeamCSV.objects.all().count() > 0:
                 TeamCSV.objects.all().delete()
             new_csv = TeamCSV(csv_file=request.FILES['csv_file'], pk=1)
             new_csv.save()
+            messages.success(request, 'Successfully uploaded CSV file.')
             return redirect(reverse('allocationapp:team_upload'))
+        else:
+            messages.error(request, 'Could not upload this CSV file. Please check you have selected a valid file!')
     else:
-        form = CSVForm
+        form = CSVForm()
 
     all_csv = TeamCSV.objects.all()
     return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
@@ -341,7 +357,11 @@ def team_upload_file(request):
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_populate_db(request):
     reset_teams()
-    csv_file = TeamCSV.objects.get(pk=1).csv_file
+    try:
+        csv_file = TeamCSV.objects.get(pk=1).csv_file
+    except:
+        messages.error(request, 'You cannot populate the database without first uploading a CSV!')
+        return redirect(reverse('allocationapp:team_upload'))
     path = csv_file.path
     with open(path) as f:
 
@@ -370,7 +390,8 @@ def team_populate_db(request):
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
-            print(problems)
+            messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
+            return redirect(reverse('allocationapp:team_upload'))
 
         else:
             for row in petl_reader:
@@ -404,25 +425,33 @@ def team_populate_db(request):
             for team in teams:
                 Preference.objects.get_or_create(
                     graduate=graduate, team=team, weight=5)
-    allcsv = TeamCSV.objects.all()
-    form = CSVForm()
-    return render(request, 'allocationapp/team_upload.html', {'populated': True, 'all_csv': allcsv, 'form': form})
+    
+    messages.success(request, 'Successfully populated the database from CSV!')
+    return redirect(reverse('allocationapp:team_upload'))
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_teams_view(request):
-    reset_teams()
-    form = CSVForm
-    return render(request, 'allocationapp/team_upload.html', {'populated': False, 'allcsv': '', 'form': form})
+    try:
+        reset_teams()
+        TeamCSV.objects.all().delete()
+        messages.success(request, 'Successfully reset the teams database!')
+    except:
+        messages.error(request, 'Could not reset the database!')
+    return redirect(reverse('allocationapp:team_upload'))
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_graduates_managers_view(request):
-    reset_graduates_managers()
-    form = CSVForm
-    return render(request, 'allocationapp/upload.html', {'populated': False, 'allcsv': '', 'form': form})
+    try:
+        reset_graduates_managers()
+        UserCSV.objects.all().delete()
+        messages.success(request, 'Successfully reset the users database!')
+    except:
+        messages.error(request, 'Could not reset the database!')
+    return redirect(reverse('allocationapp:upload'))
 
 
 @login_required
@@ -439,9 +468,7 @@ def get_allocation(request):
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
 
-    
-    # TODO: will also return a message to say allocation has been run
-    # TODO: integrate this with code for checking whether allocation has been run already -- on another branch right now.
+    messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:portal'))
 
 
@@ -464,6 +491,11 @@ def create_new_team(request):
                                                         manager=Manager.objects.get(id=int(manager)))
 
         if department_id == 'other':
+
+            if len(department_input) == 0:
+                messages.error(request, 'You need to specify a department name.')
+                return redirect(reverse('allocationapp:create_new_team'))
+
             Department.objects.get_or_create(name=department_input)
             team_info.department = Department.objects.get(name=department_input)
         else:
@@ -479,7 +511,10 @@ def create_new_team(request):
             team_info.technologies.add(Technology.objects.get(name=tech_info))
 
         team_info.save()
-        return redirect(reverse('allocationapp:manager_view_teams'))
+
+        messages.success(request, f'Added {name} to the database.')
+        return redirect(reverse('allocationapp:create_new_team'))
+    
     departments = Department.objects.all()
     skills = Skill.objects.all()
     technologies = Technology.objects.all()
@@ -498,18 +533,25 @@ def create_new_grad(request):
         email = request.POST['email']
         role_id = int(request.POST['role'])
 
-        new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
-                                                             last_name=last_name,
-                                                             email=email,
-                                                             password=make_password(
-                                                                 CustomUser.objects.make_random_password())
-                                                             )
+        try:
+            new_user, created = CustomUser.objects.get_or_create(first_name=first_name,
+                                                                last_name=last_name,
+                                                                email=email,
+                                                                password=make_password(
+                                                                    CustomUser.objects.make_random_password())
+                                                                )
+        except:
+            messages.error(request, f'The email address {email} is already present within the database.')
+            return redirect(reverse('allocationapp:create_new-grad'))
+
         if role_id == 1:
             Manager.objects.get_or_create(user=new_user)
         if role_id == 2:
             Graduate.objects.get_or_create(user=new_user)
         send_password_reset(new_user)
-        return redirect(reverse('allocationapp:upload'))
+
+        messages.success(request, f'Added {first_name} {last_name} to the database!')
+        return redirect(reverse('allocationapp:create_new_grad'))
 
     return render(request, 'allocationapp/create_new_graduate.html')
 

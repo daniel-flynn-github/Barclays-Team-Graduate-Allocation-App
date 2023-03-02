@@ -8,6 +8,17 @@
 
 {% block body_block %}
     <div class="container p-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <div id="accordion">
             <h2>You manage these teams:</h2>
             {% if teams %}

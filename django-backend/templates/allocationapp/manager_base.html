@@ -42,7 +42,7 @@
             {% if teams %}
                 {% for team in teams %}
                     <li class="nav-item">
-                        <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit Teams</a>
+                        <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:manager_edit_team' team.id %}">Edit {{ team.name }}</a>
                     </li>
             {% endfor %}
         {% endif %}
@@ -57,8 +57,8 @@
                 {% endif %}
             </div>
         </nav>
-          {% block body_block %}
-        {% endblock %}
+            {% block body_block %}
+            {% endblock %}
 
         <!-- More bootstrap scripts -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
@@ -67,5 +67,6 @@
         <script src="{% static 'js/main.js' %}"></script>
         <script src="{% static 'js/create_new_team.js' %}"></script>
         <script src="{% static 'js/manager_teams.js' %}"></script>
+        <script src="{% static 'js/skills_and_technologies_handler.js' %}"></script>
     </body>
 </html>
