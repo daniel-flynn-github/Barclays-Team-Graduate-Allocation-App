@@ -50,10 +50,12 @@ function resetVotes() {
         document.getElementById("voteCount_" + team_id).innerHTML = 0;
         document.getElementById("like_btn_team_" + team_id).classList.remove("disabled");
         document.getElementById("remove_vote_team_" + team_id).hidden = true;
-    }
 
-    // Reset the JSON object for votes back to 0
-    localStorage.setItem("voteCountsObject", "{}");
+        // Reset the JSON object for votes back to 0
+        voteCounts[team_id] = 0;
+        localStorage.setItem('voteCountsObject', JSON.stringify(voteCounts))
+        pluralize(team_id);
+    }
 }
 
 function pluralize(team_id) {
