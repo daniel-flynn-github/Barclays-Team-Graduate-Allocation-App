@@ -131,7 +131,8 @@ def manager_view_teams(request):
             assigned_team=Team.objects.get(id=int(team_id))
         )
 
-        return redirect(reverse('allocationapp:manager_view_teams'))
+        response_data = {'success': True}
+        return JsonResponse(response_data)
 
 
 @login_required

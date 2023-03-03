@@ -84,9 +84,9 @@
                                                         <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
                                                     {% endfor %}
                                                 </select>
-                                                <input type="hidden" value="{{ team.id }}" name="team_id" />
+                                                <input type="hidden" value="{{ team.id }}" name="team_id" id="team_id"/>
 
-                                                <button class="btn btn-success" type="submit">Add to team</button>
+                                                <button class="btn btn-success" type="submit" id="add_to_team">Add to team</button>
                                             </form>
                                         </td>
                                     </tr>
