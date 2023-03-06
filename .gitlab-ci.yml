@@ -1,27 +1,19 @@
-image: ubuntu:latest
-
 default:
-  before_script:
-    - apt-get -y update
-    - cd django-backend
-    - pip3 install -r requirements.txt
   cache:
     key: packages
     paths:
       - django-backend/__pycache__
       - django-backend/*/__pycache__
       - django-backend/venv
-  script:
-    - apt-get install -y libmagic-dev
-    - apt -y install mysql-client net-tools
-    - ./install_packages.sh
-  artifacts:
-    paths:
-      - django-backend/venv
-      - django-backend/.apt-packages
 
-migrations:
+build:
   stage: build
+  before_script:
+    - apt-get -y update
+    - apt-get install -y libmagic-dev
+    - apt -y install net-tools python3 python3-pip mysql-client
+    - cd django-backend
+    - pip3 install -r requirements.txt
   script:
     - python3 manage.py makemigrations
     - python3 manage.py migrate
@@ -29,19 +21,12 @@ migrations:
 
 django-tests:
   stage: test
-  before_script:
-    - cd django-backend
-    - source venv/bin/activate
-    - apt-get -y update
-    - apt-get install -y libmagic-dev
-    - apt -y install mysql-client net-tools
   script:
+    - cd django-backend
     - coverage run manage.py test
     - coverage report
     - coverage xml
   coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
-  dependencies:
-    - default
   artifacts:
     reports:
       coverage_report:
