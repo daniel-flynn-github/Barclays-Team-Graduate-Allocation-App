@@ -5,12 +5,6 @@ default:
     - apt -y install net-tools python3 python3-pip mysql-client
     - cd django-backend
     - pip3 install -r requirements.txt
-  cache:
-    key: packages
-    paths:
-      - django-backend/__pycache__
-      - django-backend/*/__pycache__
-      - django-backend/venv
 
 migrations:
   stage: build
