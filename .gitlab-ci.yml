@@ -1,13 +1,21 @@
+image: ubuntu:latest
+
 default:
+  cache:
+    key: packages
+    paths:
+      - django-backend/__pycache__
+      - django-backend/*/__pycache__
+      - django-backend/venv
+
+build:
+  stage: build
   before_script:
     - apt-get -y update
     - apt-get install -y libmagic-dev
     - apt -y install net-tools python3 python3-pip mysql-client
     - cd django-backend
     - pip3 install -r requirements.txt
-
-migrations:
-  stage: build
   script:
     - python3 manage.py makemigrations
     - python3 manage.py migrate
@@ -16,6 +24,7 @@ migrations:
 django-tests:
   stage: test
   script:
+    - cd django-backend
     - coverage run manage.py test
     - coverage report
     - coverage xml
