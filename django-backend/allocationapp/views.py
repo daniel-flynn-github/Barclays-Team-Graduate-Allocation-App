@@ -154,6 +154,7 @@ def manager_edit_team(request, team_id):
         capacity = request.POST['chosen_capacity']
         description = request.POST['chosen_description']
 
+        #TODO: change to team
         teams = Team.objects.filter(id=team_id)
         teams.update(
             department=Department.objects.get(id=int(department_id)),
