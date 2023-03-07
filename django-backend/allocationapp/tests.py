@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from .models import *
 from .views import *
+from .utilities import *
 from django.urls import reverse
 from . import allocation
 from .allocation import run_allocation
@@ -278,6 +279,42 @@ class TestManagerViews(TestCase):
         response = self.client.get(url)
         self.assertEqual(Team.objects.get(name="team1").technologies.filter(name='Pre-assigned Technology').count(), 1)
         self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+
+class TestUtilitiesFunctions(TestCase):
+    def setUp(self):
+        # Department.objects.create(name="dep2")
+        # Team.objects.create(name = "team1", capacity=3, lower_bound=2, department=Department.objects.get(name="dep1"))
+        # Skill.objects.get(name="data science")
+        # Technology.objects.get(name="R")
+        # Team.objects.get(name="team1").skills.add(Skill.objects.get(name="data science"))
+        # Team.objects.get(name="team1").technologies.add(Technology.objects.get(name="R"))
+        # Team.objects.create(name = "team2", capacity=4, lower_bound=3, manager=Manager.objects.get(user=CustomUser.objects.get(first_name="manager")), department=Department.objects.get(name="dep2"))
+        # Team.objects.create(name = "team3", capacity=3, lower_bound=2)
+
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad", email="grad@barclays.com", username="grad", password="1234"))
+        Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager", email="manager@barclays.com", username="manager", password="1234"))
+        Admin.objects.create(user=CustomUser.objects.create_user(first_name="admin", email="admin@barclays.com", username="admin", password="1234"))
+
+    def testIsGrad(self):
+        self.assertTrue(is_grad(CustomUser.objects.get(first_name="grad")))
+        self.assertFalse(is_manager(CustomUser.objects.get(first_name="grad")))
+        self.assertFalse(is_admin(CustomUser.objects.get(first_name="grad")))
+    
+    def testIsManager(self):
+        self.assertFalse(is_grad(CustomUser.objects.get(first_name="manager")))
+        self.assertTrue(is_manager(CustomUser.objects.get(first_name="manager")))
+        self.assertFalse(is_admin(CustomUser.objects.get(first_name="manager")))
+    
+    def testIsAdmin(self):
+        self.assertFalse(is_grad(CustomUser.objects.get(first_name="admin")))
+        self.assertFalse(is_manager(CustomUser.objects.get(first_name="admin")))
+        self.assertTrue(is_admin(CustomUser.objects.get(first_name="admin")))
+    
+    def testResetUsers(self):
+        reset_users()
+        self.assertFalse(CustomUser.objects.filter(first_name="admin").exists())
+        self.assertFalse(CustomUser.objects.filter(first_name="grad").exists())
+        self.assertFalse(CustomUser.objects.filter(first_name="manager").exists())
 
 class TestAllocation(TestCase):
     def setUp(self):
