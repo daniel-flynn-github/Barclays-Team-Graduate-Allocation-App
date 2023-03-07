@@ -1,25 +1,24 @@
 image: ubuntu:latest
 
 default:
-
   before_script:
     - apt-get -y update
+    - apt-get install -y libmagic-dev
     - apt -y install net-tools python3 python3-pip mysql-client
     - cd django-backend
     - pip3 install -r requirements.txt
+  cache:
+    key: packages
+    paths:
+      - django-backend/__pycache__
+      - django-backend/*/__pycache__
+      - django-backend/venv
 
-
-
-#build-job:
-#  stage: build
-#  script:
-#    - echo "Hello, $GITLAB_USER_LOGIN!"
 
 migrations:
   stage: build
   script:
     - python3 manage.py makemigrations
-    # - python3 manage.py makemigrations myapp
     - python3 manage.py migrate
     - python3 manage.py check
 
@@ -27,9 +26,6 @@ migrations:
 django-tests:
   stage: test
   script:
-    # The MYSQL user only gets permissions for MYSQL_DB, so Django can't create a test database.
-    # - echo "GRANT ALL on *.* to '${MYSQL_USER}';"| mysql -u root --password="${MYSQL_ROOT_PASSWORD}" -h mysql
-    # use python3 explicitly. see https://wiki.ubuntu.com/Python/3
     - coverage run manage.py test
     - coverage report
     - coverage xml
@@ -39,10 +35,3 @@ django-tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-
-
-# deploy-prod:
-#   stage: deploy
-#   script:
-#     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-#   environment: production
