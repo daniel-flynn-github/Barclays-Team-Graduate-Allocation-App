@@ -1,0 +1,6 @@
+Django==4.1.3
+django-allauth==0.52.0
+networkx==3.0
+petl==1.7.12
+python-magic==0.4.27
+coverage==7.1.0
