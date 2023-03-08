@@ -162,7 +162,7 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
-LOGIN_REDIRECT_URL = 'allocationapp:cast_votes'
+LOGIN_REDIRECT_URL = 'allocationapp:index'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
