@@ -6,7 +6,13 @@ default:
     - apt-get install -y libmagic-dev
     - apt -y install net-tools python3 python3-pip mysql-client
     - cd django-backend
-    - pip3 install -r requirements.txt
+    - pip3 install -r requirements_gitlab.txt
+  cache:
+    key: packages
+    paths:
+      - django-backend/__pycache__
+      - django-backend/*/__pycache__
+      - django-backend/venv
 
 
 migrations:
@@ -29,10 +35,3 @@ django-tests:
       coverage_report:
         coverage_format: cobertura
         path: coverage.xml
-
-
-# deploy-prod:
-#   stage: deploy
-#   script:
-#     - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-#   environment: production
