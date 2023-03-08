@@ -39,12 +39,14 @@
             <li class="nav-item">
                 <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:cast_votes' %}">Portal</a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:upload' %}">Upload Users</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:team_upload' %}">Upload Teams</a>
-            </li>
+            {% if not allocation_ran %}
+                <li class="nav-item">
+                    <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:upload' %}">Upload Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:team_upload' %}">Upload Teams</a>
+                </li>
+            {% endif %}
         </ul>
             <div class="form-line">
                 {% if user.is_authenticated %}

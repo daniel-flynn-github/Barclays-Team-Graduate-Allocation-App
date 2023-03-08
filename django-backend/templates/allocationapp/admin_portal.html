@@ -18,6 +18,7 @@
             {% endfor %}
         {% endif %}
 
+        {% if not allocation_ran %}
         <h1 class="text-center" id="title">
             Upload Users and Teams via CSV
         </h1>
@@ -144,10 +145,13 @@
                 </div>
             </div>
         </div>
-        <h1 class="text-center" id="or">Click below to allocate users to teams</h1>
+        {% endif %}
+
+        <h1 class="text-center" id="or">{% if allocation_ran %}Allocation already run. Please reset for a new cohort.{% else %}Click below to allocate users to teams{% endif %}</h1>
         <div class="row d-flex justify-content-center align-items-center">
             {% if allocation_ran %}
                 <a class="btn btn-warning btn-lg disabled sr" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Allocation Already Run</a>
+                <a class="btn btn-danger btn-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
             {% else %}
                 <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
             {% endif %}
