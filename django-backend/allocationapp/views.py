@@ -240,6 +240,9 @@ def add_new_technology(request, team_id, tech_name):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def upload_file(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
         
@@ -256,12 +259,15 @@ def upload_file(request):
     else:
         form = CSVForm()
     all_csv = UserCSV.objects.all()
-    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False, 'allocation_ran': allocation_run(),})
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def populate_db(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     reset_graduates_managers()
     try:
         csv_file = UserCSV.objects.get(pk=1).csv_file
@@ -339,6 +345,9 @@ def populate_db(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_upload_file(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+    
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
         if form.is_valid() and len(request.FILES['csv_file']) > 0:
@@ -354,12 +363,15 @@ def team_upload_file(request):
         form = CSVForm()
 
     all_csv = TeamCSV.objects.all()
-    return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+    return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False, 'allocation_ran': allocation_run()})
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_populate_db(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     reset_teams()
     try:
         csv_file = TeamCSV.objects.get(pk=1).csv_file
@@ -437,6 +449,9 @@ def team_populate_db(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_teams_view(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     try:
         reset_teams()
         TeamCSV.objects.all().delete()
@@ -449,6 +464,9 @@ def reset_teams_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_graduates_managers_view(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     try:
         reset_graduates_managers()
         UserCSV.objects.all().delete()
@@ -479,6 +497,9 @@ def get_allocation(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def create_new_team(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         name = request.POST['group_name']
         manager = request.POST['group_manager']
@@ -524,13 +545,16 @@ def create_new_team(request):
     technologies = Technology.objects.all()
     managers = Manager.objects.all()
     context_dict = {'managers': managers, 'departments': departments, 'skills': skills, 'technologies': technologies,
-                    'count': range(0, 200)}
+                    'count': range(0, 200), 'allocation_ran': allocation_run(),}
     return render(request, 'allocationapp/create_new_team.html', context=context_dict)
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def create_new_grad(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
@@ -557,7 +581,7 @@ def create_new_grad(request):
         messages.success(request, f'Added {first_name} {last_name} to the database!')
         return redirect(reverse('allocationapp:create_new_grad'))
 
-    return render(request, 'allocationapp/create_new_graduate.html')
+    return render(request, 'allocationapp/create_new_graduate.html', context={'allocation_ran': allocation_run()})
 
 
 @login_required
