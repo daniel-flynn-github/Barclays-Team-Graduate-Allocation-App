@@ -15,3 +15,14 @@ function addTech(team_id) {
         return window.location.href = "/allocation/manager/edit_team/" + team_id + "/add_technology/" + tech_input.value;
     }
 }
+
+function checkInput(name) {
+    var input = document.getElementById("new_" + name + "_textbox");
+    var button = document.getElementById(name + "_btn");
+
+    if (input.value.length > 0) {
+        button.classList.remove('disabled');
+    } else {
+        button.classList.add('disabled');
+    }
+}

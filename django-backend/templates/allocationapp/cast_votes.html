@@ -7,6 +7,17 @@
 
 {% block body_block %}
     <div class="container p-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show text-left">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <div class="row mb-3">
             <div class="col-8">
                 <form action="{% url 'allocationapp:vote_submitted' %}" id="cast-votes-form" method="POST">
@@ -39,8 +50,7 @@
                                             <div class="btn btn_vote" onclick="countVotes('{{ team.id }}')" id="like_btn_team_{{ team.id }}">
                                                 <i class="bi bi-hand-thumbs-up"></i>
                                             </div>
-                                            <span class="vote_text"><span class="vote_count_value" id="voteCount_{{ team.id }}">0</span> <span id="vote_text_{{ team.id }}">votes</span></span>
-
+                                            <span class="vote_text"><span class="vote_count_value" id="voteCount_{{ team.id }}">{%if prefilled_votes%}{{ prefilled_votes|lookup:team.id }}{%else%}0{%endif%}</span> <span id="vote_text_{{ team.id }}">votes</span></span>
                                             <!-- Only shows if there are > 0 votes -->
                                             <div hidden="true" class="btn btn_vote text-warning remove_vote_btn" onclick="removeVotes('{{ team.id }}')" id="remove_vote_team_{{ team.id }}">
                                                 <i class="bi bi-hand-thumbs-down"></i>

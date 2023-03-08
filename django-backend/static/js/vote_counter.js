@@ -50,10 +50,12 @@ function resetVotes() {
         document.getElementById("voteCount_" + team_id).innerHTML = 0;
         document.getElementById("like_btn_team_" + team_id).classList.remove("disabled");
         document.getElementById("remove_vote_team_" + team_id).hidden = true;
-    }
 
-    // Reset the JSON object for votes back to 0
-    localStorage.setItem("voteCountsObject", "{}");
+        // Reset the JSON object for votes back to 0
+        voteCounts[team_id] = 0;
+        localStorage.setItem('voteCountsObject', JSON.stringify(voteCounts))
+        pluralize(team_id);
+    }
 }
 
 function pluralize(team_id) {
@@ -66,3 +68,34 @@ function pluralize(team_id) {
         document.getElementById("vote_text_" + team_id).innerHTML = 'votes';
     }
 }
+
+function setStateOnLoad() {
+    // Run this on page load -- allows for votes state to be reflected in the JS layer.
+    // Use this incase user goes to EDIT their PREFILLED votes.
+    all_team_votes = document.getElementsByClassName("vote_count_value");
+    cached_votes = JSON.parse(localStorage.getItem("voteCountsObject"));
+
+    // For each team...
+    for (i=0; i < all_team_votes.length; i++) {
+        team_id = all_team_votes[i].id.substring(10);
+        number_of_votes = all_team_votes[i].innerHTML
+        cached_votes[team_id] = number_of_votes;
+
+        if (number_of_votes == 5) {
+            // Like button disabled, ensure dislike button is shown.
+            document.getElementById("like_btn_team_" + team_id).classList.add("disabled");
+            document.getElementById("remove_vote_team_" + team_id).hidden = false;
+        } else if (number_of_votes > 0) {
+            // Both the like & dislike buttons are active.
+            document.getElementById("remove_vote_team_" + team_id).hidden = false;
+        } else {
+            // The dislike button is not shown, ensure like button is enabled.
+            document.getElementById("like_btn_team_" + team_id).classList.remove("disabled");
+            document.getElementById("remove_vote_team_" + team_id).hidden = true;
+        }
+    }
+
+    localStorage.setItem('voteCountsObject', JSON.stringify(cached_votes))
+}
+
+setStateOnLoad();
