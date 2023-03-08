@@ -41,6 +41,8 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
 
     for graduate in graduates:
         for team in teams:
+            if not (Preference.objects.filter(graduate=graduate, team=team)).exists():
+                Preference.objects.create(graduate=graduate, team=team, weight=0)
             # 6 - to revert the scale from 1 to 5
             if (Preference.objects.get(graduate=graduate, team=team).weight >= 100):
                 G.add_edge(graduate, team, weight=Preference.objects.get(

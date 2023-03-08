@@ -419,10 +419,6 @@ def team_populate_db(request):
 
         graduates = Graduate.objects.all()
         teams = Team.objects.all()
-        for graduate in graduates:
-            for team in teams:
-                Preference.objects.get_or_create(
-                    graduate=graduate, team=team, weight=5)
     
     messages.success(request, 'Successfully populated the database from CSV!')
     return redirect(reverse('allocationapp:team_upload'))
