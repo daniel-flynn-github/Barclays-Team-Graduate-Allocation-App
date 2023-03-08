@@ -25,7 +25,10 @@ def index(request):
     if is_manager(request.user):
         return redirect(reverse('allocationapp:manager_view_teams'))
     elif is_grad(request.user):
-        return redirect(reverse('allocationapp:cast_votes'))
+        if grad_has_already_voted(request.user):
+            return redirect(reverse('allocationapp:vote_submitted'))
+        else:
+            return redirect(reverse('allocationapp:cast_votes'))
     elif is_admin(request.user):
         return redirect(reverse('allocationapp:portal'))
     else:
@@ -59,8 +62,8 @@ def cast_votes(request):
         context_dict = {}
 
         # Get all the votes cast by the graduate
-        votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id)))
-        if len(votes) > 0:
+        votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
+        if grad_has_already_voted(current_user):
             # Grad has previously cast their votes.
             team_id_to_votes = {}
             for vote in votes:
