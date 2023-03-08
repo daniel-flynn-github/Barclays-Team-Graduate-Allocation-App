@@ -59,7 +59,9 @@ def cast_votes(request):
 
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
-        context_dict = {}
+        context_dict = {
+            'allocation_run': allocation_run(),
+        }
 
         # Get all the votes cast by the graduate
         votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
@@ -106,6 +108,7 @@ def result_page(request):
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': assigned_team_members,
         'current_user_id': request.user.id,
+        'allocation_run': allocation_run(),
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
