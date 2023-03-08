@@ -591,3 +591,17 @@ def admin_portal(request):
         'allocation_ran': allocation_run(),
     }
     return render(request, 'allocationapp/admin_portal.html', context=context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def reset_allocation_app(request):
+    # When this is called, it resets the whole app so a new allocation can be run.
+    # Firstly, update the AllocationState. This means allocation_ran() now returns False.
+    AllocationState.objects.all().delete()
+
+    # Now, reset the entire database of everything except from the admin account.
+    reset_graduates_managers()
+    reset_teams()
+
+    return redirect(reverse('allocationapp:portal'))
