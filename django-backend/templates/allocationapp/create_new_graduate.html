@@ -12,6 +12,17 @@
 
         <div class="form-group">
              <div class="col-md-8 offset-md-2" id="create_new_grad">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {%if message.tags == 'error'%}alert-danger{%else%}alert-success{%endif%} alert-dismissible fade show text-left mt-2">
+                            <strong>{{ message }}</strong>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                  <form action=#, method="POST">
                  {% csrf_token %}
 
@@ -29,24 +40,24 @@
                      </div>
 
                      <div class="row">
-                         <div class="col">
-                             <label class="required" for="email">Email: </label>
-                             <input name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp">
-                         </div>
-                         <div class="col">
-                          <label class="required" for="role">Role: </label>
-                             <select id = "role" class="form-control" name="role" required>
-                             <option value="1">Manager</option>
-                             <option value="2">Graduate</option>
+                        <div class="col">
+                            <label class="required" for="email">Email: </label>
+                            <input name="email" type="email" class="form-control" id="email" aria-describedby="emailHelp" required>
+                        </div>
+                        <div class="col">
+                            <label class="required" for="role">Role: </label>
+                            <select id = "role" class="form-control" name="role" required>
+                            <option value="1">Manager</option>
+                            <option value="2">Graduate</option>
                          </select>
                          </div>
                      </div>
                      <div class="row text-center" id="grad_button">
                          <div class="col">
-                              <a class="btn btn-primary btn-lg"href="{% url 'allocationapp:upload' %}">Back to Grad Upload</a>
+                            <a class="btn btn-primary btn-lg"href="{% url 'allocationapp:upload' %}">Back to Grad Upload</a>
                           </div>
                          <div class="col" >
-                             <input class="btn btn-primary btn-lg" type="reset" value="Reset">
+                            <input class="btn btn-primary btn-lg" type="reset" value="Reset">
                          </div>
                         <div class="col">
                             <input class="btn btn-primary btn-lg" type="submit" value="Submit">

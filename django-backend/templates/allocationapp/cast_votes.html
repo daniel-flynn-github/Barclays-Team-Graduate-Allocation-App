@@ -7,6 +7,17 @@
 
 {% block body_block %}
     <div class="container p-4">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show text-left">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <div class="row mb-3">
             <div class="col-8">
                 <form action="{% url 'allocationapp:vote_submitted' %}" id="cast-votes-form" method="POST">
