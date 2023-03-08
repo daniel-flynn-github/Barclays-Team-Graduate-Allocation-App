@@ -35,7 +35,6 @@ def run_min_cost_max_flow(graduates, teams, with_lower_bound=False):
         if type(teams) == dict:
             for team, capacity in teams.items():
                 G.add_node(team, demand=capacity)
-            print("dict is happening")
         else:
             for team in teams:
                 G.add_node(team, demand=team.capacity)
