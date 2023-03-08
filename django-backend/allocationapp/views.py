@@ -264,6 +264,7 @@ def admin_view_teams(request):
             'teams': teams,
             'team_members': team_members,
             'graduates_with_no_team': Graduate.objects.filter(assigned_team=None),
+            'allocation_ran':allocation_run()
         }
 
         return render(request, 'allocationapp/admin_teams.html', context=context_dict)
@@ -529,7 +530,7 @@ def get_allocation(request):
     AllocationState.objects.create(has_allocated=True)
 
     messages.success(request, 'Allocation has been run!')
-    return redirect(reverse('allocationapp:portal'))
+    return redirect(reverse('allocationapp:admin_view_teams'))
 
 
 @login_required
