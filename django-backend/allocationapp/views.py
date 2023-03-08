@@ -263,68 +263,72 @@ def populate_db(request):
         messages.error(request, 'You cannot populate the database without first uploading a CSV!')
         return redirect(reverse('allocationapp:upload'))
     path = csv_file.path
-    with open(path) as f:
-
-        emails = []
-        def name_constraints(value):
-            if value is not None and type(value) == str and len(value) < 128:
-               return True
-            else:
-               return False
-        
-        def email_constraints(value):
-            if value is not None and name_constraints(value) and value.lower().strip() not in emails:
-                try:
-                    validate_email(value)
-                except:
-                    return False
-                emails.append(value)
-                return True
-            else:
-                return False
-
-        def role_constraints(value):
-            if value is not None and value.lower().strip() == 'manager' or value.lower().strip() == 'graduate':
-                return True
-            else:
-                return False
-            
-
-        petl_table = petl.fromcsv(path, encoding='utf-8-sig')
-        headers = ('first name','last name','email','role')
-
-        constraints = [
-            dict(first_name_constraint='first_name_constraint', field='first name', assertion=name_constraints),
-            dict(last_name_constraint='last_name_constraint', field='last name', assertion=name_constraints),
-            dict(email_constraint='email_constraint', field='email', assertion=email_constraints),
-            dict(role_constraint='role_constraint', field='role', assertion=role_constraints)
-        ]
-
-        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
-        petl_reader = petl.data(petl_table)
-
-        if petl.nrows(problems) != 0:
-            messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
-            return redirect(reverse('allocationapp:upload'))
-
+    emails = []
+    def name_constraints(value):
+        if (value is not None) and (type(value) == str) and (len(value) < 128):
+            return True
         else:
-            for row in petl_reader:
-                new_user, created = CustomUser.objects.get_or_create(
-                    first_name=row[0],
-                    last_name=row[1],
-                    email=row[2].lower().strip(),
-                    password=make_password(
-                        CustomUser.objects.make_random_password())
+            return False
+    
+    def email_constraints(value):
+        print("HHHHHHHHHHHHHHHH")
+        print(emails)
+        if (value is not None) and (name_constraints(value)) and (value.lower().strip() not in emails):
+            try:
+                validate_email(value)
+            except:
+                return False
+            emails.append(value)
+            return True
+        else:
+            return False
+
+    def role_constraints(value):
+        if (value is not None) and (value.lower().strip() == 'manager' or value.lower().strip() == 'graduate'):
+            return True
+        else:
+            return False
+        
+
+    petl_table = petl.fromcsv(path, encoding='utf-8-sig')
+    print(petl_table)
+    headers = ('First Name','Last Name','Email','Role')
+
+    constraints = [
+        dict(first_name_constraint='first_name_constraint', field='First Name', assertion=name_constraints),
+        dict(last_name_constraint='last_name_constraint', field='Last Name', assertion=name_constraints),
+        dict(email_constraint='email_constraint', field='Email', assertion=email_constraints),
+        dict(role_constraint='role_constraint', field='Role', assertion=role_constraints)
+    ]
+
+    problems = petl.validate(petl_table, constraints = constraints, header = headers)  
+    petl_reader = petl.data(petl_table)
+    print(petl_reader)
+    print(petl.nrows(problems))
+
+    if petl.nrows(problems) != 0:
+        print("HELLO")
+        messages.error(request, 'There are problems with the format of the CSV file. Please follow the format outlined in the admin portal.')
+        return redirect(reverse('allocationapp:upload'))
+
+    else:
+        for row in petl_reader:
+            new_user, created = CustomUser.objects.get_or_create(
+                first_name=row[0],
+                last_name=row[1],
+                email=row[2].lower().strip(),
+                password=make_password(
+                    CustomUser.objects.make_random_password())
+            )
+            if row[3].lower().strip() == 'graduate':
+                Graduate.objects.get_or_create(
+                    user=new_user
                 )
-                if row[3].lower().strip() == 'graduate':
-                    Graduate.objects.get_or_create(
-                        user=new_user
-                    )
-                elif row[3].lower().strip() == 'manager':
-                    Manager.objects.get_or_create(
-                        user=new_user
-                    )
-                send_password_reset(new_user)
+            elif row[3].lower().strip() == 'manager':
+                Manager.objects.get_or_create(
+                    user=new_user
+                )
+            send_password_reset(new_user)
 
     messages.success(request, 'Successfully populated the database from CSV!')
     return redirect(reverse('allocationapp:upload'))

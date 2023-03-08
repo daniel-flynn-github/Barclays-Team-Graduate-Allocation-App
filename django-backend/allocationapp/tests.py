@@ -1,4 +1,6 @@
 from django.test import TestCase, Client
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.messages import get_messages
 from .models import *
 from .views import *
 from .utilities import *
@@ -315,6 +317,127 @@ class TestUtilitiesFunctions(TestCase):
         self.assertFalse(CustomUser.objects.filter(first_name="admin").exists())
         self.assertFalse(CustomUser.objects.filter(first_name="grad").exists())
         self.assertFalse(CustomUser.objects.filter(first_name="manager").exists())
+
+class TestUploadCSVs(TestCase):
+
+    # populate_db
+    # check that error checking works
+    # check that db is populated
+
+    # check email is sent out
+
+    def setUp(self):
+        Admin.objects.create(user=CustomUser.objects.create_user(first_name="admin", email="admin@barclays.com", username="admin", password="1234"))
+    
+    def testUploadValidUserCSV(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        csv_data = b'first_name,last_name,email,role\nPattie,Allcroft,pallcroft0@apple.com,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        csv_file = SimpleUploadedFile('test.csv', csv_data)
+        url = reverse('allocationapp:upload')
+        data = {'csv_file': csv_file}
+        response = self.client.post(url, data)
+        self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+        self.assertEqual(UserCSV.objects.count(), 1)
+        self.assertEqual(UserCSV.objects.first().csv_file.read(), csv_data)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Successfully uploaded CSV file.')
+        # repeat upload to check behaviour
+        new_csv_data = b'first_name,last_name,email,role\nCarolin,Gates,cgates2@psu.edu,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        new_csv_file = SimpleUploadedFile('test.csv', new_csv_data)
+        new_data = {'csv_file': new_csv_file}
+        new_response = self.client.post(url, new_data)
+        self.assertEqual(UserCSV.objects.count(), 1)
+        self.assertEqual(UserCSV.objects.first().csv_file.read(), new_csv_data)
+        messages = list(get_messages(new_response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Successfully uploaded CSV file.')
+    
+    def testUploadInvalidUserCSV(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        txt_data = b'first_name,last_name,email,role\nPattie,Allcroft,pallcroft0@apple.com,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        txt_file = SimpleUploadedFile('test.txt', txt_data)
+        url = reverse('allocationapp:upload')
+        data = {'csv_file': txt_file}
+        response = self.client.post(url, data)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Could not upload this CSV file. Please check you have selected a valid file!')
+        self.assertTemplateUsed(response, 'allocationapp/upload.html')
+    
+    def testUploadValidTeamCSV(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        csv_data = b'first_name,last_name,email,role\nPattie,Allcroft,pallcroft0@apple.com,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        csv_file = SimpleUploadedFile('test.csv', csv_data)
+        url = reverse('allocationapp:team_upload')
+        data = {'csv_file': csv_file}
+        response = self.client.post(url, data)
+        self.assertRedirects(response, reverse('allocationapp:team_upload'), status_code=302, target_status_code=200)
+        self.assertEqual(TeamCSV.objects.count(), 1)
+        self.assertEqual(TeamCSV.objects.first().csv_file.read(), csv_data)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Successfully uploaded CSV file.')
+        # repeat upload to check behaviour
+        new_csv_data = b'first_name,last_name,email,role\nCarolin,Gates,cgates2@psu.edu,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        new_csv_file = SimpleUploadedFile('test.csv', new_csv_data)
+        new_data = {'csv_file': new_csv_file}
+        new_response = self.client.post(url, new_data)
+        self.assertEqual(TeamCSV.objects.count(), 1)
+        self.assertEqual(TeamCSV.objects.first().csv_file.read(), new_csv_data)
+        messages = list(get_messages(new_response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Successfully uploaded CSV file.')
+    
+    def testUploadInvalidTeamCSV(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        txt_data = b'first_name,last_name,email,role\nPattie,Allcroft,pallcroft0@apple.com,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        txt_file = SimpleUploadedFile('test.txt', txt_data)
+        url = reverse('allocationapp:team_upload')
+        data = {'csv_file': txt_file}
+        response = self.client.post(url, data)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'Could not upload this CSV file. Please check you have selected a valid file!')
+        self.assertTemplateUsed(response, 'allocationapp/team_upload.html')
+    
+    def testPopulateDBWithUserCSVDataWithNoCSVUploaded(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        url = reverse('allocationapp:create')
+        response = self.client.post(url)
+        messages = list(get_messages(response.wsgi_request))
+        self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[0]), 'You cannot populate the database without first uploading a CSV!')
+        self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+
+    def testPopulateDBWithUserCSVDataWithValidCSVUploaded(self):
+        self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        #upload valid csv
+        csv_data = b'First Name,Last Name,Email,Role\nPattie,Allcroft,pallcroft0@apple.com,graduate\nLotty,Boon,lboon1@ed.gov,manager\n'
+        csv_file = SimpleUploadedFile('test.csv', csv_data)
+        self.client.post(reverse('allocationapp:upload'), {'csv_file': csv_file})
+        #populate
+        url = reverse('allocationapp:create')
+        response = self.client.post(url)
+        # self.assertTrue(Graduate.objects.filter(user=CustomUser.objects.get(first_name='Pattie')).exists())
+        # self.assertTrue(Manager.objects.filter(user=CustomUser.objects.get(first_name='Lotty')).exists())
+        messages = list(get_messages(response.wsgi_request))
+        #self.assertEqual(len(messages), 1)
+        self.assertEqual(str(messages[1]), 'Successfully populated the database from CSV!')
+        self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+
+    def testPopulateDBWithUserCSVDataWithInvalidCSVUploaded(self):
+        # self.client.login(email='admin@barclays.com', password='1234', username='admin')
+        # url = reverse('allocationapp:create')
+        # response = self.client.post(url)
+        # messages = list(get_messages(response.wsgi_request))
+        # self.assertEqual(len(messages), 1)
+        # self.assertEqual(str(messages[0]), 'You cannot populate the database without first uploading a CSV!')
+        # self.assertRedirects(response, reverse('allocationapp:upload'), status_code=302, target_status_code=200)
+        pass
+
+    def testPopulateDBWithTeamCSVData(self):
+        pass
 
 class TestAllocation(TestCase):
     def setUp(self):
