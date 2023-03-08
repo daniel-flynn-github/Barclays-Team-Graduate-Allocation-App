@@ -58,9 +58,18 @@ def cast_votes(request):
 
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
-        context_dict = {
-            'teams': Team.objects.all(),
-        }
+        context_dict = {}
+
+        # Get all the votes cast by the graduate
+        votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id)))
+        if len(votes) > 0:
+            # Grad has previously cast their votes.
+            team_id_to_votes = {}
+            for vote in votes:
+                team_id_to_votes[vote.team.id] = vote.weight
+            context_dict['prefilled_votes'] = team_id_to_votes
+
+        context_dict['teams'] = Team.objects.all()
 
         if allocation_run():
             return redirect(reverse('allocationapp:vote_submitted'))
