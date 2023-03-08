@@ -10,10 +10,10 @@ def increase_preference_weight_for_previous_team_to_discourage(graduates):
     for graduate in graduates:
         if graduate.assigned_team != None:
             preference = Preference.objects.get_or_create(
-                graduate=graduate, team=graduate.assigned_team)
-            # indexed at 0 because get_or_create returns a tuple (object, bool)
-            preference[0].weight += 100
-            preference[0].save()
+                graduate=graduate, 
+                team=graduate.assigned_team,
+                defaults={'weight': 0}
+            )
 
 # function using networkx library to run a min_cost_max_flow
 # with_lower_bound attribute is False by default, if true the algorithm is run capping the team capacities at the lower bound
