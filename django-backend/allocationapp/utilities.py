@@ -71,6 +71,12 @@ def is_admin(current_user):
         return True
     except:
         return False
+    
+def is_admin_or_manager(current_user):
+    if is_manager(current_user) or is_admin(current_user):
+        return True
+    else:
+        return False
 
 
 def allocation_run():
