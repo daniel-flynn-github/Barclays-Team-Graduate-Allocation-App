@@ -12,6 +12,17 @@
 
         <div class="form-group">
              <div class="col-md-8 offset-md-2">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert {%if message.tags == 'error'%}alert-danger{%else%}alert-success{%endif%} alert-dismissible fade show text-left mt-2">
+                            <strong>{{ message }}</strong>
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
                  <form action=#, method="POST">
                  {% csrf_token %}
 
@@ -38,13 +49,7 @@
                  <div class="row">
                     <div class="col">
                         <label for="group_capacity">Capacity: </label>
-                        <select class="custom-select" id="group_capacity" name="group_capacity" required>
-                            {% if count %}
-                                {% for i in count %}
-                                    <option value={{ i }}>{{ i }}</option>
-                                {% endfor %}
-                            {% endif %}
-                        </select>
+                        <input type="number" min="1" name="group_capacity" id="group_capacity" class="form-control">
                     </div>
 
                   <!--    Department   second line -->
@@ -98,7 +103,7 @@
                      <!--    Description   fourth line -->
                 <div class="row">
                     <label for="group_description">Description: </label>
-                    <textarea class="form-control" id="group_description" rows="4" placeholder="Please enter your group description here..." name="group_description"></textarea>
+                    <textarea required class="form-control" id="group_description" rows="4" placeholder="Please enter your group description here..." name="group_description"></textarea>
                 </div>
                      <br>
                      <div class="row text-center">

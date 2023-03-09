@@ -7,6 +7,17 @@
 
 {% block body_block %}
    <div class="container mt-5 text-center">
+      {% if messages %}
+         {% for message in messages %}
+               <div class="alert alert-success alert-dismissible fade show text-left">
+                  <strong>{{ message }}</strong>
+                  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                     <span aria-hidden="true">&times;</span>
+                  </button>
+               </div>
+         {% endfor %}
+      {% endif %}
+
       <div id="voteSubmitted" class="mb-3">
          {% if not allocation_run %}
             <p>Your votes have been <strong>submitted</strong>. You will be notified via email when the results are posted.</p>

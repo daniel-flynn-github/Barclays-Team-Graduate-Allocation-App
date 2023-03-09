@@ -8,9 +8,36 @@
 
 {% block body_block %}
     <div class="container text-center p-5" id="codeEntryGradContainer">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success alert-dismissible fade show text-left">
+                    <strong>{{ message }}</strong>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
         <form class="p-5" method="POST">
             {% csrf_token %}
             <h1>Login here</h1>
+
+            {% if form.errors %}
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ error|escape }}</strong>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+                
+                {% for error in form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        <strong>{{ error|escape }}</strong>
+                    </div>
+                {% endfor %}
+            {% endif %}
 
             <div class="user-details-container">
                 <div class="form-group text-center">
@@ -25,6 +52,6 @@
             <button class="btn btn-success" id="codeEntryGraduateBtn" type="submit">Login</button>
         </form>
 
-        <p>Don't have an account? Please <a href="{% url 'account_signup' %}">signup here</a>.</p>
+        <p>Haven't received your password reset link yet? Please <a href="{% url 'account_reset_password' %}">request it here</a>.</p>
     </div>
 {% endblock %}
