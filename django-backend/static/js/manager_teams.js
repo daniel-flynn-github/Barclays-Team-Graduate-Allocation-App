@@ -79,7 +79,7 @@ add_forms.forEach(function (add_form){
         xhr.setRequestHeader('X-CSRFToken', document.getElementsByName('csrfmiddlewaretoken')[0].value);
         xhr.onload = function(){
             if (xhr.status === 200){
-                var select_grad = document.getElementById("select_graduate");
+                var select_grad = add_form.querySelector('select#select_graduate');
                 var grad_id = select_grad.options[select_grad.selectedIndex].value;
                 var grad_text = select_grad.options[select_grad.selectedIndex].text;
                 var grad_name = grad_text.split('|')[0].trim();
