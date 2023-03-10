@@ -8,7 +8,6 @@ gradRows.forEach(function(gradRow) {
             // When the delete (X) button, within the graduate's row, is clicked
             event.preventDefault();
 
-
             var xhr = new XMLHttpRequest();
             xhr.open("GET", event.target.href);  // delete the graduate e.g. /delete_team_member/7/
             xhr.onreadystatechange = function() {
@@ -66,6 +65,37 @@ function disable_dropdown(){
     });
 }
 
+function delete_new_add_member(new_member, grad_id){
+     new_member.querySelector('.delete-btn').addEventListener('click', function (event){
+         event.preventDefault();
+
+         var xhr = new XMLHttpRequest();
+         xhr.open('GET', event.target.href, true);
+         xhr.onreadystatechange = function () {
+             if(xhr.readyState === 4){
+                 if (xhr.status === 200) {
+                     var response = JSON.parse(xhr.responseText);
+                     if (response.success) {
+                         var element = document.getElementById("grad_" + grad_id);
+                         var delete_text = $('#grad_text_' + grad_id).text();
+                         if (element === null) {
+                             return;
+                         }
+                         element.parentNode.parentNode.removeChild(element.parentNode);
+                         add_to_dropdown(grad_id, delete_text);
+                         enable_dropdown();
+                     } else {
+                         alert("Response Failed. Please refresh page and try again");
+                     }
+                 } else {
+                     alert("Status Failed. Please refresh page and try again");
+                 }
+             }
+         }
+         xhr.send();
+     });
+}
+
 var add_forms = document.querySelectorAll("form[id ^= add_grad_form]");
 var team_mem_lists = document.querySelectorAll('ul[id ^= team_member]');
 
@@ -91,45 +121,15 @@ add_forms.forEach(function (add_form){
 
                 team_mem_lists.forEach(function (team_mem_list){
                     var team_list_id = team_mem_list.id.split('_').pop();
-                    if (add_form_id === team_list_id){
-                        new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '"> <strong>New*</strong> ' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
-                        team_mem_list.appendChild(new_member);
+                    if (add_form_id !== team_list_id){
+                       return;
                     }
+                    new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '">' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
+                    team_mem_list.appendChild(new_member);
                 });
                 delete_from_dropdown(grad_id);
                 disable_dropdown();
-
-                new_member.querySelector('.delete-btn').addEventListener('click', function (event){
-                    event.preventDefault();
-
-                     var xhr = new XMLHttpRequest();
-                     xhr.open('GET', event.target.href);
-                     xhr.onreadystatechange = function () {
-                         if (xhr.readyState === 4) {
-                             if (xhr.status === 200) {
-                                 var response = JSON.parse(xhr.responseText);
-                                 if (response.success) {
-                                     var element = document.getElementById("grad_" + grad_id);
-                                     var delete_text = $('#grad_text_' + grad_id).text();
-                                     if (element === null) {
-                                         return;
-                                     }
-                                     element.parentNode.parentNode.removeChild(element.parentNode);
-                                     add_to_dropdown(grad_id, delete_text);
-                                     enable_dropdown();
-                                 } else {
-                                     alert("Response Failed. Please refresh page and try again");
-                                 }
-                             } else {
-                                 alert("Status Failed. Please refresh page and try again");
-                             }
-                         }
-                         else {
-                             alert("State Failed Please refresh page and try again");
-                         }
-                     }
-                    xhr.send();
-                });
+                delete_new_add_member(new_member, grad_id);
             }
             else {
                 alert("Failed to delete team member. Please refresh page and try again.");
