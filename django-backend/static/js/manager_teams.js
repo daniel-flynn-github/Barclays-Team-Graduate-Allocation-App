@@ -88,10 +88,11 @@ add_forms.forEach(function (add_form){
                 var add_form_id = add_form.id.split('_').pop();
                 var new_member = document.createElement('li');
 
+
                 team_mem_lists.forEach(function (team_mem_list){
                     var team_list_id = team_mem_list.id.split('_').pop();
                     if (add_form_id === team_list_id){
-                        new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '">' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
+                        new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '"> <strong>New*</strong> ' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
                         team_mem_list.appendChild(new_member);
                     }
                 });
@@ -103,31 +104,35 @@ add_forms.forEach(function (add_form){
 
                      var xhr = new XMLHttpRequest();
                      xhr.open('GET', event.target.href);
-                     xhr.onreadystatechange = function (){
-                             if (xhr.status === 200){
+                     xhr.onreadystatechange = function () {
+                         if (xhr.readyState === 4) {
+                             if (xhr.status === 200) {
                                  var response = JSON.parse(xhr.responseText);
-                                 if(response.success){
+                                 if (response.success) {
                                      var element = document.getElementById("grad_" + grad_id);
                                      var delete_text = $('#grad_text_' + grad_id).text();
-                                     if(element !== null){
-                                          element.parentNode.parentNode.removeChild(element.parentNode);
-                                          add_to_dropdown(grad_id, delete_text);
+                                     if (element === null) {
+                                         return;
                                      }
+                                     element.parentNode.parentNode.removeChild(element.parentNode);
+                                     add_to_dropdown(grad_id, delete_text);
                                      enable_dropdown();
+                                 } else {
+                                     alert("Response Failed. Please refresh page and try again");
                                  }
-                                 else {
-                                     alert("response failed");
-                                 }
+                             } else {
+                                 alert("Status Failed. Please refresh page and try again");
                              }
-                             else {
-                                 alert("status have problem");
-                             }
+                         }
+                         else {
+                             alert("State Failed Please refresh page and try again");
+                         }
                      }
-                     xhr.send();
+                    xhr.send();
                 });
             }
             else {
-                alert("Failed to delete team member. Please wait seconds and try again.");
+                alert("Failed to delete team member. Please refresh page and try again.");
             }
         }
         xhr.send(new FormData(add_form));
