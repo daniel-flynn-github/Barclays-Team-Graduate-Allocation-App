@@ -22,17 +22,23 @@ gradRows.forEach(function(gradRow) {
                             var grad_text = $("#grad_text_" + grad_id).text();
                             element.parentNode.parentNode.removeChild(element.parentNode);
 
-                            // Then want to add this graduate back to the drop-down
-                            $("#add_grad_form").attr('hidden', false);
-                            $("#select_graduate").append($("<option>", {
-                                value: grad_id,
-                                text: grad_text,
-                            }));
+                            // Then want to add this graduate back to the drop-down IN ALL TEAMS!
+                            var addGradForms = document.getElementsByClassName('add_grad_forms');
+                            for (i=0; i < addGradForms.length; i++) {
+                                $(".add_grad_forms").eq(i).attr("hidden", false);
+                            }
+                          
+                            $(".select_graduate_forms").each(function() {
+                                $(this).append($("<option>", {
+                                  value: grad_id,
+                                  text: grad_text,
+                                }));
+                            });
                         } else {
-                            alert("Failed to delete team member. Please wait seconds and try again.");
+                            alert("Failed to delete team member. Please wait a few seconds and try again.");
                         }
                     } else {
-                        alert("Failed to delete team member. Please wait seconds and try again.");
+                        alert("Failed to delete team member. Please wait a few seconds and try again.");
                     }
                 }
             };
@@ -42,7 +48,6 @@ gradRows.forEach(function(gradRow) {
 });
 
 var addGradForms = document.getElementsByClassName('add_grad_forms');
-console.log(addGradForms[0]);
 
 for (i=0; i < addGradForms.length; i++) {
     const thisForm = addGradForms[i];
