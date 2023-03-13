@@ -40,7 +40,7 @@ function add_to_dropdown(grad_id, grad_text){
     dropdown.forEach(function (dropdown){
         var option = document.createElement("option");
         option.value = grad_id;
-        option.text = grad_text;
+        option.text = option.text = grad_text.indexOf("*New") !== -1 ? grad_text.replace("*New", "") : grad_text;
         dropdown.appendChild(option);
 });
 }
@@ -124,7 +124,7 @@ add_forms.forEach(function (add_form){
                     if (add_form_id !== team_list_id){
                        return;
                     }
-                    new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '">' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
+                    new_member.innerHTML = '<div class="row grads_in_team" id="grad_' + grad_id + '">' + '<div class="col" id="grad_text_' + grad_id + '"><strong>*New </strong>' + grad_name + ' | <a href="mailto:' + grad_email + '">' + grad_email + '</a>' + '</div>' + '<div class="col">' + link + '" class="btn btn-danger delete-btn">&times;</a>' + '</div>' + '</div>';
                     team_mem_list.appendChild(new_member);
                 });
                 delete_from_dropdown(grad_id);
