@@ -597,8 +597,7 @@ def reset_allocation_app(request):
     # Firstly, update the AllocationState. This means allocation_ran() now returns False.
     AllocationState.objects.all().delete()
 
-    # Now, reset the entire database of everything except from the admin account.
-    reset_graduates_managers()
-    reset_teams()
+    # Now, reset all the user cast preferences.
+    Preference.objects.all().delete()
 
     return redirect(reverse('allocationapp:portal'))
