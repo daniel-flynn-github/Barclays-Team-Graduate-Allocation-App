@@ -1,8 +1,11 @@
 from django.test import TestCase, Client
 from .models import *
 from .views import *
+from .utilities import *
 from django.urls import reverse
 from . import allocation
+from .allocation import run_allocation
+import json
 
 class TestModelStringRepresentations(TestCase):
     def setUp(self):
@@ -115,6 +118,203 @@ class TestIndexView(TestCase):
         self.client.login(email='grad@barclays.com', password='1234', username='grad')
         response = self.client.get(reverse("allocationapp:index"))
         self.assertRedirects(response, reverse('allocationapp:cast_votes'), status_code=302, target_status_code=200)
+
+class TestGraduateViews(TestCase):
+    def setUp(self):
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad", email="grad@barclays.com", username="grad", password="1234"))
+        Team.objects.create(name = "team1", capacity=3, lower_bound=2)
+        Team.objects.create(name = "team2", capacity=4, lower_bound=3)
+
+    def testCastVotes(self):
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        url = reverse("allocationapp:cast_votes")
+        data = {'votes': json.dumps({'%s' % Team.objects.get(name="team1").id: 5, '%s' % Team.objects.get(name="team2").id: 3})}
+        response = self.client.post(url, data)
+        self.assertRedirects(response, reverse('allocationapp:vote_submitted'), status_code=302, target_status_code=200)
+        self.assertEqual(Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name="grad"))).count(), 2)
+        self.assertEqual(Preference.objects.get(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")), team=Team.objects.get(name="team1")).weight, 5)
+        self.assertEqual(Preference.objects.get(graduate=Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")), team=Team.objects.get(name="team2")).weight, 3)
+    
+    def testViewTeams(self):
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        url = reverse('allocationapp:cast_votes')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'allocationapp/cast_votes.html')
+        teams_displayed = response.context['teams']
+        self.assertEqual(len(teams_displayed), 2)
+        self.assertEqual(teams_displayed[0].name, 'team1')
+        self.assertEqual(teams_displayed[1].name, 'team2')
+    
+    def testVoteSubmitted(self):
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        url = reverse('allocationapp:vote_submitted')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'allocationapp/vote_submitted.html')
+        self.assertEqual(response.context["current_graduate"], Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")))
+    
+    def testResultPageBeforeAllocation(self):
+        AllocationState.objects.create(has_allocated=False)
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        url = reverse('allocationapp:result_page')
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse('allocationapp:cast_votes'), status_code=302, target_status_code=200)
+    
+    def testResultPageAfterAlocation(self):
+        AllocationState.objects.create(has_allocated=True)
+        self.client.login(email='grad@barclays.com', password='1234', username='grad')
+        url = reverse('allocationapp:result_page')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'allocationapp/result_page.html')
+
+class TestManagerViews(TestCase):
+    def setUp(self):
+        Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager", email="manager@barclays.com", username="manager", password="1234"))
+        Department.objects.create(name="dep1")
+        Department.objects.create(name="dep2")
+        Skill.objects.create(name="problem solving")
+        Skill.objects.create(name="data science")
+        Technology.objects.create(name="Python")
+        Technology.objects.create(name="R")
+        Team.objects.create(name = "team1", capacity=3, lower_bound=2, manager=Manager.objects.get(user=CustomUser.objects.get(first_name="manager")), department=Department.objects.get(name="dep1"))
+        Team.objects.get(name="team1").skills.add(Skill.objects.get(name="data science"))
+        Team.objects.get(name="team1").technologies.add(Technology.objects.get(name="R"))
+        Team.objects.create(name = "team2", capacity=4, lower_bound=3, manager=Manager.objects.get(user=CustomUser.objects.get(first_name="manager")), department=Department.objects.get(name="dep2"))
+        Team.objects.create(name = "team3", capacity=3, lower_bound=2)
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad", email="grad@barclays.com", username="grad", password="1234"), assigned_team=Team.objects.get(name="team1"))
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad2", email="grad2@barclays.com", username="grad2", password="1234"))
+
+    def testManagerViewTeams(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_view_teams')
+        response = self.client.get(url)
+        teams = response.context["teams"]
+        self.assertEqual(len(teams), 2)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context["team_members"][Team.objects.get(name="team1").id]), [Graduate.objects.get(user=CustomUser.objects.get(first_name="grad"))])
+        self.assertEqual(list(response.context["graduates_with_no_team"]), [Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2"))])
+        self.assertTemplateUsed(response, 'allocationapp/manager_teams.html')
+    
+    def testManagerChangingTeamForGraduate(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_view_teams')
+        data = {'selected_grad': CustomUser.objects.get(first_name="grad2").id, 'team_id': Team.objects.get(name="team2").id}
+        response = self.client.post(url, data)
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team2"))
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
+    
+    def testManagerDeletingGraduateFromTeam(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:delete_team_member', args=[CustomUser.objects.get(first_name="grad").id])
+        response = self.client.post(url)
+        self.assertIsNone(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")).assigned_team)
+    
+    def testManagerEditingTeamFunctionality(self):
+        #TODO: test to check if manager can edit non-managed teams
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id])
+        data = {
+            'department_id': Department.objects.get(name="dep2").id,
+            'chosen_technologies': [Technology.objects.get(name="Python").id],
+            'chosen_skills': [Skill.objects.get(name="problem solving").id],
+            'chosen_capacity': 5,
+            'chosen_description': 'Newly changed team'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(Team.objects.get(name="team1").department, Department.objects.get(name="dep2"))
+        self.assertEqual(Team.objects.get(name="team1").technologies.count(), 1)
+        self.assertEqual(list(Team.objects.get(name="team1").technologies.all()), [Technology.objects.get(name="Python")])
+        self.assertEqual(Team.objects.get(name="team1").skills.count(), 1)
+        self.assertEqual(list(Team.objects.get(name="team1").skills.all()), [Skill.objects.get(name="problem solving")])
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
+        self.assertEqual(Team.objects.get(name="team1").capacity, 5)
+        self.assertEqual(Team.objects.get(name="team1").description, "Newly changed team")
+    
+    def testManagerEditingTeamDisplay(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id])
+        response = self.client.get(url)
+        self.assertTemplateUsed(response, 'allocationapp/edit_team.html')
+    
+    def testManagerAddingNewSkill(self):
+        # TODO: test that manager can't edit non-owned team
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_add_skill', args=[Team.objects.get(name="team1").id, "Code Reviewing"])
+        response = self.client.get(url)
+        # check if it exists in the first place
+        self.assertTrue(Skill.objects.filter(name='Code Reviewing').exists())
+        # check if it is assigned to team 1
+        self.assertTrue(Team.objects.get(name="team1").skills.filter(name='Code Reviewing').exists())
+        self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+    
+    def testManagerAddingSkillThatAlreadyExists(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        skill = Skill.objects.create(name="Pre-assigned Skill")
+        Team.objects.get(name="team1").skills.add(skill)
+        self.assertEqual(Team.objects.get(name="team1").skills.filter(name='Pre-assigned Skill').count(), 1)
+        url = reverse('allocationapp:manager_add_skill', args=[Team.objects.get(name="team1").id, "Pre-assigned Skill"])
+        response = self.client.get(url)
+        self.assertEqual(Team.objects.get(name="team1").skills.filter(name='Pre-assigned Skill').count(), 1)
+        self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+
+    def testManagerAddingNewTechnology(self):
+         # TODO: test that manager can't edit non-owned team
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        url = reverse('allocationapp:manager_add_tech', args=[Team.objects.get(name="team1").id, "C#"])
+        response = self.client.get(url)
+        # check if it exists in the first place
+        self.assertTrue(Technology.objects.filter(name='C#').exists())
+        # check if it is assigned to team 1
+        self.assertTrue(Team.objects.get(name="team1").technologies.filter(name='C#').exists())
+        self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+
+    def testManagerAddingTechnologyThatAlreadyExists(self):
+        self.client.login(email='manager@barclays.com', password='1234', username='manager')
+        technology = Technology.objects.create(name="Pre-assigned Technology")
+        Team.objects.get(name="team1").technologies.add(technology)
+        self.assertEqual(Team.objects.get(name="team1").technologies.filter(name='Pre-assigned Technology').count(), 1)
+        url = reverse('allocationapp:manager_add_tech', args=[Team.objects.get(name="team1").id, "Pre-assigned Technology"])
+        response = self.client.get(url)
+        self.assertEqual(Team.objects.get(name="team1").technologies.filter(name='Pre-assigned Technology').count(), 1)
+        self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+
+class TestUtilitiesFunctions(TestCase):
+    def setUp(self):
+        # Department.objects.create(name="dep2")
+        # Team.objects.create(name = "team1", capacity=3, lower_bound=2, department=Department.objects.get(name="dep1"))
+        # Skill.objects.get(name="data science")
+        # Technology.objects.get(name="R")
+        # Team.objects.get(name="team1").skills.add(Skill.objects.get(name="data science"))
+        # Team.objects.get(name="team1").technologies.add(Technology.objects.get(name="R"))
+        # Team.objects.create(name = "team2", capacity=4, lower_bound=3, manager=Manager.objects.get(user=CustomUser.objects.get(first_name="manager")), department=Department.objects.get(name="dep2"))
+        # Team.objects.create(name = "team3", capacity=3, lower_bound=2)
+
+        Graduate.objects.create(user=CustomUser.objects.create_user(first_name="grad", email="grad@barclays.com", username="grad", password="1234"))
+        Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager", email="manager@barclays.com", username="manager", password="1234"))
+        Admin.objects.create(user=CustomUser.objects.create_user(first_name="admin", email="admin@barclays.com", username="admin", password="1234"))
+
+    def testIsGrad(self):
+        self.assertTrue(is_grad(CustomUser.objects.get(first_name="grad")))
+        self.assertFalse(is_manager(CustomUser.objects.get(first_name="grad")))
+        self.assertFalse(is_admin(CustomUser.objects.get(first_name="grad")))
+    
+    def testIsManager(self):
+        self.assertFalse(is_grad(CustomUser.objects.get(first_name="manager")))
+        self.assertTrue(is_manager(CustomUser.objects.get(first_name="manager")))
+        self.assertFalse(is_admin(CustomUser.objects.get(first_name="manager")))
+    
+    def testIsAdmin(self):
+        self.assertFalse(is_grad(CustomUser.objects.get(first_name="admin")))
+        self.assertFalse(is_manager(CustomUser.objects.get(first_name="admin")))
+        self.assertTrue(is_admin(CustomUser.objects.get(first_name="admin")))
+    
+    def testResetUsers(self):
+        reset_users()
+        self.assertFalse(CustomUser.objects.filter(first_name="admin").exists())
+        self.assertFalse(CustomUser.objects.filter(first_name="grad").exists())
+        self.assertFalse(CustomUser.objects.filter(first_name="manager").exists())
 
 class TestAllocation(TestCase):
     def setUp(self):
