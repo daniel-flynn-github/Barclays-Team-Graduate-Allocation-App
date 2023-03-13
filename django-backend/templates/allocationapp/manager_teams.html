@@ -72,7 +72,7 @@
                                     </tr>
                                     <tr>
                                         <th>Team Members</th>
-                                        <td id="team_members">
+                                        <td id="team_members" class="team_members_in_each_team">
                                             <ul>
                                                 {% for grad in team_members|lookup:team.id %}
                                                     <li>
@@ -88,9 +88,9 @@
                                                 {% endfor %}
                                             </ul>
 
-                                            <form id="add_grad_form" action="#" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
+                                            <form id="add_grad_form" class="add_grad_forms" action="{% url 'allocationapp:manager_view_teams' %}" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
                                                 {% csrf_token %}
-                                                <select name="selected_grad" id="select_graduate" class="form-control">
+                                                <select name="selected_grad" id="select_graduate_{{ team.id }}" class="form-control select_graduate_forms">
                                                     {% for grad in graduates_with_no_team %}
                                                         <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
                                                     {% endfor %}
