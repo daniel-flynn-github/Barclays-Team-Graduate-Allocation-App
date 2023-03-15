@@ -73,7 +73,7 @@
                                     <tr>
                                         <th>Team Members</th>
                                         <td id="team_members">
-                                            <ul>
+                                            <ul id="team_member_{{ team.id }}">
                                                 {% for grad in team_members|lookup:team.id %}
                                                     <li>
                                                         <div class="row grads_in_team" id="grad_{{ grad.user.id }}">
@@ -88,7 +88,7 @@
                                                 {% endfor %}
                                             </ul>
 
-                                            <form id="add_grad_form" action="#" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
+                                            <form id="add_grad_form_{{ team.id }}" action="#" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
                                                 {% csrf_token %}
                                                 <select name="selected_grad" id="select_graduate" class="form-control">
                                                     {% for grad in graduates_with_no_team %}
