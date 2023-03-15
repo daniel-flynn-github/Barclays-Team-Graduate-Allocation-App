@@ -11,8 +11,6 @@ from .models import *
 from .forms import CSVForm
 from .utilities import *
 
-
-
 import json
 import csv
 import petl
@@ -102,7 +100,8 @@ def result_page(request):
     assigned_team_members = None
     if current_user.assigned_team:
         # If a user is removed manually from a team, after the allocation is run, this stops errors from happening.
-        assigned_team_members = Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id))
+        assigned_team_members = Graduate.objects.filter(
+            assigned_team=Team.objects.get(id=current_user.assigned_team.id))
 
     context_dict = {
         'assigned_team': current_user.assigned_team,
@@ -145,7 +144,8 @@ def manager_view_teams(request):
             assigned_team=Team.objects.get(id=int(team_id))
         )
 
-        return redirect(reverse('allocationapp:manager_view_teams'))
+        response_data = {'success': True}
+        return JsonResponse(response_data)
 
 
 @login_required
@@ -321,12 +321,13 @@ def populate_db(request):
     with open(path) as f:
 
         emails = []
+
         def name_constraints(value):
             if value is not None and type(value) == str and len(value) < 128:
-               return True
+                return True
             else:
-               return False
-        
+                return False
+
         def email_constraints(value):
             if value is not None and name_constraints(value) and value.lower().strip() not in emails:
                 try:
@@ -343,10 +344,9 @@ def populate_db(request):
                 return True
             else:
                 return False
-            
 
         petl_table = petl.fromcsv(path, encoding='utf-8-sig')
-        headers = ('first name','last name','email','role')
+        headers = ('first name', 'last name', 'email', 'role')
 
         constraints = [
             dict(first_name_constraint='first_name_constraint', field='first name', assertion=name_constraints),
@@ -355,7 +355,7 @@ def populate_db(request):
             dict(role_constraint='role_constraint', field='role', assertion=role_constraints)
         ]
 
-        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        problems = petl.validate(petl_table, constraints=constraints, header=headers)
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
@@ -433,19 +433,25 @@ def team_populate_db(request):
                 return False
 
         petl_table = petl.fromcsv(path, encoding='utf-8-sig')
-        headers = ('team name','team description','capacity','department','manager','technologies','skills')
+        headers = ('team name', 'team description', 'capacity', 'department', 'manager', 'technologies', 'skills')
 
         constraints = [
-            dict(team_name_constraint='team_name_constraint', field='team name', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
-            dict(team_description_constraint='team_description_constraint', field='team description', assertion=lambda x: type(x) == str and len(x) <= 512),
-            dict(capacity_constraint='capacity_constraint', field='capacity', assertion=lambda x: x != None and x.strip().isnumeric() and int(x) > 0),
-            dict(capacity_constraint='department_constraint', field='department', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(team_name_constraint='team_name_constraint', field='team name',
+                 assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(team_description_constraint='team_description_constraint', field='team description',
+                 assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(capacity_constraint='capacity_constraint', field='capacity',
+                 assertion=lambda x: x != None and x.strip().isnumeric() and int(x) > 0),
+            dict(capacity_constraint='department_constraint', field='department',
+                 assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
             dict(manager_constraint='manager_constraint', field='manager', assertion=manager_constraints),
-            dict(technologies_constraint='technologies_constraint', field='technologies', assertion=lambda x: type(x) == str and len(x) <= 512),
-            dict(skills_constraint='skills_constraint', field='skills', assertion=lambda x: type(x) == str and len(x) <= 512)
+            dict(technologies_constraint='technologies_constraint', field='technologies',
+                 assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(skills_constraint='skills_constraint', field='skills',
+                 assertion=lambda x: type(x) == str and len(x) <= 512)
         ]
 
-        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        problems = petl.validate(petl_table, constraints=constraints, header=headers)
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
@@ -518,7 +524,6 @@ def reset_graduates_managers_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def get_allocation(request):
-
     if allocation_run():
         return redirect(reverse('allocationapp:portal'))
 
@@ -528,6 +533,9 @@ def get_allocation(request):
     # Update global allocation state
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
+
+    # TODO: will also return a message to say allocation has been run TODO: integrate this with code for checking
+    #  whether allocation has been run already -- on another branch right now.
 
     messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:admin_view_teams'))
@@ -544,8 +552,8 @@ def create_new_team(request):
         manager = request.POST['group_manager']
         department_id = request.POST['group_department']
         department_input = request.POST['department_input']
-        technologies = request.POST['group_technologies']
-        skills = request.POST['group_skills']
+        technologies = request.POST.getlist('group_technologies')
+        skills = request.POST.getlist('group_skills')
         capacity = request.POST['group_capacity']
         description = request.POST['group_description']
 
@@ -565,14 +573,23 @@ def create_new_team(request):
         else:
             team_info.department = Department.objects.get(id=int(department_id))
 
-        skill_split = skills.split(',')
-        tech_spilt = technologies.split(",")
-        for skill in skill_split:
-            skill_info, created = Skill.objects.get_or_create(name=skill)
-            team_info.skills.add(Skill.objects.get(name=skill_info))
-        for technology in tech_spilt:
-            tech_info, created = Technology.objects.get_or_create(name=technology)
-            team_info.technologies.add(Technology.objects.get(name=tech_info))
+        for skill in skills:
+            if skill.isdigit():
+                team_info.skills.add(Skill.objects.get(id=int(skill)))
+            else:
+                skill_split = skill.split(',')
+                for split in skill_split:
+                    skill_info, created = Skill.objects.get_or_create(name=split)
+                    team_info.skills.add(Skill.objects.get(name=skill_info))
+
+        for tech in technologies:
+            if tech.isdigit():
+                team_info.technologies.add(Technology.objects.get(id=int(tech)))
+            else:
+                tech_split = tech.split(",")
+                for split2 in tech_split:
+                    tech_info, created = Technology.objects.get_or_create(name=split2)
+                    team_info.technologies.add(Technology.objects.get(name=tech_info))
 
         team_info.save()
 
@@ -639,8 +656,7 @@ def reset_allocation_app(request):
     # Firstly, update the AllocationState. This means allocation_ran() now returns False.
     AllocationState.objects.all().delete()
 
-    # Now, reset the entire database of everything except from the admin account.
-    reset_graduates_managers()
-    reset_teams()
+    # Now, reset all the user cast preferences.
+    Preference.objects.all().delete()
 
     return redirect(reverse('allocationapp:portal'))
