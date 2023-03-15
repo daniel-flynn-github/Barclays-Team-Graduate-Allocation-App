@@ -3,7 +3,7 @@ image: python:3.9
 default:
   before_script:
     - cd django-backend
-    - pip3 install -r requirements_gitlab.txt
+    - pip3 install -r requirements.txt
 
 
 migrations:
