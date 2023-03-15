@@ -73,19 +73,31 @@
                 <div class="row">
                     <div class="col">
                         <label for="group_skills">Skills: </label>
-                        <input id="group_skills" type="text" class="form-control" placeholder="Spilt skills using ' , '" name="group_skills" required>
-                         <small class="form-text text-muted">
-                            Please using ' , ' (Comma) to split skills
-                        </small>
+                        <input type="text" class="form-control" id="skill_text" placeholder="Spilt skills using ' , '" style="display: none;">
+                    <br>
+                         <select class="selectpicker" multiple data-width="auto" id = "group_skills" class="form-control" name="group_skills" required>
+                                    {% if skills %}
+                                        {% for skill in skills %}
+                                            <option value="{{ skill.id }}">{{ skill.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <option value="add" class="add-skill">Add Skill</option>
+                         </select>
                     </div>
 
                  <!--    Technologies   Third line -->
                     <div class="col">
                         <label for="group_technologies">Technologies:  </label>
-                        <input id="group_technologies" type="text" class="form-control" placeholder="Spilt technologies using ' , '", name="group_technologies" required>
-                        <small class="form-text text-muted">
-                            Please using ' , ' (Comma) to split technologies
-                        </small>
+                        <input type="text" class="form-control" id="technologies_text" placeholder="Spilt technologies using ' , '" style="display: none;">
+                    <br>
+                         <select class="selectpicker" multiple data-width="auto" id = "group_technologies" class="form-control" name="group_technologies" required>
+                                    {% if technologies %}
+                                        {% for tech in technologies %}
+                                            <option value="{{ tech.id }}">{{ tech.name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                    <option value="add" class="add-skill">Add Skill</option>
+                         </select>
                     </div>
                 </div>
                      <!--    Description   fourth line -->

@@ -1,18 +1,9 @@
-image: ubuntu:latest
+image: python:3.9
 
 default:
   before_script:
-    - apt-get -y update
-    - apt-get install -y libmagic-dev
-    - apt -y install net-tools python3 python3-pip mysql-client
     - cd django-backend
-    - pip3 install -r requirements_gitlab.txt
-  cache:
-    key: packages
-    paths:
-      - django-backend/__pycache__
-      - django-backend/*/__pycache__
-      - django-backend/venv
+    - pip3 install -r requirements.txt
 
 
 migrations:

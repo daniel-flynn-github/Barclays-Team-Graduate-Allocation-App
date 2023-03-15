@@ -79,3 +79,8 @@ def allocation_run():
         return allocation_state.has_allocated
     else:
         return False
+
+
+def grad_has_already_voted(current_user):
+    votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
+    return len(votes) > 0

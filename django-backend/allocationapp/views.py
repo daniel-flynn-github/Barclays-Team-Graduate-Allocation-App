@@ -11,8 +11,6 @@ from .models import *
 from .forms import CSVForm
 from .utilities import *
 
-
-
 import json
 import csv
 import petl
@@ -25,7 +23,10 @@ def index(request):
     if is_manager(request.user):
         return redirect(reverse('allocationapp:manager_view_teams'))
     elif is_grad(request.user):
-        return redirect(reverse('allocationapp:cast_votes'))
+        if grad_has_already_voted(request.user):
+            return redirect(reverse('allocationapp:vote_submitted'))
+        else:
+            return redirect(reverse('allocationapp:cast_votes'))
     elif is_admin(request.user):
         return redirect(reverse('allocationapp:portal'))
     else:
@@ -58,11 +59,13 @@ def cast_votes(request):
 
         return redirect(reverse('allocationapp:vote_submitted'))
     else:
-        context_dict = {}
+        context_dict = {
+            'allocation_run': allocation_run(),
+        }
 
         # Get all the votes cast by the graduate
-        votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=request.user.id)))
-        if len(votes) > 0:
+        votes = Preference.objects.filter(graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
+        if grad_has_already_voted(current_user):
             # Grad has previously cast their votes.
             team_id_to_votes = {}
             for vote in votes:
@@ -99,12 +102,14 @@ def result_page(request):
     assigned_team_members = None
     if current_user.assigned_team:
         # If a user is removed manually from a team, after the allocation is run, this stops errors from happening.
-        assigned_team_members = Graduate.objects.filter(assigned_team=Team.objects.get(id=current_user.assigned_team.id))
+        assigned_team_members = Graduate.objects.filter(
+            assigned_team=Team.objects.get(id=current_user.assigned_team.id))
 
     context_dict = {
         'assigned_team': current_user.assigned_team,
         'assigned_team_members': assigned_team_members,
         'current_user_id': request.user.id,
+        'allocation_run': allocation_run(),
     }
 
     return render(request, 'allocationapp/result_page.html', context=context_dict)
@@ -141,7 +146,8 @@ def manager_view_teams(request):
             assigned_team=Team.objects.get(id=int(team_id))
         )
 
-        return redirect(reverse('allocationapp:manager_view_teams'))
+        response_data = {'success': True}
+        return JsonResponse(response_data)
 
 
 @login_required
@@ -213,7 +219,7 @@ def add_new_skill(request, team_id, skill_name):
         team = Team.objects.get(id=int(team_id))
         team.skills.add(skill)
 
-    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id': int(team_id)}))
 
 
 @login_required
@@ -229,13 +235,16 @@ def add_new_technology(request, team_id, tech_name):
         team = Team.objects.get(id=int(team_id))
         team.technologies.add(technology)
 
-    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
+    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id': int(team_id)}))
 
 
 # ---- Begin ADMIN views ----
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def upload_file(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
         
@@ -252,12 +261,15 @@ def upload_file(request):
     else:
         form = CSVForm()
     all_csv = UserCSV.objects.all()
-    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+    return render(request, 'allocationapp/upload.html', {'form': form, 'all_csv': all_csv, 'populated': False, 'allocation_ran': allocation_run(),})
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def populate_db(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     reset_graduates_managers()
     try:
         csv_file = UserCSV.objects.get(pk=1).csv_file
@@ -268,12 +280,13 @@ def populate_db(request):
     with open(path) as f:
 
         emails = []
+
         def name_constraints(value):
             if value is not None and type(value) == str and len(value) < 128:
-               return True
+                return True
             else:
-               return False
-        
+                return False
+
         def email_constraints(value):
             if value is not None and name_constraints(value) and value.lower().strip() not in emails:
                 try:
@@ -290,10 +303,9 @@ def populate_db(request):
                 return True
             else:
                 return False
-            
 
         petl_table = petl.fromcsv(path, encoding='utf-8-sig')
-        headers = ('first name','last name','email','role')
+        headers = ('first name', 'last name', 'email', 'role')
 
         constraints = [
             dict(first_name_constraint='first_name_constraint', field='first name', assertion=name_constraints),
@@ -302,7 +314,7 @@ def populate_db(request):
             dict(role_constraint='role_constraint', field='role', assertion=role_constraints)
         ]
 
-        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        problems = petl.validate(petl_table, constraints=constraints, header=headers)
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
@@ -335,6 +347,9 @@ def populate_db(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_upload_file(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+    
     if request.method == 'POST':
         form = CSVForm(request.POST, request.FILES)
         if form.is_valid() and len(request.FILES['csv_file']) > 0:
@@ -350,12 +365,15 @@ def team_upload_file(request):
         form = CSVForm()
 
     all_csv = TeamCSV.objects.all()
-    return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False})
+    return render(request, 'allocationapp/team_upload.html', {'form': form, 'all_csv': all_csv, 'populated': False, 'allocation_ran': allocation_run()})
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def team_populate_db(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     reset_teams()
     try:
         csv_file = TeamCSV.objects.get(pk=1).csv_file
@@ -374,19 +392,25 @@ def team_populate_db(request):
                 return False
 
         petl_table = petl.fromcsv(path, encoding='utf-8-sig')
-        headers = ('team name','team description','capacity','department','manager','technologies','skills')
+        headers = ('team name', 'team description', 'capacity', 'department', 'manager', 'technologies', 'skills')
 
         constraints = [
-            dict(team_name_constraint='team_name_constraint', field='team name', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
-            dict(team_description_constraint='team_description_constraint', field='team description', assertion=lambda x: type(x) == str and len(x) <= 512),
-            dict(capacity_constraint='capacity_constraint', field='capacity', assertion=lambda x: x != None and x.strip().isnumeric() and int(x) > 0),
-            dict(capacity_constraint='department_constraint', field='department', assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(team_name_constraint='team_name_constraint', field='team name',
+                 assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
+            dict(team_description_constraint='team_description_constraint', field='team description',
+                 assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(capacity_constraint='capacity_constraint', field='capacity',
+                 assertion=lambda x: x != None and x.strip().isnumeric() and int(x) > 0),
+            dict(capacity_constraint='department_constraint', field='department',
+                 assertion=lambda x: x != None and type(x) == str and len(x) <= 128),
             dict(manager_constraint='manager_constraint', field='manager', assertion=manager_constraints),
-            dict(technologies_constraint='technologies_constraint', field='technologies', assertion=lambda x: type(x) == str and len(x) <= 512),
-            dict(skills_constraint='skills_constraint', field='skills', assertion=lambda x: type(x) == str and len(x) <= 512)
+            dict(technologies_constraint='technologies_constraint', field='technologies',
+                 assertion=lambda x: type(x) == str and len(x) <= 512),
+            dict(skills_constraint='skills_constraint', field='skills',
+                 assertion=lambda x: type(x) == str and len(x) <= 512)
         ]
 
-        problems = petl.validate(petl_table, constraints = constraints, header = headers)   
+        problems = petl.validate(petl_table, constraints=constraints, header=headers)
         petl_reader = petl.data(petl_table)
 
         if petl.nrows(problems) != 0:
@@ -421,10 +445,6 @@ def team_populate_db(request):
 
         graduates = Graduate.objects.all()
         teams = Team.objects.all()
-        for graduate in graduates:
-            for team in teams:
-                Preference.objects.get_or_create(
-                    graduate=graduate, team=team, weight=5)
     
     messages.success(request, 'Successfully populated the database from CSV!')
     return redirect(reverse('allocationapp:team_upload'))
@@ -433,6 +453,9 @@ def team_populate_db(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_teams_view(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     try:
         reset_teams()
         TeamCSV.objects.all().delete()
@@ -445,6 +468,9 @@ def reset_teams_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def reset_graduates_managers_view(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     try:
         reset_graduates_managers()
         UserCSV.objects.all().delete()
@@ -457,7 +483,6 @@ def reset_graduates_managers_view(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def get_allocation(request):
-
     if allocation_run():
         return redirect(reverse('allocationapp:portal'))
 
@@ -468,6 +493,9 @@ def get_allocation(request):
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
 
+    # TODO: will also return a message to say allocation has been run TODO: integrate this with code for checking
+    #  whether allocation has been run already -- on another branch right now.
+
     messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:portal'))
 
@@ -475,13 +503,16 @@ def get_allocation(request):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def create_new_team(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         name = request.POST['group_name']
         manager = request.POST['group_manager']
         department_id = request.POST['group_department']
         department_input = request.POST['department_input']
-        technologies = request.POST['group_technologies']
-        skills = request.POST['group_skills']
+        technologies = request.POST.getlist('group_technologies')
+        skills = request.POST.getlist('group_skills')
         capacity = request.POST['group_capacity']
         description = request.POST['group_description']
 
@@ -501,14 +532,23 @@ def create_new_team(request):
         else:
             team_info.department = Department.objects.get(id=int(department_id))
 
-        skill_split = skills.split(',')
-        tech_spilt = technologies.split(",")
-        for skill in skill_split:
-            skill_info, created = Skill.objects.get_or_create(name=skill)
-            team_info.skills.add(Skill.objects.get(name=skill_info))
-        for technology in tech_spilt:
-            tech_info, created = Technology.objects.get_or_create(name=technology)
-            team_info.technologies.add(Technology.objects.get(name=tech_info))
+        for skill in skills:
+            if skill.isdigit():
+                team_info.skills.add(Skill.objects.get(id=int(skill)))
+            else:
+                skill_split = skill.split(',')
+                for split in skill_split:
+                    skill_info, created = Skill.objects.get_or_create(name=split)
+                    team_info.skills.add(Skill.objects.get(name=skill_info))
+
+        for tech in technologies:
+            if tech.isdigit():
+                team_info.technologies.add(Technology.objects.get(id=int(tech)))
+            else:
+                tech_split = tech.split(",")
+                for split2 in tech_split:
+                    tech_info, created = Technology.objects.get_or_create(name=split2)
+                    team_info.technologies.add(Technology.objects.get(name=tech_info))
 
         team_info.save()
 
@@ -520,13 +560,16 @@ def create_new_team(request):
     technologies = Technology.objects.all()
     managers = Manager.objects.all()
     context_dict = {'managers': managers, 'departments': departments, 'skills': skills, 'technologies': technologies,
-                    'count': range(0, 200)}
+                    'count': range(0, 200), 'allocation_ran': allocation_run(),}
     return render(request, 'allocationapp/create_new_team.html', context=context_dict)
 
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def create_new_grad(request):
+    if allocation_run():
+        return redirect(reverse('allocationapp:portal'))
+
     if request.method == 'POST':
         first_name = request.POST['first_name']
         last_name = request.POST['last_name']
@@ -553,7 +596,7 @@ def create_new_grad(request):
         messages.success(request, f'Added {first_name} {last_name} to the database!')
         return redirect(reverse('allocationapp:create_new_grad'))
 
-    return render(request, 'allocationapp/create_new_graduate.html')
+    return render(request, 'allocationapp/create_new_graduate.html', context={'allocation_ran': allocation_run()})
 
 
 @login_required
@@ -563,3 +606,16 @@ def admin_portal(request):
         'allocation_ran': allocation_run(),
     }
     return render(request, 'allocationapp/admin_portal.html', context=context)
+
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def reset_allocation_app(request):
+    # When this is called, it resets the whole app so a new allocation can be run.
+    # Firstly, update the AllocationState. This means allocation_ran() now returns False.
+    AllocationState.objects.all().delete()
+
+    # Now, reset all the user cast preferences.
+    Preference.objects.all().delete()
+
+    return redirect(reverse('allocationapp:portal'))
