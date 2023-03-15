@@ -7,7 +7,6 @@ gradRows.forEach(function(gradRow) {
         if (event.target.classList.contains("delete-btn")) {
             // When the delete (X) button, within the graduate's row, is clicked
             event.preventDefault();
-            event.stopPropagation();
 
             var xhr = new XMLHttpRequest();
             xhr.open("GET", event.target.href);  // delete the graduate e.g. /delete_team_member/7/
