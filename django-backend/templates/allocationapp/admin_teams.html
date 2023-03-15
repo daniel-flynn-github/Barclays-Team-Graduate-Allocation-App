@@ -18,7 +18,6 @@
                 </div>
             {% endfor %}
         {% endif %}
-        <a class="btn btn-danger btn-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
         <div id="accordion">
             <h2>Allocated teams:</h2>
             {% if teams %}
@@ -108,8 +107,9 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <h2>You're not in charge of any teams. This is likely an error, so please contact an admin.</h2>
+                <h2>No teams created from CSV, please check data format.</h2>
             {% endif %}
+            <a class="btn btn-danger btn-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
         </div>
     </div>
 {% endblock %}
