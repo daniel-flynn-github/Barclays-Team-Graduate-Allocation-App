@@ -151,7 +151,7 @@ def manager_view_teams(request):
 
 
 @login_required
-@user_passes_test(is_manager, login_url='/allocation/')
+@user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def delete_team_member(request, user_id):
     Graduate.objects.filter(user=CustomUser.objects.get(
         id=user_id)).update(assigned_team=None)
@@ -160,8 +160,8 @@ def delete_team_member(request, user_id):
 
 
 @login_required
-@user_passes_test(is_manager, login_url='/allocation/')
-def manager_edit_team(request, team_id):
+@user_passes_test(is_admin_or_manager, login_url='/allocation/')
+def manager_admin_edit_team(request, team_id):
     context_dict = {
         'team': Team.objects.get(id=team_id),
         'departments': Department.objects.all(),
@@ -200,14 +200,18 @@ def manager_edit_team(request, team_id):
 
         messages.success(request, f'Successfully updated {teams.first().name}!')
 
-        return redirect(reverse('allocationapp:manager_view_teams'))
+        if is_admin(request.user):
+            return redirect(reverse('allocationapp:admin_view_teams'))
+        else:
+            return redirect(reverse('allocationapp:manager_view_teams'))
+
 
     else:
         return render(request, 'allocationapp/edit_team.html', context=context_dict)
 
 
 @login_required
-@user_passes_test(is_manager, login_url='/allocation/')
+@user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def add_new_skill(request, team_id, skill_name):
     # TODO: security risk: a manager can post a skill to a team they do not manage!
 
@@ -218,12 +222,15 @@ def add_new_skill(request, team_id, skill_name):
     if new_skill_created:
         team = Team.objects.get(id=int(team_id))
         team.skills.add(skill)
+    if is_admin(request.user):
+        return redirect(reverse('allocationapp:admin_edit_team', kwargs={'team_id':int(team_id)}))
+    else:
+        return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
 
-    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id': int(team_id)}))
 
 
 @login_required
-@user_passes_test(is_manager, login_url='/allocation/')
+@user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def add_new_technology(request, team_id, tech_name):
     # TODO: security risk: a manager can post a tech to a team they do not manage!
 
@@ -235,10 +242,46 @@ def add_new_technology(request, team_id, tech_name):
         team = Team.objects.get(id=int(team_id))
         team.technologies.add(technology)
 
-    return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id': int(team_id)}))
+    if is_admin(request.user):
+        return redirect(reverse('allocationapp:admin_edit_team', kwargs={'team_id':int(team_id)}))
+    else:
+        return redirect(reverse('allocationapp:manager_edit_team', kwargs={'team_id':int(team_id)}))
 
 
 # ---- Begin ADMIN views ----
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def admin_view_teams(request):
+    # Similar to the cast votes page -- a manager can view all of their team(s) here
+    # and edit them as needed. This is essentially the managers "Homepage"
+    if request.method == "GET":
+        teams = Team.objects.all()
+        team_members = {}
+
+        for team in teams:
+            team_members[team.id] = Graduate.objects.filter(
+                assigned_team=Team.objects.get(id=team.id))
+
+        context_dict = {
+            'teams': teams,
+            'team_members': team_members,
+            'graduates_with_no_team': Graduate.objects.filter(assigned_team=None),
+            'allocation_ran':allocation_run()
+        }
+
+        return render(request, 'allocationapp/admin_teams.html', context=context_dict)
+
+    else:
+        selected_grad_id = request.POST['selected_grad']
+        team_id = request.POST['team_id']
+
+        Graduate.objects.filter(user=CustomUser.objects.get(id=int(selected_grad_id))).update(
+            assigned_team=Team.objects.get(id=int(team_id))
+        )
+
+        return redirect(reverse('allocationapp:admin_view_teams'))
+
+
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def upload_file(request):
@@ -497,7 +540,7 @@ def get_allocation(request):
     #  whether allocation has been run already -- on another branch right now.
 
     messages.success(request, 'Allocation has been run!')
-    return redirect(reverse('allocationapp:portal'))
+    return redirect(reverse('allocationapp:admin_view_teams'))
 
 
 @login_required
