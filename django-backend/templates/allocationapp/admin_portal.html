@@ -152,6 +152,7 @@
             {% if allocation_ran %}
                 <a class="btn btn-warning btn-lg disabled sr" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Allocation Already Run</a>
                 <a class="btn btn-danger btn-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
+                <p class="p-0 m-0"><a class="btn btn-success btn-lg ml-2" href="{% url 'allocationapp:admin_view_teams' %}" id="run_btn">View Teams</a></p>
             {% else %}
                 <a class="btn btn-warning btn-lg" href="{% url 'allocationapp:get_allocation' %}" id="run_btn">Run Allocation</a>
             {% endif %}
