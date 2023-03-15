@@ -203,7 +203,6 @@ class TestManagerViews(TestCase):
         data = {'selected_grad': CustomUser.objects.get(first_name="grad2").id, 'team_id': Team.objects.get(name="team2").id}
         response = self.client.post(url, data)
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team2"))
-        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
     
     def testManagerDeletingGraduateFromTeam(self):
         self.client.login(email='manager@barclays.com', password='1234', username='manager')

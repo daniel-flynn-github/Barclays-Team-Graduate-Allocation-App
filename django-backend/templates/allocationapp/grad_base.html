@@ -31,12 +31,15 @@
                 <a class="navbar-brand mb-0 h1" href="{% url 'allocationapp:cast_votes' %}">Allocator</a>
             </div>
         <ul class="nav nav-tabs mr-auto">
-            <li class="nav-item">
-                <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:cast_votes' %}">Votes</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:result_page' %}">Results</a>
-            </li>
+            {% if allocation_run %}
+                <li class="nav-item">
+                    <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:result_page' %}">Results</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link text-dark" style="font-size: larger" href="{% url 'allocationapp:cast_votes' %}">Votes</a>
+                </li>
+            {% endif %}
         </ul>
             <div class="form-line">
                 {% if user.is_authenticated %}

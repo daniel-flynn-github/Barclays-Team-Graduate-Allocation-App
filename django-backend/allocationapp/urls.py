@@ -29,5 +29,6 @@ urlpatterns = [
     path('admin/team_upload/create/', views.team_populate_db, name='team_create'),
     path('admin/team_upload/reset/', views.reset_teams_view, name='team_reset'),
     path('admin/run_allocation/', views.get_allocation, name="get_allocation"),
-    path('admin/portal/', views.admin_portal, name="portal"),
+    path('admin/portal/', views.admin_portal, name = "portal"),
+    path('admin/portal/reset_app/', views.reset_allocation_app, name = "reset_allocation_app"),
 ]

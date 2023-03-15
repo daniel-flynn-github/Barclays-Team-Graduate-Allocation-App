@@ -7,6 +7,7 @@ gradRows.forEach(function(gradRow) {
         if (event.target.classList.contains("delete-btn")) {
             // When the delete (X) button, within the graduate's row, is clicked
             event.preventDefault();
+            event.stopPropagation();
 
             var xhr = new XMLHttpRequest();
             xhr.open("GET", event.target.href);  // delete the graduate e.g. /delete_team_member/7/
@@ -24,10 +25,10 @@ gradRows.forEach(function(gradRow) {
                             add_to_dropdown(grad_id, grad_text);
 
                         } else {
-                            alert("Failed to delete team member. Please wait seconds and try again.");
+                            alert("Failed to delete team member. Please wait a few seconds and try again.");
                         }
                     } else {
-                        alert("Failed to delete team member. Please wait seconds and try again.");
+                        alert("Failed to delete team member. Please wait a few seconds and try again.");
                     }
                 }
             };
