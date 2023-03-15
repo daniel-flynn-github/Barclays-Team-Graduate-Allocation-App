@@ -33,10 +33,11 @@
                 <div class="panel-heading" role="tab" id="headingOne">
                     <h3 class="panel-title">
                         <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne" id="dropdown">
-                            View your team members</a>
+                            Your fellow team members
+                        </a>
                     </h3>
                 </div>
-                <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+                <div id="collapseOne" class="panel-collapse collapse in show" role="tabpanel" aria-labelledby="headingOne">
                     <div class="panel-body">
                         {% if assigned_team_members %}
                             {% for team_member in assigned_team_members %}
