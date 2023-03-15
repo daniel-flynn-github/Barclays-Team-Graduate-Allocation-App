@@ -69,7 +69,6 @@ def run_allocation(all_graduates, all_teams, testing=False):
     vacancies_on_lower_bound = 0
     for team in all_teams:
         total_vacancies += team.capacity
-        print(team.name + ' capacity: ' + str(team.capacity))
         vacancies_on_lower_bound += team.lower_bound
 
     if len(all_graduates) > total_vacancies:
@@ -137,7 +136,3 @@ def run_allocation(all_graduates, all_teams, testing=False):
                     graduate.save()
                     allocation_result[team].append(graduate)
         
-
-    #TESTING REMOVE
-    for team,grads in allocation_result.items():
-        print(team.name + ': '+ ', '.join([grad.user.first_name for grad in grads]) + '\n')

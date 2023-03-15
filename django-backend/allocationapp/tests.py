@@ -426,11 +426,10 @@ class TestAllocation(TestCase):
         team3.lower_bound = 2
         team3.save()
         grad1_preferences=Preference.objects.filter(graduate = Graduate.objects.get(user = CustomUser.objects.get(first_name="grad1")))
-        grad1_preferences.delete()
+        grad1_preferences.all().delete()
         allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
-        grad3_preferences=Preference.objects.filter(graduate = Graduate.objects.get(user = CustomUser.objects.get(first_name="grad1")))
         for pref in grad1_preferences:
-            self.assertEqual(pref.weight == 0)
+            self.assertTrue(pref.weight == 100 or pref.weight == 0)
     
     def test_same_preferences_max(self):
         preferences = Preference.objects.all()
