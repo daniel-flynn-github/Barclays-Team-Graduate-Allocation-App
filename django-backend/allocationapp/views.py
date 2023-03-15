@@ -10,6 +10,7 @@ from .allocation import run_allocation
 from .models import *
 from .forms import CSVForm
 from .utilities import *
+from django.core.mail import send_mail
 
 import json
 import csv
@@ -533,13 +534,19 @@ def get_allocation(request):
     # Update global allocation state
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
+    recievers = []
+    for graduate in Graduate.objects.all():
+        recievers.append(graduate.user.email)
+    for manager in Manager.objects.all():
+        recievers.append(manager.user.email)
+    message = "Allocations have been run and you have been assigned a new team. Please login to see the results"
+    send_mail("You have been allocated a new team",message=message,from_email=None,recipient_list=recievers)
 
     # TODO: will also return a message to say allocation has been run TODO: integrate this with code for checking
     #  whether allocation has been run already -- on another branch right now.
 
     messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:admin_view_teams'))
-
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
