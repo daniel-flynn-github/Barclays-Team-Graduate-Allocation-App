@@ -64,7 +64,7 @@
                                     </tr>
                                     <tr>
                                         <th>Group Size</th>
-                                        <td>{{ team.capacity }}</td>
+                                        <td id="capacity_{{ team.id }}">{{ team.capacity }}</td>
                                     </tr>
                                     <tr>
                                         <th>Description</th>
@@ -72,8 +72,8 @@
                                     </tr>
                                     <tr>
                                         <th>Team Members</th>
-                                        <td id="team_members" class="team_members_in_each_team">
-                                            <ul>
+                                        <td id="team_members">
+                                            <ul id="team_member_{{ team.id }}">
                                                 {% for grad in team_members|lookup:team.id %}
                                                     <li>
                                                         <div class="row grads_in_team" id="grad_{{ grad.user.id }}">
@@ -88,9 +88,9 @@
                                                 {% endfor %}
                                             </ul>
 
-                                            <form id="add_grad_form" class="add_grad_forms" action="{% url 'allocationapp:manager_view_teams' %}" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
+                                            <form id="add_grad_form_{{ team.id }}" action="#" method="POST" {% if not graduates_with_no_team %}hidden{% endif %}>
                                                 {% csrf_token %}
-                                                <select name="selected_grad" id="select_graduate_{{ team.id }}" class="form-control select_graduate_forms">
+                                                <select name="selected_grad" id="select_graduate" class="form-control">
                                                     {% for grad in graduates_with_no_team %}
                                                         <option value="{{ grad.user.id }}">{{ grad.user.first_name }} {{ grad.user.last_name }} | {{ grad.user.email }}</option>
                                                     {% endfor %}
