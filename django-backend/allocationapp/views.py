@@ -154,6 +154,10 @@ def manager_view_teams(request):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def delete_team_member(request, user_id):
+    if (is_manager(request.user)):
+        if (Graduate.objects.get(user=CustomUser.objects.get(id=user_id)).assigned_team.manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
+
     Graduate.objects.filter(user=CustomUser.objects.get(
         id=user_id)).update(assigned_team=None)
     response_data = {'success': True}
@@ -163,6 +167,10 @@ def delete_team_member(request, user_id):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def manager_admin_edit_team(request, team_id):
+    if (is_manager(request.user)):
+        if (Team.objects.get(id=team_id).manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
+
     context_dict = {
         'team': Team.objects.get(id=team_id),
         'departments': Department.objects.all(),
@@ -214,7 +222,9 @@ def manager_admin_edit_team(request, team_id):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def add_new_skill(request, team_id, skill_name):
-    # TODO: security risk: a manager can post a skill to a team they do not manage!
+    if (is_manager(request.user)):
+        if (Team.objects.get(id=team_id).manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
 
     # Add the new skill to the database.
     skill, new_skill_created = Skill.objects.get_or_create(name=skill_name)
@@ -233,7 +243,9 @@ def add_new_skill(request, team_id, skill_name):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def add_new_technology(request, team_id, tech_name):
-    # TODO: security risk: a manager can post a tech to a team they do not manage!
+    if (is_manager(request.user)):
+        if (Team.objects.get(id=team_id).manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
 
     # Add the new skill to the database.
     technology, new_tech_created = Technology.objects.get_or_create(name=tech_name)
