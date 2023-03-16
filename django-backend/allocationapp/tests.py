@@ -355,9 +355,9 @@ class TestAllocation(TestCase):
     def test_get_allocation(self):
         # calling allocation with testing argument = True, so that no random reshuffling occurs and allocation can be tested with hardcoded results below
         allocation_result = allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
-        #print(allocation_result)
+         #print(allocation_result)
 
-        # unit tests to check that correct team has been allocated to each grad
+         # unit tests to check that correct team has been allocated to each grad
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team1"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
@@ -368,3 +368,101 @@ class TestAllocation(TestCase):
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team3"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team3"))
         self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team3"))
+        for grad in Graduate.objects.all():
+            grad.assigned_team = None
+    
+            
+    # def test_less_graduates_than_capacity(self):
+    #     with self.assertRaises(MinCapacityError):
+    #             allocation.run_allocation(list(Graduate.objects.all())[:2], list(Team.objects.all()), testing=True)
+    # # def test_more_graduates_than_capacity(self):
+    #     with self.assertRaises(MaxCapacityError):
+    #         allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all())[:2], testing=True)
+
+
+    def test_graduates_equal_capacity(self):
+        team3 = Team.objects.get(name='team3')
+        team3.capacity = 3
+        team3.lower_bound = 1
+        team3.save()
+
+        allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+        
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad6")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team3"))
+        for grad in Graduate.objects.all():
+            grad.assigned_team = None
+
+    def test_graduates_equal_lower_bound(self):
+        team3 = Team.objects.get(name='team3')
+        team3.capacity = 5
+        team3.lower_bound = 5
+        team3.save()
+        allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad6")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team3"))
+        for grad in Graduate.objects.all():
+            grad.assigned_team = None
+
+    def test_uncomplete_preference(self):
+        team3 = Team.objects.get(name='team3')
+        team3.capacity = 5
+        team3.lower_bound = 2
+        team3.save()
+        grad1_preferences=Preference.objects.filter(graduate = Graduate.objects.get(user = CustomUser.objects.get(first_name="grad1")))
+        grad1_preferences.all().delete()
+        allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+        for pref in grad1_preferences:
+            self.assertTrue(pref.weight == 100 or pref.weight == 0)
+    
+    def test_same_preferences_max(self):
+        preferences = Preference.objects.all()
+        for pref in preferences:
+            pref.weight == 5
+            pref.save()
+        allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad6")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team3"))
+
+    def test_same_preferences_min(self):
+        preferences = Preference.objects.all()
+        for pref in preferences:
+            pref.weight == 0
+            pref.save()
+        allocation.run_allocation(list(Graduate.objects.all()), list(Team.objects.all()), testing=True)
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad5")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad7")).assigned_team, Team.objects.get(name="team1"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad3")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad4")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad6")).assigned_team, Team.objects.get(name="team2"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad1")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad2")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad8")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad9")).assigned_team, Team.objects.get(name="team3"))
+        self.assertEqual(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad10")).assigned_team, Team.objects.get(name="team3"))
+
+

@@ -52,7 +52,9 @@ def cast_votes(request):
             p = Preference(
                 team=Team.objects.get(id=int(team_id)),
                 weight=votes[team_id],
-                graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
+                graduate=Graduate.objects.get(
+                    user=CustomUser.objects.get(id=current_user.id))
+            )
             p.save()
 
         return redirect(reverse('allocationapp:vote_submitted'))
