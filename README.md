@@ -9,7 +9,7 @@ The project was built using python 3.8 and all the project dependencies can be i
 
 ## Usage
 The general workflow of the app is as following:
-- An admin creates an account and uploads/enters all the data necessary for the allocation to happen
+- An admin logs in and uploads/enters all the data necessary for the allocation to happen
     - There is the possibility to upload a csv file for Graduates and Teams. After the file is uploaded, the database will be populated with the data extracted from the csvs.
     - Alternatively the admin can enter teams and graduates manually
 - All the graduates input in the system will receive an email with an auto-generated password that they can use to login into the webapp. They will be prompted to change the password on their first access
@@ -28,7 +28,7 @@ Yuqi Li - 2512344L@student.gla.ac.uk <br>
 Feel free to contact any one of us via email for any questions, comments or concerns.
 
 ## License
-This project is under the open source MIT license
+This project is under the BSD 3-Clause License. Please see the LICENSE file for further information.
 
 ## Project status
 The project will be worked on until the 17th of March 2023, the code-freeze date for our project. After that, we will hand our project over to our customer and write a dissertation about our project.
