@@ -144,8 +144,6 @@ STATICFILES_DIRS = [STATIC_DIR,]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
-
 AUTHENTICATION_BACKENDS = (
     # Needed to login by username in Django admin, regardless of `allauth`
     "django.contrib.auth.backends.ModelBackend",
@@ -165,5 +163,18 @@ ACCOUNT_UNIQUE_EMAIL = True
 LOGIN_REDIRECT_URL = 'allocationapp:index'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/login/'
 
+
+#EMAIL SETTINGS WILL NEED TO BE CONFIGURED FOR PRODUCTION
+#CURRENTly JUST STORES IN LOCAL FILE
+
+#Choose SSL or TLS for production(only 1)
+#EMAIL_USE_SSL = True/False
+#EMAIL_USE_TLS = True/False
+#Change to your email address of choice
+DEFAULT_EMAIL = 'webmaster@localhost'
+#Change to 'EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend" to use smtp server
 EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+#Remove for production
 EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
+#Configure port
+#EMAIL_PORT = 'XXX'

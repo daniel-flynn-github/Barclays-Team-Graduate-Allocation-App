@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
@@ -10,6 +10,7 @@ from .allocation import run_allocation
 from .models import *
 from .forms import CSVForm
 from .utilities import *
+from django.core.mail import send_mail
 
 import json
 import csv
@@ -264,8 +265,8 @@ def add_new_technology(request, team_id, tech_name):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def admin_view_teams(request):
-    # Similar to the cast votes page -- a manager can view all of their team(s) here
-    # and edit them as needed. This is essentially the managers "Homepage"
+    # Similar to the cast votes page -- a admin can view all teams here
+    # and edit them as needed.
     if request.method == "GET":
         teams = Team.objects.all()
         team_members = {}
@@ -292,6 +293,27 @@ def admin_view_teams(request):
         )
 
         return redirect(reverse('allocationapp:admin_view_teams'))
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def allocation_data_download(request):
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="allocation_result.csv"'},
+    )
+    writer = csv.writer(response, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(['First Name', "Last Name", "Email", "Team", "Department"])
+    for team in Team.objects.all():
+        grad_rows = []
+        for grad in Graduate.objects.filter(assigned_team=team):
+            row = [grad.user.first_name,grad.user.last_name,grad.user.email,team.name,team.department.name]
+            grad_rows.append(row)
+        writer.writerows(grad_rows)
+    return response
+
+
+
+    
 
 
 @login_required
@@ -547,13 +569,19 @@ def get_allocation(request):
     # Update global allocation state
     AllocationState.objects.all().delete()
     AllocationState.objects.create(has_allocated=True)
+    recievers = []
+    for graduate in Graduate.objects.all():
+        recievers.append(graduate.user.email)
+    for manager in Manager.objects.all():
+        recievers.append(manager.user.email)
+    message = "Allocations have been run and you have been assigned a new team. Please login to see the results"
+    send_mail("You have been allocated a new team",message=message,from_email=None,recipient_list=recievers)
 
     # TODO: will also return a message to say allocation has been run TODO: integrate this with code for checking
     #  whether allocation has been run already -- on another branch right now.
 
     messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:admin_view_teams'))
-
 
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
