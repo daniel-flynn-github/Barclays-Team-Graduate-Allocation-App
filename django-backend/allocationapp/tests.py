@@ -252,7 +252,6 @@ class TestManagerViews(TestCase):
         self.assertTemplateUsed(response, 'allocationapp/edit_team.html')
     
     def testManagerAddingNewSkill(self):
-        # TODO: test that manager can't edit non-owned team
         self.client.login(email='manager@barclays.com', password='1234', username='manager')
         url = reverse('allocationapp:manager_add_skill', args=[Team.objects.get(name="team1").id, "Code Reviewing"])
         response = self.client.get(url)
@@ -272,8 +271,13 @@ class TestManagerViews(TestCase):
         self.assertEqual(Team.objects.get(name="team1").skills.filter(name='Pre-assigned Skill').count(), 1)
         self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
 
+    def testManagerAddingNewSkillToTeamTheyDontOwn(self):
+        self.client.login(email='manager2@barclays.com', password='1234', username='manager2')
+        url = reverse('allocationapp:manager_add_skill', args=[Team.objects.get(name="team1").id, "Code Reviewing"])
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
+
     def testManagerAddingNewTechnology(self):
-         # TODO: test that manager can't edit non-owned team
         self.client.login(email='manager@barclays.com', password='1234', username='manager')
         url = reverse('allocationapp:manager_add_tech', args=[Team.objects.get(name="team1").id, "C#"])
         response = self.client.get(url)
@@ -292,6 +296,12 @@ class TestManagerViews(TestCase):
         response = self.client.get(url)
         self.assertEqual(Team.objects.get(name="team1").technologies.filter(name='Pre-assigned Technology').count(), 1)
         self.assertRedirects(response, reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id]), status_code=302, target_status_code=200)
+
+    def testManagerAddingNewTechnplogyToTeamTheyDontOwn(self):
+        self.client.login(email='manager2@barclays.com', password='1234', username='manager2')
+        url = reverse('allocationapp:manager_add_tech', args=[Team.objects.get(name="team1").id, "Code Reviewing"])
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
 
 class TestUtilitiesFunctions(TestCase):
     def setUp(self):
