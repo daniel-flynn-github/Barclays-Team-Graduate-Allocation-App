@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib import messages
@@ -53,7 +53,9 @@ def cast_votes(request):
             p = Preference(
                 team=Team.objects.get(id=int(team_id)),
                 weight=votes[team_id],
-                graduate=Graduate.objects.get(user=CustomUser.objects.get(id=current_user.id)))
+                graduate=Graduate.objects.get(
+                    user=CustomUser.objects.get(id=current_user.id))
+            )
             p.save()
 
         return redirect(reverse('allocationapp:vote_submitted'))
@@ -251,8 +253,8 @@ def add_new_technology(request, team_id, tech_name):
 @login_required
 @user_passes_test(is_admin, login_url='/allocation/')
 def admin_view_teams(request):
-    # Similar to the cast votes page -- a manager can view all of their team(s) here
-    # and edit them as needed. This is essentially the managers "Homepage"
+    # Similar to the cast votes page -- a admin can view all teams here
+    # and edit them as needed.
     if request.method == "GET":
         teams = Team.objects.all()
         team_members = {}
@@ -279,6 +281,27 @@ def admin_view_teams(request):
         )
 
         return redirect(reverse('allocationapp:admin_view_teams'))
+
+@login_required
+@user_passes_test(is_admin, login_url='/allocation/')
+def allocation_data_download(request):
+    response = HttpResponse(
+        content_type='text/csv',
+        headers={'Content-Disposition': 'attachment; filename="allocation_result.csv"'},
+    )
+    writer = csv.writer(response, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+    writer.writerow(['First Name', "Last Name", "Email", "Team", "Department"])
+    for team in Team.objects.all():
+        grad_rows = []
+        for grad in Graduate.objects.filter(assigned_team=team):
+            row = [grad.user.first_name,grad.user.last_name,grad.user.email,team.name,team.department.name]
+            grad_rows.append(row)
+        writer.writerows(grad_rows)
+    return response
+
+
+
+    
 
 
 @login_required

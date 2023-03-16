@@ -3,7 +3,7 @@ import random
 import math
 import itertools
 
-from allocationapp.models import Preference
+from allocationapp.models import Preference, CustomUser
 
 
 def increase_preference_weight_for_previous_team_to_discourage(graduates):
@@ -91,7 +91,7 @@ def run_allocation(all_graduates, all_teams, testing=False):
                     graduate.save()
                     allocation_result[team].append(graduate)
     # alg will need to be run twice when there are more vacancies than graduates
-    elif len(all_graduates) >= vacancies_on_lower_bound:
+    else:
         # randomly shuffle graduates to randomise who gets picked for first or second run
         # (since first-run people are more likely to get their preferred team)
         if (not testing):
@@ -135,4 +135,4 @@ def run_allocation(all_graduates, all_teams, testing=False):
                     graduate.assigned_team = team
                     graduate.save()
                     allocation_result[team].append(graduate)
-        #print(allocation_result)
+        

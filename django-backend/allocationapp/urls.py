@@ -36,4 +36,5 @@ urlpatterns = [
     path('admin/edit_team/<int:team_id>/add_technology/<str:tech_name>/', views.add_new_technology, name='admin_add_tech'),
     path('admin/delete_team_member/<int:user_id>/', views.delete_team_member, name='delete_team_member'),
     path('admin/portal/reset_app/', views.reset_allocation_app, name = "reset_allocation_app"),
+    path('admin/view_teams/allocation_download/', views.allocation_data_download, name = "allocation_data_download")
 ]

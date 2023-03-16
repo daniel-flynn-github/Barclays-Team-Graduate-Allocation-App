@@ -110,7 +110,14 @@
             {% else %}
                 <h2>No teams created from CSV, please check data format.</h2>
             {% endif %}
-            <a class="btn btn-danger btn-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
-        </div>
+            <div class = 'col-md-8 offset-md-2'>
+            <div class="row">
+                <div class="col">
+                    <a class="btn btn-danger bt-lg ml-2" href="{% url 'allocationapp:reset_allocation_app' %}" id="run_btn">Reset Allocation App</a>
+                </div>
+                <div class="col">
+                    <a class="btn btn-warning btn-lg ml-3" href="{% url 'allocationapp:allocation_data_download' %}" id="run_btn">Download as CSV</a>
+                </div>
+            </div>
     </div>
 {% endblock %}
