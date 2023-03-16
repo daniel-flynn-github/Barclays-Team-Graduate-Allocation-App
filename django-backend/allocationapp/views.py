@@ -565,9 +565,6 @@ def get_allocation(request):
     message = "Allocations have been run and you have been assigned a new team. Please login to see the results"
     send_mail("You have been allocated a new team",message=message,from_email=None,recipient_list=recievers)
 
-    # TODO: will also return a message to say allocation has been run TODO: integrate this with code for checking
-    #  whether allocation has been run already -- on another branch right now.
-
     messages.success(request, 'Allocation has been run!')
     return redirect(reverse('allocationapp:admin_view_teams'))
 
