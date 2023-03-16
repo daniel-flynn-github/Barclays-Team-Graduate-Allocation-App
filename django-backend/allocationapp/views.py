@@ -153,6 +153,10 @@ def manager_view_teams(request):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def delete_team_member(request, user_id):
+    if (is_manager(request.user)):
+        if (Graduate.objects.get(user=CustomUser.objects.get(id=user_id)).assigned_team.manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
+
     Graduate.objects.filter(user=CustomUser.objects.get(
         id=user_id)).update(assigned_team=None)
     response_data = {'success': True}
