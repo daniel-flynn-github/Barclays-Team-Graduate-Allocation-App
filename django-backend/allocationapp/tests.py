@@ -172,6 +172,7 @@ class TestGraduateViews(TestCase):
 class TestManagerViews(TestCase):
     def setUp(self):
         Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager", email="manager@barclays.com", username="manager", password="1234"))
+        Manager.objects.create(user=CustomUser.objects.create_user(first_name="manager2", email="manager2@barclays.com", username="manager2", password="1234"))
         Department.objects.create(name="dep1")
         Department.objects.create(name="dep2")
         Skill.objects.create(name="problem solving")
@@ -210,6 +211,13 @@ class TestManagerViews(TestCase):
         response = self.client.post(url)
         self.assertIsNone(Graduate.objects.get(user=CustomUser.objects.get(first_name="grad")).assigned_team)
     
+    def testManagerEditingTeamTheyDoNotOwn(self):
+        # Manager tries to access an edit_team URL for a team they don't own.
+        self.client.login(email='manager2@barclays.com', password='1234', username='manager2')
+        url = reverse('allocationapp:manager_edit_team', args=[Team.objects.get(name="team1").id])
+        response = self.client.get(url)
+        self.assertRedirects(response, reverse('allocationapp:manager_view_teams'), status_code=302, target_status_code=200)
+
     def testManagerEditingTeamFunctionality(self):
         #TODO: test to check if manager can edit non-managed teams
         self.client.login(email='manager@barclays.com', password='1234', username='manager')
