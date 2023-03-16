@@ -162,6 +162,10 @@ def delete_team_member(request, user_id):
 @login_required
 @user_passes_test(is_admin_or_manager, login_url='/allocation/')
 def manager_admin_edit_team(request, team_id):
+    if (is_manager(request.user)):
+        if (Team.objects.get(id=team_id).manager != Manager.objects.get(user=CustomUser.objects.get(id=request.user.id))):
+            return redirect(reverse('allocationapp:manager_view_teams'))
+
     context_dict = {
         'team': Team.objects.get(id=team_id),
         'departments': Department.objects.all(),
