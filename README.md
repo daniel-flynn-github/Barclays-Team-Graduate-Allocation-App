@@ -7,6 +7,23 @@ We took this broad requirement and developed it as a Django webapp that takes in
 ## Installation
 The project was built using python 3.8 and all the project dependencies can be installed by running `pip3 install -r requirements.txt` while in the 'django-backend' folder.
 
+## Setup
+Run the following commands in the django-backend directory:
+- 'python manage.py makemigrations'
+- 'python manage.py migrate'
+- 'python manage.py shell'
+- Admin.objects.create(user=CustomUser.objects.create_user(first_name="admin", email="example@email.com", username="admin", password="1234"))
+- *change email and password fields to whatever logins details you wish for the admin account
+- 'python manage.py runserver'
+
+## Setting up email server for live use:
+- Instructions to configure email server at the bottom of settings.py
+
+## Testing Setup
+- 'python manage.py populate.py' -> automatically populates the database
+- Change 'DEBUG = True' in settings.py -> allows debugging response when error is encountered
+- Add '127.0.0.1' to ALLOWED_HOSTS in settings.py -> allows server to be run locally
+
 ## Usage
 The general workflow of the app is as following:
 - An admin logs in and uploads/enters all the data necessary for the allocation to happen
