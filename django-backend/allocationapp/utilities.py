@@ -42,7 +42,7 @@ def send_password_reset(user: settings.AUTH_USER_MODEL):
         request.META['HTTP_HOST'] = '127.0.0.1:8000'
     else:
         # TEMPORARY filler url must be  changed to real link when website is hosted
-        request.META['HTTP_HOST'] = 'www.mysite.com'
+        request.META['HTTP_HOST'] = 'sh24.eu.pythonanywhere.com'
 
     form = ResetPasswordForm({"email": user.email})
     if form.is_valid():
