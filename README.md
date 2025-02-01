@@ -1,4 +1,4 @@
-**[report.pdf](Report)**
+**[Report](report.pdf)**
 
 # Team 24 - Barclays Team-Graduate Allocation App
 
