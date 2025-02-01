@@ -1,3 +1,5 @@
+**[report.pdf](Report)**
+
 # Team 24 - Barclays Team-Graduate Allocation App
 
 ## The Project
